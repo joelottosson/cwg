@@ -251,7 +251,7 @@ namespace TankRandomPlayer
             m_LastDirection = newDirection;
         } else {
             // Stand still (19%) 
-            MoveNeutral(joystick);
+            MoveDirection(Consoden::TankGame::Direction::Neutral, joystick);
         }
 
         // Set a random fire direction
@@ -285,7 +285,7 @@ namespace TankRandomPlayer
         // New state counter
         joystick->Counter().SetVal(joystick->Counter().GetVal() + 1);
 
-        joystick->MoveDirection().SetNull();
+        joystick->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
         m_connection.SetChanges(joystick, m_InstanceId, m_HandlerId);        
     }
 

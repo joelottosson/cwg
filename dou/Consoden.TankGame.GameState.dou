@@ -65,7 +65,12 @@
             <type>Binary</type>
         </member>
         <member>
-            <summary>Winner the game</summary>
+            <summary>Survivor of the game</summary>
+            <name>Survivor</name>
+            <type>Consoden.TankGame.Winner</type>
+        </member>
+        <member>
+            <summary>Winner of the game (highest points)</summary>
             <name>Winner</name>
             <type>Consoden.TankGame.Winner</type>
         </member>

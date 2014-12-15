@@ -49,6 +49,10 @@ namespace TankEngine
 
         bool MineSquare(int pos_x, int pos_y);
 
+        bool FlagSquare(int pos_x, int pos_y);
+
+        void TakeFlag(int pos_x, int pos_y);
+
         bool IsTankHit(int pos_x, int pos_y);
 
         void AddMine(int pos_x, int pos_y);
