@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>List of valid board files</summary>
+    <name>Consoden.TankGame.Boards</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <parameters>
+        <parameter>
+            <summary>Path where board files resides. Parsed recursively.</summary>
+            <name>Path</name>
+            <type>String</type>
+            <value>$(SAFIR_RUNTIME)/data/tank_game/boards</value>
+        </parameter>
+    </parameters>
+    <members>        
+        <member>            
+            <name>BoardList</name>
+            <arraySize>100</arraySize>
+            <type>String</type>
+            <maxLength>500</maxLength>
+        </member>
+    </members>
+</class>
+

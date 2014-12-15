@@ -1,0 +1,37 @@
+General rules
+* The game is turn based, with a fixed time for each turn determined by the game engine. The time per turn is 1 second.
+* Each player may set their joysticks as many times as they like during each turn. The game engine will only read out the current joystick state for the players at the end of each turn, and then evaluate the game state for next turn. Once the new game state is ready, it is published to the players by an Update event of the game state entity.
+* Each player program will be locked down to one CPU core, so one player program cannot "steal" CPU cycles from its opponent.
+* Each player controls one tank. The game is over once one or both tanks are destroyed.
+
+Tank rules
+* Tanks occupy one square.
+* Tanks move one square per turn.
+* Tanks may move in directions Left, Right, Up or Down.
+* Tanks may change direction at any time without time penalty.
+* Tanks must move every turn. If the player sets the joystick MoveDirection to Null, the game will default to move the tank to the left.
+* During each move, both tanks drops a mine in their previous square
+* Moving into a mine causes tank to explode
+* Moving into a wall square causes tank to explode
+* Moving into a square where a missile enters during next turn causes the tank to explode
+* Moving into enemy tank causes both tanks to explode (draw game)
+* Tanks may move outside the border of the game field, the tank is then wrapped to the opposite side of the game field. Example: Game field is 10x10 squares. Tank is at position (0,0) and moves up. Tank ends up in position (0,9).
+
+Missile rules
+* Missiles normally occupy two squares. The only exception is when a missile hits a wall. If both missile squares would end up inside the wall, the missile is compacted into a single square explosion at the outer wall square - hence a missile cannot reach through single square walls.
+* Missiles move two squares per turn.
+* Missiles may be fired in directions Left, Right, Up or Down.
+* Missiles may be fired at any time, but only one missile per tank may be active at any time.
+* A newly fired missiles position is based on the tanks next position (after the mandatory move) and the firing direction. The missile will occupy the two squares closest to the tanks next position in the firing direction. Example: Tank in (1,1), moving right. Its next position is (2,1). If firing direction is down, missile will occupy (2,2) and (2,3). If firing direction is right, missile will occupy (3,1) and (4,1). 
+* A missile that hits a wall explodes. Next turn it will be gone and a new missile may be fired.
+* A missile that hits a tank explodes.
+* A missile that completely leaves the game field (both squares outside game field) are considered gone and a new missile may be fired. Missiles do not wrap like tanks do.
+* Only one missile per player may exist on the game field. Trying to fire while again before the last shot missile has disappeared will have no effect.
+* Firing direction need only to be set in the turn when the missile is fired, there is no time penalty to change firing direction.
+* Changing firing direction while the missile is active in the game field has no effect on the missile.
+* Firing with FireDirection set to Null has no effect.
+* If the tank is destroyed in the next turn, a missile may still be fired unless the tank moved into a wall square. 
+
+Tournament rules
+* Every pair of players meet each other in group play. The four best implementations will meet in a tournament combat.
+* Every match consists of three game fields and every game field is played twice with opposite starting positions.
