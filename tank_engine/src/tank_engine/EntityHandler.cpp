@@ -166,7 +166,12 @@ namespace TankEngine
             {
                 pace=static_cast<int>(game->GamePace().GetVal()*1000.0f);
             }
-            m_Engine.Init(entityId, m_HandlerId, pace);
+            int maxGameTime=60000; // default 1 minute
+            if (!game->GameTime().IsNull())
+            {
+                maxGameTime=static_cast<int>(game->GameTime().GetVal());
+            }
+            m_Engine.Init(entityId, m_HandlerId, pace, maxGameTime);
         }
         else
         {

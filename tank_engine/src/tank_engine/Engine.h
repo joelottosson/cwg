@@ -28,6 +28,7 @@
 #include <boost/asio.hpp>
 #include <vector>
 #include <Consoden/TankGame/Joystick.h>
+#include <Consoden/TankGame/GameState.h>
 
 #include "JoystickEntityHandler.h"
 #include "JoystickEngineIF.h"
@@ -51,7 +52,8 @@ namespace TankEngine
          */
         void Init(Safir::Dob::Typesystem::EntityId gameEntityId,
                   Safir::Dob::Typesystem::HandlerId game_handler_id,
-                  int gamePace);
+                  int gamePace,
+                  int maxGameTime);
 
         /** 
          *
@@ -80,12 +82,17 @@ namespace TankEngine
         void UpdateState();
         void Evaluate();
         void ScheduleMissileCleanup();
+        void AddPoints(int points, Safir::Dob::Typesystem::InstanceId player_id, Consoden::TankGame::GameStatePtr game_ptr);
+        void SetWinner(Consoden::TankGame::GameStatePtr game_ptr);
 
         bool mGamePrepare;
         bool mGameRunning;
         bool mMissileCleanupRunning;
         boost::asio::deadline_timer mTimer;
         int mCounter;
+        int mMaxGameTime;
+        int mPlayerOneCounter;
+        int mPlayerTwoCounter;
         Safir::Dob::Typesystem::EntityId m_GameEntityId;
         Safir::Dob::Typesystem::HandlerId m_HandlerId;
         JoystickEntityHandler m_JoystickHandler;

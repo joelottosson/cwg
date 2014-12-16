@@ -67,6 +67,16 @@ namespace TankEngine
         return (m_Game[pos_x][pos_y] == 'o');
     }
  
+    bool GameMap::FlagSquare(int pos_x, int pos_y)
+    {
+        return (m_Game[pos_x][pos_y] == 'f');
+    }
+ 
+    void GameMap::TakeFlag(int pos_x, int pos_y)
+    {
+        m_Game[pos_x][pos_y] = '.';
+    }
+ 
     bool GameMap::IsTankHit(int pos_x, int pos_y)
     {
         bool tank_is_hit = false;
@@ -287,9 +297,11 @@ namespace TankEngine
             return Consoden::TankGame::Direction::Left;
         } else if (d == Consoden::TankGame::Direction::Up) {
             return Consoden::TankGame::Direction::Down;
-        } 
+        } else if (d == Consoden::TankGame::Direction::Down) {
+            return Consoden::TankGame::Direction::Up;
+        }
         
-        return Consoden::TankGame::Direction::Up;
+        return Consoden::TankGame::Direction::Neutral;
         
     }
 
