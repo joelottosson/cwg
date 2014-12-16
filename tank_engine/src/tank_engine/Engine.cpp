@@ -366,6 +366,71 @@ namespace TankEngine
         gm.MoveMissiles();
 
         // Move all tanks according to rules and evaluate resutls
+
+        // Check for frontal collission
+        for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
+             (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
+             tank_index++) {
+
+            Consoden::TankGame::TankPtr tank_ptr = 
+                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
+
+            Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
+
+            bool tank_tank_collission = false;
+
+            for (Safir::Dob::Typesystem::ArrayIndex tank2_index = tank_index + 1;
+                 (tank2_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank2_index].IsNull());
+                 tank2_index++) {
+
+                Consoden::TankGame::TankPtr tank2_ptr = 
+                    boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank2_index].GetPtr());
+
+                Consoden::TankGame::JoystickPtr joystick2_ptr = m_JoystickCacheMap[tank2_ptr->TankId().GetVal()];
+
+                if (!tank_ptr->InFlames() && !tank2_ptr->InFlames()) {
+                    int w = game_ptr->Width().GetVal();
+                    int h = game_ptr->Height().GetVal();
+
+                    if ((tank_ptr->PosX() == ((tank2_ptr->PosX() + 1) % w)) && 
+                        (tank_ptr->PosY() == tank2_ptr->PosY()) && 
+                        (joystick_ptr->MoveDirection().GetVal() == Consoden::TankGame::Direction::Left) &&
+                        (joystick2_ptr->MoveDirection().GetVal() == Consoden::TankGame::Direction::Right)) {
+                        tank_tank_collission = true;
+                    }
+
+                    if ((((tank_ptr->PosX() + 1) % w) == tank2_ptr->PosX()) && 
+                        (tank_ptr->PosY() == tank2_ptr->PosY()) && 
+                        (joystick_ptr->MoveDirection().GetVal() == Consoden::TankGame::Direction::Right) &&
+                        (joystick2_ptr->MoveDirection().GetVal() == Consoden::TankGame::Direction::Left)) {
+                        tank_tank_collission = true;
+                    }
+
+                    if ((tank_ptr->PosX() == tank2_ptr->PosX()) && 
+                        (tank_ptr->PosY() == ((tank2_ptr->PosY() + 1) % h)) && 
+                        (joystick_ptr->MoveDirection().GetVal() == Consoden::TankGame::Direction::Up) &&
+                        (joystick2_ptr->MoveDirection().GetVal() == Consoden::TankGame::Direction::Down)) {
+                        tank_tank_collission = true;
+                    }
+
+                    if ((tank_ptr->PosX() == tank2_ptr->PosX()) && 
+                        (((tank_ptr->PosY() + 1) % h) == tank2_ptr->PosY()) && 
+                        (joystick_ptr->MoveDirection().GetVal() == Consoden::TankGame::Direction::Down) &&
+                        (joystick2_ptr->MoveDirection().GetVal() == Consoden::TankGame::Direction::Up)) {
+                        tank_tank_collission = true;
+                    }
+
+                    if (tank_tank_collission) {
+                        tank_ptr->InFlames() = true;
+                        tank_ptr->HitTank() = true;
+                        tank2_ptr->InFlames() = true;
+                        tank2_ptr->HitTank() = true;
+                    }                    
+                }
+            }
+        }
+
+
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
              (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
              tank_index++) {
@@ -682,7 +747,7 @@ namespace TankEngine
     }
 
     void Engine::AddPoints(int points, Safir::Dob::Typesystem::InstanceId player_id, Consoden::TankGame::GameStatePtr game_ptr) {
-        if (game_ptr->PlayerOneId() == player_id) {
+        if (game_ptr->PlayerOneId().GetVal() == player_id) {
             game_ptr->PlayerOnePoints().SetVal(game_ptr->PlayerOnePoints().GetVal() + points);
         } else {
             game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);            
