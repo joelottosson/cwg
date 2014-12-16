@@ -19,7 +19,7 @@ MatchStateMachine::MatchStateMachine(cwg::MatchPtr matchRequest,
     ,m_games()
     ,m_repetion(0)
     ,m_lastGameState()
-    ,m_running(true)
+    ,m_running(false)
     ,m_currentGameStateHasFinished(false)
 {
     CreateBoards();
@@ -35,13 +35,21 @@ void MatchStateMachine::Start()
     StartNextGame();
 }
 
+void MatchStateMachine::Reset()
+{
+    m_matchEid=sdt::EntityId(cwg::Match::ClassTypeId, sdt::InstanceId::GenerateRandom());
+    m_running=false;
+    m_currentGameStateHasFinished=false;
+    m_state->CurrentGameNumber()=0;
+    m_state->PlayerOneTotalPoints()=0;
+    m_state->PlayerTwoTotalPoints()=0;
+    m_state->Winner()=cwg::Winner::Unknown;
+    m_lastGameState.reset();
+}
+
 void MatchStateMachine::OnNewGameState(const cwg::GameStatePtr gameState)
 {
-    if (!m_running)
-    {
-        return;
-    }
-
+     m_running=true;
     m_currentGameStateHasFinished=false;
     OnUpdatedGameState(gameState);
 }

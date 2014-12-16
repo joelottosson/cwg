@@ -86,9 +86,11 @@ void MatchServer::OnCreateRequest(const sd::EntityRequestProxy entityRequestProx
 
 void MatchServer::OnUpdateRequest(const sd::EntityRequestProxy /*entityRequestProxy*/, sd::ResponseSenderPtr responseSender)
 {
-    //not allowed
-    auto error=sd::ErrorResponse::CreateErrorResponse(sd::ResponseGeneralErrorCodes::SafirNoPermission(), L"");
-    responseSender->Send(error);
+    //means restart match
+    RestartMatch();
+
+    auto ok=sd::SuccessResponse::Create();
+    responseSender->Send(ok);
 }
 
 void MatchServer::OnDeleteRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
@@ -155,6 +157,15 @@ void MatchServer::DeleteMatch()
     //delete match
     m_connection.DeleteAllInstances(cwg::Match::ClassTypeId, m_defaultHandler);
     m_currentMatch.reset();
+}
+
+void MatchServer::RestartMatch()
+{
+    auto keep=m_currentMatch; //keep reference to prevent destruction
+    DeleteMatch();
+    keep->Reset();
+    m_currentMatch=keep;
+    m_work->get_io_service().post([=]{m_currentMatch->Start();});
 }
 
 bool MatchServer::ExistMatchRunning()

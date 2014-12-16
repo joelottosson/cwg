@@ -54,6 +54,7 @@ private:
     bool ExistMatchRunning();
     bool VerifyMatchRequest(cwg::MatchPtr m, sd::ResponseSenderPtr responseSender);
     void DeleteMatch();
+    void RestartMatch();
     void OnMatchFinished();
     void OnStartNewGame(cwg::GameStatePtr gameState);
 

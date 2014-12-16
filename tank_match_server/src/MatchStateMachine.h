@@ -23,6 +23,7 @@ public:
                std::function<void()> onMatchFinished);
 
     void Start();
+    void Reset();
 
     //Update state machine
     void OnNewGameState(const cwg::GameStatePtr gameState);

@@ -283,22 +283,7 @@ void MainWindow::OnActionStopGame()
 
 void MainWindow::OnActionRestartGame()
 {
-//    if (m_match.NumberOfGames()<=0)
-//    {
-//        QMessageBox::information(this, "No game to restart", "There is no info about last game. Please start a new game.");
-//        return;
-//    }
-//    if (!m_dobConnection.IsOpen())
-//    {
-//        QMessageBox::information(this, "Not connected", "Can't start a game because we are not connected to the game engine!");
-//        return;
-//    }
-
-//    //ReverseTanks()
-//    m_match.Reset();
-//    if (m_match.NextGame())
-//    {
-//        SendNewGameRequest();
-//    }
+    auto dummyPtr=Consoden::TankGame::Match::Create();
+    m_dobConnection.UpdateRequest(dummyPtr, Safir::Dob::Typesystem::InstanceId(m_world.MatchId()), this);
 }
 

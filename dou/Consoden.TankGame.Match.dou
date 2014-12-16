@@ -3,6 +3,7 @@
     <summary>
         A match consists of a number of games between two players. The number of games is
         calculated by two times the number of boards stated multiplied with RepeatBoardSequence.
+        Sending an update request for a Match has the meaning of requesting a restart of the match.
     </summary>
     <name>Consoden.TankGame.Match</name>
     <baseClass>Safir.Dob.Entity</baseClass>
