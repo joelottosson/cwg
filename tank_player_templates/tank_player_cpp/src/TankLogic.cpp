@@ -38,7 +38,7 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 
     //Advanced tower aim stategy
     Consoden::TankGame::Direction::Enumeration towerDirection=
-            static_cast<Consoden::TankGame::Direction::Enumeration>((currentPosition.first+currentPosition.second)%4);
+            static_cast<Consoden::TankGame::Direction::Enumeration>((1+currentPosition.first+currentPosition.second)%4);
 
     //Of course we always want to fire
     bool fire = true;
