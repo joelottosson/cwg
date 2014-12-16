@@ -26,6 +26,7 @@ MatchStateMachine::MatchStateMachine(cwg::MatchPtr matchRequest,
     m_state->CurrentGameNumber()=0;
     m_state->PlayerOneTotalPoints()=0;
     m_state->PlayerTwoTotalPoints()=0;
+    m_state->Winner()=cwg::Winner::Unknown;
 }
 
 void MatchStateMachine::Start()
@@ -44,10 +45,8 @@ void MatchStateMachine::Update(const Consoden::TankGame::GameStatePtr &updatedSt
     m_lastGameState=updatedState;
     if (!updatedState->Winner().IsNull() && updatedState->Winner()!=cwg::Winner::Unknown)
     {
-        std::cout<<"game finished: "<<updatedState->Winner().GetVal()<<std::endl;
         if (m_state->CurrentGameNumber()==m_state->TotalNumberOfGames())
         {
-            std::cout<<"match finished"<<std::endl;
             m_running=false;
             m_onMatchFinished();
             return;

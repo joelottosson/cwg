@@ -87,7 +87,6 @@ private:
     QEvent::Type m_dispatchEvent;
     DobConnector m_conThread;
     QTimer m_updateTimer;
-    Consoden::TankGame::MatchPtr m_currentMatch;
 
     void SendNewGameRequest();
     void MatchFinished();
@@ -98,7 +97,6 @@ private slots:
     void OnActionNewGame();
     void OnActionRestartGame();
     void OnActionStopGame();
-    void OnActionSaveGame();
 };
 
 

@@ -26,17 +26,20 @@ class GameWorld
 public:
     GameWorld(int updateInterval);
 
+    void Clear();
     void ClearGameState();
+
     void Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t id);
     void Reset(const Consoden::TankGame::GameStatePtr& game, boost::int64_t id);
+
+    void Update();
     void Update(const Consoden::TankGame::MatchPtr& match);
     void Update(const Consoden::TankGame::GameStatePtr& game);
     void Update(const Consoden::TankGame::JoystickConstPtr& joystick);
-    void Update();
 
     qint64 MatchId() const {return m_matchState.machId;}
     qint64 GameId() const {return m_matchState.gameState.gameId;}
-    bool Finished() const;
+    bool MatchFinished() const;
 
     void AddPlayer(const Consoden::TankGame::PlayerConstPtr player, qint64 id);
     void DeletePlayer(qint64 id);

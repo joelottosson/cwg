@@ -48,7 +48,6 @@
     <addaction name="actionNew_game"/>
     <addaction name="actionRestart_game"/>
     <addaction name="actionStop_game"/>
-    <addaction name="actionSave_game_field"/>
     <addaction name="separator"/>
    </widget>
    <addaction name="menuMenu"/>

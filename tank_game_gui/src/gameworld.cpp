@@ -61,6 +61,12 @@ GameWorld::GameWorld(int updateInterval)
     }
 }
 
+void GameWorld::Clear()
+{
+    m_matchState=MatchState();
+    m_matchState.finished=true;
+}
+
 void GameWorld::ClearGameState()
 {
     m_matchState.gameState=GameState();
@@ -496,7 +502,7 @@ void GameWorld::Update()
     m_lastAnimationUpdate=QDateTime::currentMSecsSinceEpoch();
 }
 
-bool GameWorld::Finished() const
+bool GameWorld::MatchFinished() const
 {
     return m_matchState.finished && m_sprites.empty() && m_eventQueue.empty();
 }

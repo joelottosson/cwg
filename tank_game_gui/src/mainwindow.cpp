@@ -21,7 +21,6 @@ MainWindow::MainWindow(int updateFrequency, QWidget *parent)
     ,m_dispatchEvent(static_cast<QEvent::Type>(QEvent::User+666))
     ,m_conThread(&m_dobConnection, this, this, 0)
     ,m_updateTimer(this)
-    ,m_currentMatch()
 {
     this->setWindowState(Qt::WindowMaximized);
     installEventFilter(this);    
@@ -58,7 +57,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::OnUpdateWorld()
 {
-    if (m_world.Finished())
+    if (m_world.MatchFinished())
     {
         MatchFinished();
     }
@@ -111,21 +110,24 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
     Consoden::TankGame::MatchPtr match=boost::dynamic_pointer_cast<Consoden::TankGame::Match>(entityProxy.GetEntity());
     if (match)
     {
-        m_currentMatch=match;
         m_world.Reset(match, entityProxy.GetInstanceId().GetRawValue());
         m_tankInfoWidget[0]->SetPoints(0);
         m_tankInfoWidget[1]->SetPoints(0);
 
-        QStringList sl;
-        sl.append("Start new match");
-        m_world.SetTextBig(sl);
+        if (match->CurrentGameNumber()==1 && match->Winner()==Consoden::TankGame::Winner::Unknown)
+        {
+            QStringList sl;
+            sl.append("Start new match");
+            m_world.SetTextBig(sl);
+        }       
+
         return;
     }
 
     Consoden::TankGame::GameStatePtr game=boost::dynamic_pointer_cast<Consoden::TankGame::GameState>(entityProxy.GetEntity());
     if (game)
     {
-        if (m_world.GameId()!=0 && !m_world.Finished())
+        if (m_world.GameId()!=0 && !m_world.MatchFinished())
         {
             QMessageBox::information(this, "New game started", "A new game was started while there is still an ongoing game." );
             return;
@@ -202,6 +204,7 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     if (match && entityProxy.GetInstanceId().GetRawValue()==m_world.MatchId())
     {
         //updated match
+        m_world.Update(match);
     }
 }
 
@@ -222,6 +225,7 @@ void MainWindow::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, cons
     else if (entityProxy.GetTypeId()==Consoden::TankGame::Match::ClassTypeId)
     {
         //match deleted
+        m_world.Clear();
     }
 }
 
@@ -239,7 +243,7 @@ void MainWindow::MatchFinished()
 {
     m_updateTimer.stop();
     QStringList sl;
-    sl.append("Game Over!");
+    sl.append("Match Over!");
     m_world.SetTextBig(sl);
 
 //    m_updateTimer.stop();
@@ -337,32 +341,3 @@ void MainWindow::OnActionRestartGame()
 //    }
 }
 
-void MainWindow::OnActionSaveGame()
-{
-//    if (m_match.NumberOfGames()<=0)
-//    {
-//        QMessageBox::information(this, "No game to save", "There is no info about last game.");
-//        return;
-//    }
-
-//    QString path;
-//    const char* runtime=getenv("SAFIR_RUNTIME");
-//    if (runtime)
-//    {
-//        path=QDir::cleanPath(QString(runtime)+QDir::separator()+"data"+QDir::separator()+"tank_game");
-//    }
-//    else
-//    {
-//        path=".";
-//    }
-
-//    path+=QDir::separator()+QString("tank_game_")+QTime::currentTime().toString();
-
-//    for (int i=0; i<m_match.NumberOfGames(); ++i)
-//    {
-//        QString file=QDir::cleanPath(path+"#"+QString::number(i)+".txt");
-//        m_match.BoardAt(i)->Save(file.toStdString());
-//    }
-//    QString fileNames=QDir::cleanPath(path+"#0.."+QString::number(m_match.NumberOfGames()-1)+".txt");
-//    QMessageBox::information(this, "Game field saved", "Game field has been saved to file: "+fileNames);
-}
