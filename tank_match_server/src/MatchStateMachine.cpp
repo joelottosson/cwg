@@ -88,6 +88,11 @@ void MatchStateMachine::UpdatePoints(const Consoden::TankGame::GameStatePtr &upd
         m_state->PlayerOneTotalPoints()+=diffP1;
         m_state->PlayerTwoTotalPoints()+=diffP2;
     }
+    else
+    {
+        m_state->PlayerOneTotalPoints()+=updatedState->PlayerOnePoints().GetVal();
+        m_state->PlayerTwoTotalPoints()+=updatedState->PlayerTwoPoints().GetVal();
+    }
 }
 
 bool MatchStateMachine::HasMatchFinished() const
@@ -179,6 +184,9 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     game->PlayerTwoId()=m_state->PlayerTwoId();
     game->PlayerOnePoints()=0;
     game->PlayerTwoPoints()=0;
+    game->GameTime()=m_state->GameTime().GetVal();
+    game->ElapsedTime()=0;
+    game->Winner()=cwg::Winner::Unknown;
 
     //create tanks
     cwg::TankPtr tank1=cwg::Tank::Create();
