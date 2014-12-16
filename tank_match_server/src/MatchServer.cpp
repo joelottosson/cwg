@@ -127,7 +127,6 @@ void MatchServer::OnUpdatedEntity(const sd::EntityProxy entityProxy)
 
 void MatchServer::OnDeletedEntity(const sd::EntityProxy /*entityProxy*/, const bool /*del*/)
 {
-    m_currentMatch->OnDeletedGameState();
 }
 
 //-------------------------------------
@@ -250,8 +249,6 @@ void MatchServer::OnMatchFinished()
 
 void MatchServer::OnStartNewGame(Consoden::TankGame::GameStatePtr gameState)
 {
-    std::cout<<"OnStartNewGame nr: "<<m_currentMatch->CurrentState()->CurrentGameNumber().GetVal()<<", time: "<<TimeString()<<std::endl;
-
     m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->MatchEntityId().GetInstanceId(), m_defaultHandler);
 
     if (m_currentMatch->CurrentState()->CurrentGameNumber()==1)
@@ -265,7 +262,6 @@ void MatchServer::OnStartNewGame(Consoden::TankGame::GameStatePtr gameState)
 
     m_startNewGameTimer.async_wait([=](const boost::system::error_code&)
     {
-        std::cout<<"   StartGame nr: "<<m_currentMatch->CurrentState()->CurrentGameNumber().GetVal()<<", time: "<<TimeString()<<std::endl;
         //Send delete request for game state
         for (auto it=m_connection.GetEntityIterator(cwg::GameState::ClassTypeId, false); it!=sd::EntityIterator(); ++it)
         {

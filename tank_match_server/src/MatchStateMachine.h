@@ -24,10 +24,9 @@ public:
 
     void Start();
 
-    //EntitySubscriber interface
+    //Update state machine
     void OnNewGameState(const cwg::GameStatePtr gameState);
     void OnUpdatedGameState(const cwg::GameStatePtr gameState);
-    void OnDeletedGameState();
 
     cwg::MatchPtr CurrentState() const {return m_state;}
     sdt::EntityId MatchEntityId() const {return m_matchEid;}

@@ -41,8 +41,15 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
             static_cast<Consoden::TankGame::Direction::Enumeration>((1+currentPosition.first+currentPosition.second)%4);
 
     //Of course we always want to fire
-    bool fire = true;
+    bool fire=true;
+
+    //Sometimes we also drop a mine
+    bool dropMine=(currentPosition.first+currentPosition.second)%4==0;
+
+//    std::wcout<<std::boolalpha<<L"Joystick: move: "<<Consoden::TankGame::Direction::ToString(moveDirection)<<
+//                L", tower: "<<Consoden::TankGame::Direction::ToString(towerDirection)<<
+//                L", fire: "<<fire<<L", mine: "<<dropMine<<std::endl;
 
     //Move our joystick.
-    SetJoystick(moveDirection, towerDirection, fire);
+    SetJoystick(moveDirection, towerDirection, fire, dropMine);
 }

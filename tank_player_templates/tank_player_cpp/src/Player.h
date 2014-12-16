@@ -54,7 +54,7 @@ private:
     //Update joystick
     void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                      Consoden::TankGame::Direction::Enumeration towerDirection,
-                     bool fire);
+                     bool fire, bool dropMine);
 };
 
 #endif

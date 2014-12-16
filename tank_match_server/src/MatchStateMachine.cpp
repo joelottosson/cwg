@@ -71,10 +71,6 @@ void MatchStateMachine::OnUpdatedGameState(const cwg::GameStatePtr gameState)
     }
 }
 
-void MatchStateMachine::OnDeletedGameState()
-{
-}
-
 void MatchStateMachine::UpdatePoints(const Consoden::TankGame::GameStatePtr &updatedState)
 {
     if (m_lastGameState)
