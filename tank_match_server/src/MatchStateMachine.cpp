@@ -60,8 +60,6 @@ void MatchStateMachine::OnUpdatedGameState(const cwg::GameStatePtr gameState)
     {
         m_currentGameStateHasFinished=true;
 
-        m_state->PlayerOneTotalPoints()+=(rand()%5+1);
-        m_state->PlayerTwoTotalPoints()+=(rand()%5+1);
         if (HasMatchFinished())
         {
             HandleMatchFinished();

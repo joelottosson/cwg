@@ -14,16 +14,15 @@
 #include "Player.h"
 #include <iostream>
 
-Player::Player(const std::wstring &playerName)
-    :m_connection()
+Player::Player(const std::wstring &playerName, boost::asio::io_service& ioService)
+    :m_work(new boost::asio::io_service::work(ioService))
+    ,m_connection()
     ,m_myHandlerId(playerName+L"Handler")
     ,m_myPlayerId(playerName+L"Instance")
     ,m_myJoystickId()
     ,m_currentGameId()
     ,m_currentTankId(-1)
-    ,m_ioService()
-    ,m_dispatcher(m_connection, m_ioService)
-    ,m_work(new boost::asio::io_service::work(m_ioService))
+    ,m_dispatcher(m_connection, ioService)
     ,m_logic()
 {
     //set up connection
@@ -39,13 +38,12 @@ Player::Player(const std::wstring &playerName)
 
     //run the game player
     std::wcout<<playerName<<L" is running"<<std::endl;
-    m_ioService.run();
 }
 
 void Player::OnStopOrder()
 {
+    m_connection.Close();
     m_work.reset();
-    m_ioService.stop();
 }
 
 void Player::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
