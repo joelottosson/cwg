@@ -111,16 +111,18 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
     if (match)
     {
         m_world.Reset(match, entityProxy.GetInstanceId().GetRawValue());
-        m_tankInfoWidget[0]->SetPoints(0);
-        m_tankInfoWidget[1]->SetPoints(0);
 
-        if (match->CurrentGameNumber()==1 && match->Winner()==Consoden::TankGame::Winner::Unknown)
+        auto player1=m_world.GetPlayerOne();
+        auto player2=m_world.GetPlayerTwo();
+        if (player1 && player2)
         {
-            QStringList sl;
-            sl.append("Start new match");
-            m_world.SetTextBig(sl);
-        }       
-
+            m_tankInfoWidget[0]->SetName(player1->name);
+            m_tankInfoWidget[0]->Update(m_world.GetJoystickOne());
+            m_tankInfoWidget[0]->SetPoints(m_world.GetPlayerOneTotalPoints());
+            m_tankInfoWidget[1]->SetName(player2->name);
+            m_tankInfoWidget[1]->Update(m_world.GetJoystickTwo());
+            m_tankInfoWidget[1]->SetPoints(m_world.GetPlayerTwoTotalPoints());
+        }
         return;
     }
 
@@ -134,37 +136,7 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
         }
 
         m_world.Reset(game, entityProxy.GetInstanceId().GetRawValue());
-
-        if (game->Counter().GetVal()<=1)
-        {
-            QStringList sl;
-            if (m_world.GetCurrentGameNumber()>1)
-            {
-                sl.append("Get ready for game "+QString::number(m_world.GetCurrentGameNumber())+" of "+QString::number(m_world.GetTotalNumberOfGames()));
-                sl.append("Score: " + QString::number(m_world.GetPlayerOneTotalPoints())+" - "+QString::number(m_world.GetPlayerTwoTotalPoints()));
-            }
-            else
-            {
-                sl.append("Get ready...");
-            }
-
-            m_world.SetTextBig(sl);
-        }
-
-        m_world.Update(game);
-
-        auto player1=m_world.GetPlayerOne();
-        auto player2=m_world.GetPlayerTwo();
-        if (player1 && player2)
-        {
-            m_tankInfoWidget[0]->SetName(player1->name);
-            m_tankInfoWidget[0]->Update(m_world.GetJoystickOne());
-            m_tankInfoWidget[1]->SetName(player2->name);
-            m_tankInfoWidget[1]->Update(m_world.GetJoystickTwo());
-        }
-
         m_tankGameWidget->Reset();
-
         m_updateTimer.start(m_updateInterval);
 
         return;
@@ -205,6 +177,8 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     {
         //updated match
         m_world.Update(match);
+        m_tankInfoWidget[0]->SetPoints(m_world.GetPlayerOneTotalPoints());
+        m_tankInfoWidget[1]->SetPoints(m_world.GetPlayerTwoTotalPoints());
     }
 }
 
@@ -231,12 +205,10 @@ void MainWindow::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, cons
 
 void MainWindow::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 {
-
 }
 
 void MainWindow::OnNotRequestOverflow()
 {
-
 }
 
 void MainWindow::MatchFinished()
@@ -244,24 +216,13 @@ void MainWindow::MatchFinished()
     m_updateTimer.stop();
     QStringList sl;
     sl.append("Match Over!");
+    auto winner=m_world.GetPlayerById(m_world.GetGameState().winnerPlayerId);
+    if (winner)
+    {
+        sl.append("...and the winner is...");
+        sl.append(winner->name+"!");
+    }
     m_world.SetTextBig(sl);
-
-//    m_updateTimer.stop();
-//    auto player1=m_world.GetPlayerOne();
-//    auto player2=m_world.GetPlayerTwo();
-//    if (!player1 || !player2)
-//    {
-//        return;
-//    }
-
-//    m_tankInfoWidget[0]->SetPoints(m_currentMatch->PlayerOneTotalPoints().GetVal());
-//    m_tankInfoWidget[1]->SetPoints(m_currentMatch->PlayerTwoTotalPoints().GetVal());
-
-//    QStringList sl;
-//    sl.append("Game Over!");
-//    sl.append(player1->name+" vs "+player2->name);
-//    sl.append(QString::number(m_world.GetPlayerOneTotalPoints())+" - "+QString::number(m_world.GetPlayerTwoTotalPoints()));
-//    m_world.SetTextBig(sl);
 }
 
 void MainWindow::OnActionNewGame()

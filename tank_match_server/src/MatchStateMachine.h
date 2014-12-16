@@ -23,9 +23,14 @@ public:
                std::function<void()> onMatchFinished);
 
     void Start();
-    void Update(const cwg::GameStatePtr& updatedState);
+
+    //EntitySubscriber interface
+    void OnNewGameState(const cwg::GameStatePtr gameState);
+    void OnUpdatedGameState(const cwg::GameStatePtr gameState);
+    void OnDeletedGameState();
+
     cwg::MatchPtr CurrentState() const {return m_state;}
-    sdt::EntityId GetEntityId() const {return m_matchEid;}
+    sdt::EntityId MatchEntityId() const {return m_matchEid;}
 
 private:
     cwg::MatchPtr m_state;
@@ -36,9 +41,13 @@ private:
     int m_repetion;
     cwg::GameStatePtr m_lastGameState;
     bool m_running;
+    bool m_currentGameStateHasFinished;
 
     void CreateBoards();
     cwg::GameStatePtr CreateGameState(const std::string& boardFile, bool reversedPlayers) const;
     void StartNextGame();
     void UpdatePoints(const cwg::GameStatePtr& updatedState);
+    bool HasGameFinished(const cwg::GameStatePtr& game) const;
+    bool HasMatchFinished() const;
+    void HandleMatchFinished();
 };

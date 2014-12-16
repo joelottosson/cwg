@@ -79,10 +79,15 @@ void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t 
     m_matchState.machId=id;
     m_matchState.players[0]=match->PlayerOneId().GetVal().GetRawValue();
     m_matchState.players[1]=match->PlayerTwoId().GetVal().GetRawValue();
-    m_matchState.totalNumberOfGames=match->TotalNumberOfGames();
-    m_matchState.currentGameNumber=match->CurrentGameNumber();
-    m_matchState.playerOnePoints=match->PlayerOneTotalPoints();
-    m_matchState.playerTwoPoints=match->PlayerTwoTotalPoints();
+    m_matchState.totalNumberOfGames=match->TotalNumberOfGames();    
+    Update(match);
+
+    if (m_matchState.currentGameNumber==1 && !m_matchState.finished)
+    {
+        QStringList sl;
+        sl.append("Start new match");
+        SetTextBig(sl);
+    }
 }
 
 void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64_t id)
@@ -118,6 +123,16 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
             m_matchState.gameState.tanks.push_back(t);
         }
     }
+
+    if (game->Counter().GetVal()<=1)
+    {
+        QStringList sl;
+        sl.append("Get ready for game "+QString::number(m_matchState.currentGameNumber)+" of "+QString::number(m_matchState.totalNumberOfGames));
+        sl.append("Score: " + QString::number(GetPlayerOneTotalPoints())+" - "+QString::number(GetPlayerTwoTotalPoints()));
+        SetTextBig(sl);
+    }
+
+    Update(game);
 }
 
 void GameWorld::Update(const Consoden::TankGame::MatchPtr& match)
@@ -127,6 +142,16 @@ void GameWorld::Update(const Consoden::TankGame::MatchPtr& match)
     m_matchState.currentGameNumber=match->CurrentGameNumber();
     m_matchState.playerOnePoints=match->PlayerOneTotalPoints();
     m_matchState.playerTwoPoints=match->PlayerTwoTotalPoints();
+
+    if (m_matchState.finished)
+    {
+        if (match->Winner()==Consoden::TankGame::Winner::PlayerOne)
+            m_matchState.winnerPlayerId=m_matchState.players[0];
+        else if (match->Winner()==Consoden::TankGame::Winner::PlayerTwo)
+            m_matchState.winnerPlayerId=m_matchState.players[1];
+        else
+            m_matchState.winnerPlayerId=0;
+    }
 }
 
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
@@ -317,7 +342,16 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         {
             m_matchState.gameState.winnerPlayerId=game->PlayerTwoId().GetVal().GetRawValue();
         }
-            break;
+            break;if (m_matchState.currentGameNumber==1 && m_matchState.finished)
+            {
+                QStringList sl;
+                sl.append("Start new match");
+                SetTextBig(sl);
+            }
+            else if (m_matchState.finished)
+            {
+
+            }
 
         default:
         {

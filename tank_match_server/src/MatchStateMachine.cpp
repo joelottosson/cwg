@@ -20,6 +20,7 @@ MatchStateMachine::MatchStateMachine(cwg::MatchPtr matchRequest,
     ,m_repetion(0)
     ,m_lastGameState()
     ,m_running(true)
+    ,m_currentGameStateHasFinished(false)
 {
     CreateBoards();
     m_state->TotalNumberOfGames()=m_state->RepeatBoardSequence().GetVal()*static_cast<int>(m_games.size());
@@ -34,26 +35,46 @@ void MatchStateMachine::Start()
     StartNextGame();
 }
 
-void MatchStateMachine::Update(const Consoden::TankGame::GameStatePtr &updatedState)
+void MatchStateMachine::OnNewGameState(const cwg::GameStatePtr gameState)
 {
     if (!m_running)
     {
         return;
     }
 
-    UpdatePoints(updatedState);
-    m_lastGameState=updatedState;
-    if (!updatedState->Winner().IsNull() && updatedState->Winner()!=cwg::Winner::Unknown)
-    {
-        if (m_state->CurrentGameNumber()==m_state->TotalNumberOfGames())
-        {
-            m_running=false;
-            m_onMatchFinished();
-            return;
-        }
+    m_currentGameStateHasFinished=false;
+    OnUpdatedGameState(gameState);
+}
 
-        StartNextGame();
+void MatchStateMachine::OnUpdatedGameState(const cwg::GameStatePtr gameState)
+{
+    if (!m_running)
+    {
+        return;
     }
+
+    UpdatePoints(gameState);
+    m_lastGameState=gameState;
+
+    if (HasGameFinished(m_lastGameState))
+    {
+        m_currentGameStateHasFinished=true;
+
+        m_state->PlayerOneTotalPoints()+=(rand()%5+1);
+        m_state->PlayerTwoTotalPoints()+=(rand()%5+1);
+        if (HasMatchFinished())
+        {
+            HandleMatchFinished();
+        }
+        else
+        {
+            StartNextGame();
+        }
+    }
+}
+
+void MatchStateMachine::OnDeletedGameState()
+{
 }
 
 void MatchStateMachine::UpdatePoints(const Consoden::TankGame::GameStatePtr &updatedState)
@@ -67,11 +88,45 @@ void MatchStateMachine::UpdatePoints(const Consoden::TankGame::GameStatePtr &upd
     }
 }
 
+bool MatchStateMachine::HasMatchFinished() const
+{
+    return (m_state->CurrentGameNumber()==m_state->TotalNumberOfGames()) && m_currentGameStateHasFinished;
+}
+
+bool MatchStateMachine::HasGameFinished(const Consoden::TankGame::GameStatePtr &game) const
+{
+    if (game)
+    {
+        return (!game->Winner().IsNull() && game->Winner()!=cwg::Winner::Unknown) && !m_currentGameStateHasFinished;
+    }
+    return false;
+}
+
+void MatchStateMachine::HandleMatchFinished()
+{
+    m_running=false;
+
+    if (m_state->PlayerOneTotalPoints()>m_state->PlayerTwoTotalPoints())
+    {
+        m_state->Winner()=cwg::Winner::PlayerOne;
+    }
+    else if (m_state->PlayerOneTotalPoints()<m_state->PlayerTwoTotalPoints())
+    {
+        m_state->Winner()=cwg::Winner::PlayerTwo;
+    }
+    else
+    {
+        m_state->Winner()=cwg::Winner::Draw;
+    }
+
+    m_onMatchFinished();
+}
+
 void MatchStateMachine::StartNextGame()
 {
-    auto gameIndex=static_cast<size_t>(m_state->CurrentGameNumber().GetVal())%m_games.size();
-    m_state->CurrentGameNumber()++;
+    auto gameIndex=static_cast<size_t>(m_state->CurrentGameNumber().GetVal())%m_games.size();    
     auto gameState=m_games[gameIndex];
+    m_state->CurrentGameNumber()++;
     m_lastGameState.reset();
     m_onStartNewGame(gameState);
 }

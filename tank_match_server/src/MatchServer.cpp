@@ -112,7 +112,7 @@ void MatchServer::OnNewEntity(const sd::EntityProxy entityProxy)
     auto gameState=boost::dynamic_pointer_cast<cwg::GameState>(entityProxy.GetEntity());
     if (gameState && m_currentMatch)
     {
-        m_currentMatch->Update(gameState);
+        m_currentMatch->OnNewGameState(gameState);
     }
 }
 
@@ -121,12 +121,13 @@ void MatchServer::OnUpdatedEntity(const sd::EntityProxy entityProxy)
     auto gameState=boost::dynamic_pointer_cast<cwg::GameState>(entityProxy.GetEntity());
     if (gameState && m_currentMatch)
     {
-        m_currentMatch->Update(gameState);
+        m_currentMatch->OnUpdatedGameState(gameState);
     }
 }
 
 void MatchServer::OnDeletedEntity(const sd::EntityProxy /*entityProxy*/, const bool /*del*/)
 {
+    m_currentMatch->OnDeletedGameState();
 }
 
 //-------------------------------------
@@ -166,7 +167,7 @@ bool MatchServer::ExistMatchRunning()
             return false;
         }
 
-        auto proxy=m_connection.Read(m_currentMatch->GetEntityId());
+        auto proxy=m_connection.Read(m_currentMatch->MatchEntityId());
         auto ongoingMatch=boost::dynamic_pointer_cast<cwg::Match>(proxy.GetEntity());
         if (!ongoingMatch)
         {
@@ -244,12 +245,14 @@ bool MatchServer::VerifyMatchRequest(cwg::MatchPtr m, sd::ResponseSenderPtr resp
 
 void MatchServer::OnMatchFinished()
 {
-    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->GetEntityId().GetInstanceId(), m_defaultHandler);
+    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->MatchEntityId().GetInstanceId(), m_defaultHandler);
 }
 
 void MatchServer::OnStartNewGame(Consoden::TankGame::GameStatePtr gameState)
 {
-    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->GetEntityId().GetInstanceId(), m_defaultHandler);
+    std::cout<<"OnStartNewGame nr: "<<m_currentMatch->CurrentState()->CurrentGameNumber().GetVal()<<", time: "<<TimeString()<<std::endl;
+
+    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->MatchEntityId().GetInstanceId(), m_defaultHandler);
 
     if (m_currentMatch->CurrentState()->CurrentGameNumber()==1)
     {
@@ -262,6 +265,7 @@ void MatchServer::OnStartNewGame(Consoden::TankGame::GameStatePtr gameState)
 
     m_startNewGameTimer.async_wait([=](const boost::system::error_code&)
     {
+        std::cout<<"   StartGame nr: "<<m_currentMatch->CurrentState()->CurrentGameNumber().GetVal()<<", time: "<<TimeString()<<std::endl;
         //Send delete request for game state
         for (auto it=m_connection.GetEntityIterator(cwg::GameState::ClassTypeId, false); it!=sd::EntityIterator(); ++it)
         {
