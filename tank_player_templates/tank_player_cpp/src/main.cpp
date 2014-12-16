@@ -17,7 +17,10 @@ int main(int argc, const char** argv)
         playerName=Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]);
     }
 
-    Player player(playerName);
+    boost::asio::io_service ioService;
+    Player player(playerName, ioService);
+    ioService.run();
+
     return 0;
 }
 

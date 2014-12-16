@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTime>
+#include <Consoden/TankGame/Boards.h>
 #include <boost/filesystem.hpp>
 #include "newgamedialog.h"
 #include "ui_newgamedialog.h"
@@ -39,6 +40,13 @@ NewGameDialog::~NewGameDialog()
     delete ui;
 }
 
+void NewGameDialog::on_browseButton_clicked()
+{
+    QString path=QDir::cleanPath(QString(Safir::Dob::Typesystem::Utilities::ToUtf8(Consoden::TankGame::Boards::Path()).c_str()));
+    QStringList fileNames=QFileDialog::getOpenFileNames(this, "Open game file", path, "Files (*.txt)" , 0, QFileDialog::DontUseNativeDialog);
+    ui->boardListWidget->addItems(fileNames);
+}
+
 void NewGameDialog::OnAddRandomBoard()
 {
     ui->boardListWidget->addItem("<generate_random>");
@@ -56,17 +64,21 @@ QString NewGameDialog::Player2() const
 
 int NewGameDialog::Repetitions() const
 {
-    return 1;
+    return ui->repeatSpinBox->value();
 }
 
 QStringList NewGameDialog::Boards() const
 {
     QStringList sl;
-    sl.append("<generate_random>");
+    for (int i=0; i<ui->boardListWidget->count(); ++i)
+    {
+        sl.append(ui->boardListWidget->item(i)->text());
+    }
+
     return sl;
 }
 
 int NewGameDialog::GameTime() const
 {
-    return 30;
+    return ui->gameTimeSpinBox->value();
 }

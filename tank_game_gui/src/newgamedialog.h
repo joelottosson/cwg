@@ -34,6 +34,7 @@ public:
     
 private slots:
     void OnAddRandomBoard();
+    void on_browseButton_clicked();
 
 private:
     Ui::NewGameDialog *ui;

@@ -21,7 +21,6 @@ MainWindow::MainWindow(int updateFrequency, QWidget *parent)
     ,m_dispatchEvent(static_cast<QEvent::Type>(QEvent::User+666))
     ,m_conThread(&m_dobConnection, this, this, 0)
     ,m_updateTimer(this)
-    ,m_currentMatch()
 {
     this->setWindowState(Qt::WindowMaximized);
     installEventFilter(this);    
@@ -58,7 +57,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::OnUpdateWorld()
 {
-    if (m_world.Finished())
+    if (m_world.MatchFinished())
     {
         MatchFinished();
     }
@@ -111,45 +110,7 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
     Consoden::TankGame::MatchPtr match=boost::dynamic_pointer_cast<Consoden::TankGame::Match>(entityProxy.GetEntity());
     if (match)
     {
-        m_currentMatch=match;
         m_world.Reset(match, entityProxy.GetInstanceId().GetRawValue());
-        m_tankInfoWidget[0]->SetPoints(0);
-        m_tankInfoWidget[1]->SetPoints(0);
-
-        QStringList sl;
-        sl.append("Start new match");
-        m_world.SetTextBig(sl);
-        return;
-    }
-
-    Consoden::TankGame::GameStatePtr game=boost::dynamic_pointer_cast<Consoden::TankGame::GameState>(entityProxy.GetEntity());
-    if (game)
-    {
-        if (m_world.GameId()!=0 && !m_world.Finished())
-        {
-            QMessageBox::information(this, "New game started", "A new game was started while there is still an ongoing game." );
-            return;
-        }
-
-        m_world.Reset(game, entityProxy.GetInstanceId().GetRawValue());
-
-        if (game->Counter().GetVal()<=1)
-        {
-            QStringList sl;
-            if (m_world.GetCurrentGameNumber()>1)
-            {
-                sl.append("Get ready for game "+QString::number(m_world.GetCurrentGameNumber())+" of "+QString::number(m_world.GetTotalNumberOfGames()));
-                sl.append("Score: " + QString::number(m_world.GetPlayerOneTotalPoints())+" - "+QString::number(m_world.GetPlayerTwoTotalPoints()));
-            }
-            else
-            {
-                sl.append("Get ready...");
-            }
-
-            m_world.SetTextBig(sl);
-        }
-
-        m_world.Update(game);
 
         auto player1=m_world.GetPlayerOne();
         auto player2=m_world.GetPlayerTwo();
@@ -157,12 +118,25 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
         {
             m_tankInfoWidget[0]->SetName(player1->name);
             m_tankInfoWidget[0]->Update(m_world.GetJoystickOne());
+            m_tankInfoWidget[0]->SetPoints(m_world.GetPlayerOneTotalPoints());
             m_tankInfoWidget[1]->SetName(player2->name);
             m_tankInfoWidget[1]->Update(m_world.GetJoystickTwo());
+            m_tankInfoWidget[1]->SetPoints(m_world.GetPlayerTwoTotalPoints());
+        }
+        return;
+    }
+
+    Consoden::TankGame::GameStatePtr game=boost::dynamic_pointer_cast<Consoden::TankGame::GameState>(entityProxy.GetEntity());
+    if (game)
+    {
+        if (m_world.GameId()!=0 && !m_world.MatchFinished())
+        {
+            QMessageBox::information(this, "New game started", "A new game was started while there is still an ongoing game." );
+            return;
         }
 
+        m_world.Reset(game, entityProxy.GetInstanceId().GetRawValue());
         m_tankGameWidget->Reset();
-
         m_updateTimer.start(m_updateInterval);
 
         return;
@@ -202,6 +176,9 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     if (match && entityProxy.GetInstanceId().GetRawValue()==m_world.MatchId())
     {
         //updated match
+        m_world.Update(match);
+        m_tankInfoWidget[0]->SetPoints(m_world.GetPlayerOneTotalPoints());
+        m_tankInfoWidget[1]->SetPoints(m_world.GetPlayerTwoTotalPoints());
     }
 }
 
@@ -222,42 +199,30 @@ void MainWindow::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, cons
     else if (entityProxy.GetTypeId()==Consoden::TankGame::Match::ClassTypeId)
     {
         //match deleted
+        m_world.Clear();
     }
 }
 
 void MainWindow::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 {
-
 }
 
 void MainWindow::OnNotRequestOverflow()
 {
-
 }
 
 void MainWindow::MatchFinished()
 {
     m_updateTimer.stop();
     QStringList sl;
-    sl.append("Game Over!");
+    sl.append("Match Over!");
+    auto winner=m_world.GetPlayerById(m_world.GetGameState().winnerPlayerId);
+    if (winner)
+    {
+        sl.append("...and the winner is...");
+        sl.append(winner->name+"!");
+    }
     m_world.SetTextBig(sl);
-
-//    m_updateTimer.stop();
-//    auto player1=m_world.GetPlayerOne();
-//    auto player2=m_world.GetPlayerTwo();
-//    if (!player1 || !player2)
-//    {
-//        return;
-//    }
-
-//    m_tankInfoWidget[0]->SetPoints(m_currentMatch->PlayerOneTotalPoints().GetVal());
-//    m_tankInfoWidget[1]->SetPoints(m_currentMatch->PlayerTwoTotalPoints().GetVal());
-
-//    QStringList sl;
-//    sl.append("Game Over!");
-//    sl.append(player1->name+" vs "+player2->name);
-//    sl.append(QString::number(m_world.GetPlayerOneTotalPoints())+" - "+QString::number(m_world.GetPlayerTwoTotalPoints()));
-//    m_world.SetTextBig(sl);
 }
 
 void MainWindow::OnActionNewGame()
@@ -279,8 +244,8 @@ void MainWindow::OnActionNewGame()
         }
 
         Consoden::TankGame::MatchPtr match=Consoden::TankGame::Match::Create();
-        match->GameTime()=30;
-        match->RepeatBoardSequence()=1;
+        match->GameTime()=dlg.GameTime();
+        match->RepeatBoardSequence()=dlg.Repetitions();
 
         int index=0;
         for (auto& f : files)
@@ -318,51 +283,7 @@ void MainWindow::OnActionStopGame()
 
 void MainWindow::OnActionRestartGame()
 {
-//    if (m_match.NumberOfGames()<=0)
-//    {
-//        QMessageBox::information(this, "No game to restart", "There is no info about last game. Please start a new game.");
-//        return;
-//    }
-//    if (!m_dobConnection.IsOpen())
-//    {
-//        QMessageBox::information(this, "Not connected", "Can't start a game because we are not connected to the game engine!");
-//        return;
-//    }
-
-//    //ReverseTanks()
-//    m_match.Reset();
-//    if (m_match.NextGame())
-//    {
-//        SendNewGameRequest();
-//    }
+    auto dummyPtr=Consoden::TankGame::Match::Create();
+    m_dobConnection.UpdateRequest(dummyPtr, Safir::Dob::Typesystem::InstanceId(m_world.MatchId()), this);
 }
 
-void MainWindow::OnActionSaveGame()
-{
-//    if (m_match.NumberOfGames()<=0)
-//    {
-//        QMessageBox::information(this, "No game to save", "There is no info about last game.");
-//        return;
-//    }
-
-//    QString path;
-//    const char* runtime=getenv("SAFIR_RUNTIME");
-//    if (runtime)
-//    {
-//        path=QDir::cleanPath(QString(runtime)+QDir::separator()+"data"+QDir::separator()+"tank_game");
-//    }
-//    else
-//    {
-//        path=".";
-//    }
-
-//    path+=QDir::separator()+QString("tank_game_")+QTime::currentTime().toString();
-
-//    for (int i=0; i<m_match.NumberOfGames(); ++i)
-//    {
-//        QString file=QDir::cleanPath(path+"#"+QString::number(i)+".txt");
-//        m_match.BoardAt(i)->Save(file.toStdString());
-//    }
-//    QString fileNames=QDir::cleanPath(path+"#0.."+QString::number(m_match.NumberOfGames()-1)+".txt");
-//    QMessageBox::information(this, "Game field saved", "Game field has been saved to file: "+fileNames);
-}

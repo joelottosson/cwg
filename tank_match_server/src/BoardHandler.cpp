@@ -6,6 +6,8 @@
 *
 *******************************************************************************/
 #include <fstream>
+#include <stdio.h>
+#include <time.h>
 #include <boost/filesystem.hpp>
 #include <Consoden/TankGame/Boards.h>
 #include "BoardHandler.h"
@@ -20,6 +22,22 @@ BoardHandler::BoardHandler(Safir::Dob::Connection& con)
 
 void BoardHandler::Init()
 {
+    namespace fs=boost::filesystem;
+    auto base=Safir::Dob::Typesystem::Utilities::ToUtf8(Consoden::TankGame::Boards::Path());
+    auto randomDir=fs::path(base)/fs::path("random");
+    if (!fs::exists(randomDir))
+    {
+        boost::filesystem::create_directories(randomDir);
+    }
+
+    //boost::filesystem::remove_all()
+    fs::directory_iterator it(randomDir), end;
+    while (it!=end)
+    {
+        fs::remove_all(it->path());
+        ++it;
+    }
+
     m_connection.RegisterEntityHandler(Consoden::TankGame::Boards::ClassTypeId, m_defaultHandler, Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId, this);
     Refresh();
 }
@@ -51,16 +69,8 @@ void BoardHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*
     std::wcout<<L"MatchServer: Revoed registration of TankGame.Boards"<<std::endl;
 }
 
-//-------------------------------------
-
 bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std::vector<char> &board, Point &tank1, Point &tank2)
 {
-    if (file=="<generate_random>")
-    {
-        GenerateRandom(xSize, ySize, board, tank1, tank2);
-        return true;
-    }
-
     xSize=0;
     ySize=0;
     board.clear();
@@ -128,13 +138,17 @@ bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std
     return true;
 }
 
-void BoardHandler::GenerateRandom(int &xSize, int &ySize, std::vector<char> &board, Point &tank1, Point &tank2)
+std::string BoardHandler::GenerateRandomFile()
 {
-    xSize=10+rand()%5;
-    ySize=10+rand()%3;
+    std::ofstream os;
+    std::string fileName=CreateFileName();
+    os.open(fileName);
+
+    int xSize=10+rand()%5;
+    int ySize=10+rand()%3;
     size_t size=xSize*ySize;
-    board.clear();
-    board.resize(size, '.');
+    std::vector<char> board(size, '.');
+
     int numWalls=size*static_cast<double>((rand()%50)/100.0); //at most 50% walls
     for (int i=0; i<numWalls; ++i)
     {
@@ -147,7 +161,6 @@ void BoardHandler::GenerateRandom(int &xSize, int &ySize, std::vector<char> &boa
         board[rand()%size]='f';
     }
 
-    // ensure that there always are two tanks
     for(;;)
     {
         int t1=rand()%size;
@@ -156,15 +169,67 @@ void BoardHandler::GenerateRandom(int &xSize, int &ySize, std::vector<char> &boa
         {
             continue; //same start positions, generate new
         }
-
-        //set tank start positions to be empty squares
-        board[static_cast<size_t>(t1)]='.';
-        board[static_cast<size_t>(t2)]='.';
-        tank1=Point(t1%xSize, t1/xSize);
-        tank2=Point(t2%xSize, t2/xSize);
-        break;
+        else
+        {
+            board[static_cast<size_t>(t1)]='t';
+            board[static_cast<size_t>(t2)]='t';
+            break;
+        }
     }
+
+    size_t index=0;
+    for (int y=0; y<ySize; ++y)
+    {
+        for (int x=0; x<xSize; ++x)
+        {
+            os<<board[index++];
+        }
+        os<<std::endl;
+    }
+
+    os.flush();
+    os.close();
+
+    return fileName;
 }
+
+//void BoardHandler::GenerateRandom(int &xSize, int &ySize, std::vector<char> &board, Point &tank1, Point &tank2)
+//{
+//    xSize=10+rand()%5;
+//    ySize=10+rand()%3;
+//    size_t size=xSize*ySize;
+//    board.clear();
+//    board.resize(size, '.');
+//    int numWalls=size*static_cast<double>((rand()%50)/100.0); //at most 50% walls
+//    for (int i=0; i<numWalls; ++i)
+//    {
+//        board[rand()%size]='x';
+//    }
+
+//    int numFlags=size*static_cast<double>((rand()%25)/100.0); //at most 25% flags
+//    for (int i=0; i<numFlags; ++i)
+//    {
+//        board[rand()%size]='f';
+//    }
+
+//    // ensure that there always are two tanks
+//    for(;;)
+//    {
+//        int t1=rand()%size;
+//        int t2=rand()%size;
+//        if (t1==t2)
+//        {
+//            continue; //same start positions, generate new
+//        }
+
+//        //set tank start positions to be empty squares
+//        board[static_cast<size_t>(t1)]='.';
+//        board[static_cast<size_t>(t2)]='.';
+//        tank1=Point(t1%xSize, t1/xSize);
+//        tank2=Point(t2%xSize, t2/xSize);
+//        break;
+//    }
+//}
 
 bool BoardHandler::ValidFile(const std::string &file) const
 {
@@ -209,4 +274,21 @@ void BoardHandler::Refresh()
     }
 
     m_connection.SetAll(boards, m_instance, m_defaultHandler);
+}
+
+// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+std::string BoardHandler::CreateFileName()
+{
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[100];
+    tstruct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+    auto base=Safir::Dob::Typesystem::Utilities::ToUtf8(Consoden::TankGame::Boards::Path());
+    auto leaf=std::string("random_")+std::string(buf)+".txt";
+    auto randomDir=boost::filesystem::path(base)/boost::filesystem::path("random")/boost::filesystem::path(leaf);
+    return randomDir.string();
 }

@@ -19,13 +19,15 @@ MatchStateMachine::MatchStateMachine(cwg::MatchPtr matchRequest,
     ,m_games()
     ,m_repetion(0)
     ,m_lastGameState()
-    ,m_running(true)
+    ,m_running(false)
+    ,m_currentGameStateHasFinished(false)
 {
     CreateBoards();
     m_state->TotalNumberOfGames()=m_state->RepeatBoardSequence().GetVal()*static_cast<int>(m_games.size());
     m_state->CurrentGameNumber()=0;
     m_state->PlayerOneTotalPoints()=0;
     m_state->PlayerTwoTotalPoints()=0;
+    m_state->Winner()=cwg::Winner::Unknown;
 }
 
 void MatchStateMachine::Start()
@@ -33,27 +35,47 @@ void MatchStateMachine::Start()
     StartNextGame();
 }
 
-void MatchStateMachine::Update(const Consoden::TankGame::GameStatePtr &updatedState)
+void MatchStateMachine::Reset()
+{
+    m_matchEid=sdt::EntityId(cwg::Match::ClassTypeId, sdt::InstanceId::GenerateRandom());
+    m_running=false;
+    m_currentGameStateHasFinished=false;
+    m_state->CurrentGameNumber()=0;
+    m_state->PlayerOneTotalPoints()=0;
+    m_state->PlayerTwoTotalPoints()=0;
+    m_state->Winner()=cwg::Winner::Unknown;
+    m_lastGameState.reset();
+}
+
+void MatchStateMachine::OnNewGameState(const cwg::GameStatePtr gameState)
+{
+     m_running=true;
+    m_currentGameStateHasFinished=false;
+    OnUpdatedGameState(gameState);
+}
+
+void MatchStateMachine::OnUpdatedGameState(const cwg::GameStatePtr gameState)
 {
     if (!m_running)
     {
         return;
     }
 
-    UpdatePoints(updatedState);
-    m_lastGameState=updatedState;
-    if (!updatedState->Winner().IsNull() && updatedState->Winner()!=cwg::Winner::Unknown)
-    {
-        std::cout<<"game finished: "<<updatedState->Winner().GetVal()<<std::endl;
-        if (m_state->CurrentGameNumber()==m_state->TotalNumberOfGames())
-        {
-            std::cout<<"match finished"<<std::endl;
-            m_running=false;
-            m_onMatchFinished();
-            return;
-        }
+    UpdatePoints(gameState);
+    m_lastGameState=gameState;
 
-        StartNextGame();
+    if (HasGameFinished(m_lastGameState))
+    {
+        m_currentGameStateHasFinished=true;
+
+        if (HasMatchFinished())
+        {
+            HandleMatchFinished();
+        }
+        else
+        {
+            StartNextGame();
+        }
     }
 }
 
@@ -68,11 +90,45 @@ void MatchStateMachine::UpdatePoints(const Consoden::TankGame::GameStatePtr &upd
     }
 }
 
+bool MatchStateMachine::HasMatchFinished() const
+{
+    return (m_state->CurrentGameNumber()==m_state->TotalNumberOfGames()) && m_currentGameStateHasFinished;
+}
+
+bool MatchStateMachine::HasGameFinished(const Consoden::TankGame::GameStatePtr &game) const
+{
+    if (game)
+    {
+        return (!game->Winner().IsNull() && game->Winner()!=cwg::Winner::Unknown) && !m_currentGameStateHasFinished;
+    }
+    return false;
+}
+
+void MatchStateMachine::HandleMatchFinished()
+{
+    m_running=false;
+
+    if (m_state->PlayerOneTotalPoints()>m_state->PlayerTwoTotalPoints())
+    {
+        m_state->Winner()=cwg::Winner::PlayerOne;
+    }
+    else if (m_state->PlayerOneTotalPoints()<m_state->PlayerTwoTotalPoints())
+    {
+        m_state->Winner()=cwg::Winner::PlayerTwo;
+    }
+    else
+    {
+        m_state->Winner()=cwg::Winner::Draw;
+    }
+
+    m_onMatchFinished();
+}
+
 void MatchStateMachine::StartNextGame()
 {
-    auto gameIndex=static_cast<size_t>(m_state->CurrentGameNumber().GetVal())%m_games.size();
-    m_state->CurrentGameNumber()++;
+    auto gameIndex=static_cast<size_t>(m_state->CurrentGameNumber().GetVal())%m_games.size();    
     auto gameState=m_games[gameIndex];
+    m_state->CurrentGameNumber()++;
     m_lastGameState.reset();
     m_onStartNewGame(gameState);
 }
@@ -87,6 +143,11 @@ void MatchStateMachine::CreateBoards()
         }
 
         auto file=sdt::Utilities::ToUtf8(m_state->Boards()[i].GetVal());
+        if (file=="<generate_random>")
+        {
+            file=BoardHandler::GenerateRandomFile();
+            //m_state->Boards()[i].SetVal(sdt::Utilities::ToWstring(file));
+        }
         auto gs1=CreateGameState(file, false);
         auto gs2=CreateGameState(file, true);
         m_games.push_back(gs1);

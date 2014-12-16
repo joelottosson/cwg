@@ -42,11 +42,8 @@ public:
                          Point& tank1,
                          Point& tank2);
 
-    static void GenerateRandom(int& xSize,
-                               int& ySize,
-                               std::vector<char>& board,
-                               Point& tank1,
-                               Point& tank2);
+    static std::string GenerateRandomFile();
+
 private:
     Safir::Dob::Connection& m_connection;
     Safir::Dob::Typesystem::HandlerId m_defaultHandler;
@@ -54,6 +51,8 @@ private:
 
     void Refresh();
     bool ValidFile(const std::string& file) const;
+
+    static std::string CreateFileName();
 
     // EntityHandler interface
     void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender);

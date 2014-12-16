@@ -48,7 +48,13 @@ GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr) :
 
 bool GameMap::IsEmpty(const std::pair<int, int>& pos) const
 {
-    return m_GamePtr->Board().GetVal()[Index(pos)]=='.';
+    char c=m_GamePtr->Board().GetVal()[Index(pos)];
+    return c=='.' || c=='f';
+}
+
+bool GameMap::IsFlag(const std::pair<int, int>& pos) const
+{
+    return m_GamePtr->Board().GetVal()[Index(pos)]=='f';
 }
 
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const

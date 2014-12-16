@@ -24,18 +24,17 @@ public:
     /**
      * The constructor starts the player.
      */
-    Player(const std::wstring& name);
+    Player(const std::wstring& name, boost::asio::io_service& ioService);
 
 private:
+    boost::shared_ptr<boost::asio::io_service::work> m_work;
     Safir::Dob::Connection m_connection;
     Safir::Dob::Typesystem::HandlerId m_myHandlerId;
     Safir::Dob::Typesystem::InstanceId m_myPlayerId;
     Safir::Dob::Typesystem::InstanceId m_myJoystickId;
     Safir::Dob::Typesystem::InstanceId m_currentGameId;
     int m_currentTankId;
-    boost::asio::io_service m_ioService;
     Safir::Utilities::AsioDispatcher m_dispatcher;
-    boost::shared_ptr<boost::asio::io_service::work> m_work;
     boost::shared_ptr<TankLogic> m_logic;
 
     //StopHandler interface
@@ -55,7 +54,7 @@ private:
     //Update joystick
     void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                      Consoden::TankGame::Direction::Enumeration towerDirection,
-                     bool fire);
+                     bool fire, bool dropMine);
 };
 
 #endif

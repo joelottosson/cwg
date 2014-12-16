@@ -12,6 +12,18 @@
 #include <Safir/Dob/NotFoundException.h>
 #include "MatchServer.h"
 
+#include <boost/lexical_cast.hpp>
+#include <boost/chrono.hpp>
+namespace
+{
+    inline std::string TimeString()
+    {
+        auto time=boost::chrono::steady_clock::now();
+        auto s=boost::chrono::duration_cast<boost::chrono::milliseconds>(time.time_since_epoch());
+        return boost::lexical_cast<std::string>(s.count()/1000.0);
+    }
+}
+
 MatchServer::MatchServer(boost::asio::io_service& ioService)
     :m_work(new boost::asio::io_service::work(ioService))
     ,m_startNewGameTimer(ioService)
@@ -74,9 +86,11 @@ void MatchServer::OnCreateRequest(const sd::EntityRequestProxy entityRequestProx
 
 void MatchServer::OnUpdateRequest(const sd::EntityRequestProxy /*entityRequestProxy*/, sd::ResponseSenderPtr responseSender)
 {
-    //not allowed
-    auto error=sd::ErrorResponse::CreateErrorResponse(sd::ResponseGeneralErrorCodes::SafirNoPermission(), L"");
-    responseSender->Send(error);
+    //means restart match
+    RestartMatch();
+
+    auto ok=sd::SuccessResponse::Create();
+    responseSender->Send(ok);
 }
 
 void MatchServer::OnDeleteRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
@@ -100,8 +114,7 @@ void MatchServer::OnNewEntity(const sd::EntityProxy entityProxy)
     auto gameState=boost::dynamic_pointer_cast<cwg::GameState>(entityProxy.GetEntity());
     if (gameState && m_currentMatch)
     {
-        std::cout<<"new gs "<<std::endl;
-        m_currentMatch->Update(gameState);
+        m_currentMatch->OnNewGameState(gameState);
     }
 }
 
@@ -110,8 +123,7 @@ void MatchServer::OnUpdatedEntity(const sd::EntityProxy entityProxy)
     auto gameState=boost::dynamic_pointer_cast<cwg::GameState>(entityProxy.GetEntity());
     if (gameState && m_currentMatch)
     {
-        std::cout<<"update gs "<<std::endl;
-        m_currentMatch->Update(gameState);
+        m_currentMatch->OnUpdatedGameState(gameState);
     }
 }
 
@@ -147,6 +159,15 @@ void MatchServer::DeleteMatch()
     m_currentMatch.reset();
 }
 
+void MatchServer::RestartMatch()
+{
+    auto keep=m_currentMatch; //keep reference to prevent destruction
+    DeleteMatch();
+    keep->Reset();
+    m_currentMatch=keep;
+    m_work->get_io_service().post([=]{m_currentMatch->Start();});
+}
+
 bool MatchServer::ExistMatchRunning()
 {
     try
@@ -156,7 +177,7 @@ bool MatchServer::ExistMatchRunning()
             return false;
         }
 
-        auto proxy=m_connection.Read(m_currentMatch->GetEntityId());
+        auto proxy=m_connection.Read(m_currentMatch->MatchEntityId());
         auto ongoingMatch=boost::dynamic_pointer_cast<cwg::Match>(proxy.GetEntity());
         if (!ongoingMatch)
         {
@@ -234,24 +255,29 @@ bool MatchServer::VerifyMatchRequest(cwg::MatchPtr m, sd::ResponseSenderPtr resp
 
 void MatchServer::OnMatchFinished()
 {
-    std::cout<<"OnMatchFinished"<<std::endl;
-    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->GetEntityId().GetInstanceId(), m_defaultHandler);
+    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->MatchEntityId().GetInstanceId(), m_defaultHandler);
 }
 
 void MatchServer::OnStartNewGame(Consoden::TankGame::GameStatePtr gameState)
 {
-    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->GetEntityId().GetInstanceId(), m_defaultHandler);
+    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->MatchEntityId().GetInstanceId(), m_defaultHandler);
 
-    m_startNewGameTimer.expires_from_now(boost::chrono::milliseconds(3000));
-    m_startNewGameTimer.async_wait([=](boost::system::error_code)
+    if (m_currentMatch->CurrentState()->CurrentGameNumber()==1)
+    {
+        m_startNewGameTimer.expires_from_now(boost::chrono::milliseconds(500));
+    }
+    else
+    {
+        m_startNewGameTimer.expires_from_now(boost::chrono::milliseconds(5000));
+    }
+
+    m_startNewGameTimer.async_wait([=](const boost::system::error_code&)
     {
         //Send delete request for game state
         for (auto it=m_connection.GetEntityIterator(cwg::GameState::ClassTypeId, false); it!=sd::EntityIterator(); ++it)
         {
             m_connection.DeleteRequest((*it).GetEntityId(), this);
         }
-
-        std::cout<<"OnStartNewGame called"<<std::endl;
 
         m_connection.CreateRequest(gameState, m_defaultHandler, this);
     });
