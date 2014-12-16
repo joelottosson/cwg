@@ -87,6 +87,11 @@ void MatchStateMachine::CreateBoards()
         }
 
         auto file=sdt::Utilities::ToUtf8(m_state->Boards()[i].GetVal());
+        if (file=="<generate_random>")
+        {
+            file=BoardHandler::GenerateRandomFile();
+            //m_state->Boards()[i].SetVal(sdt::Utilities::ToWstring(file));
+        }
         auto gs1=CreateGameState(file, false);
         auto gs2=CreateGameState(file, true);
         m_games.push_back(gs1);

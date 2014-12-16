@@ -279,8 +279,8 @@ void MainWindow::OnActionNewGame()
         }
 
         Consoden::TankGame::MatchPtr match=Consoden::TankGame::Match::Create();
-        match->GameTime()=30;
-        match->RepeatBoardSequence()=1;
+        match->GameTime()=dlg.GameTime();
+        match->RepeatBoardSequence()=dlg.Repetitions();
 
         int index=0;
         for (auto& f : files)

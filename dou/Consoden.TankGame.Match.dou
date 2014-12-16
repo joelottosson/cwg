@@ -30,9 +30,9 @@
                 array are allowed.
             </summary>
             <name>Boards</name>
-            <arraySize>25</arraySize>
+            <arraySize>100</arraySize>
             <type>String</type>
-            <maxLength>50</maxLength>
+            <maxLength>250</maxLength>
         </member>
         <member>
             <summary>

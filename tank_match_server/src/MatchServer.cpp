@@ -240,6 +240,9 @@ void MatchServer::OnMatchFinished()
 
 void MatchServer::OnStartNewGame(Consoden::TankGame::GameStatePtr gameState)
 {
+    boost:
+
+    std::cout<<"-OnStartNewGame "<<std::time(0)<<std::endl;
     m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->GetEntityId().GetInstanceId(), m_defaultHandler);
 
     m_startNewGameTimer.expires_from_now(boost::chrono::milliseconds(3000));
@@ -251,7 +254,7 @@ void MatchServer::OnStartNewGame(Consoden::TankGame::GameStatePtr gameState)
             m_connection.DeleteRequest((*it).GetEntityId(), this);
         }
 
-        std::cout<<"OnStartNewGame called"<<std::endl;
+        std::cout<<"  OnStartNewGame called"<<std::time(0)<<std::endl;
 
         m_connection.CreateRequest(gameState, m_defaultHandler, this);
     });
