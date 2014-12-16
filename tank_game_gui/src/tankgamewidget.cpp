@@ -63,13 +63,14 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 {
     UpdatePaintConstants();
 
-    //Paint mines and flags
+    //Paint mines
     PaintMines(*m_backgroundPainter);
-    PaintFlags(*m_backgroundPainter);
 
     QPixmap tmp(*m_backgroundPixmap);    
     QPainter painter(&tmp);
     painter.setRenderHint(QPainter::Antialiasing);
+
+    PaintFlags(painter);
 
     //Paint tanks
     int blueTank=true;
