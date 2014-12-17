@@ -89,6 +89,7 @@ private:
     QMediaPlayer m_explosionMediaPlayer1;
     QMediaPlayer m_fireMediaPlayer2;
     QMediaPlayer m_explosionMediaPlayer2;
+    QMediaPlayer m_captureFlag;
 
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
 
