@@ -233,7 +233,12 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     {
         if (!game->Tanks()[i].IsNull())
         {
-            const Consoden::TankGame::TankConstPtr& tank=game->Tanks()[i].GetPtr();            
+            const Consoden::TankGame::TankConstPtr& tank=game->Tanks()[i].GetPtr();
+
+//            std::wcout<<"Tank_"<<i<<" pos: ("<<tank->PosX().GetVal()<<", "<<tank->PosY().GetVal()<<") move: "<<
+//                       Consoden::TankGame::Direction::ToString(tank->MoveDirection())<<std::boolalpha<<
+//                       ", inFlames: "<<tank->InFlames().GetVal()<<", hitWall: "<<tank->HitWall()<<", hitTank: "<<tank->HitTank()<<std::endl;
+
             Tank& t=m_matchState.gameState.tanks[i];
             t.moveDirection=ToDirection(tank->MoveDirection());
             t.fires=tank->Fire().GetVal();
@@ -247,7 +252,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
                 {
                     t.explosion=SetInFlames;
 
-                    if (t.deathCause==Tank::HitWall)
+                    if (t.deathCause==Tank::HitWall || t.deathCause==Tank::HitTank)
                     {
                         continue;
                     }
@@ -255,28 +260,43 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
                     t.paintPosition=t.position;
                     t.position=QPointF(tank->PosX().GetVal(), tank->PosY().GetVal());
 
+                    bool hasSpecialEndPos=false;
+                    qreal specialEndPos=0;
                     if (tank->HitWall().IsNull()==false && tank->HitWall().GetVal()==true)
+                    {
+                        t.deathCause=Tank::HitWall;
+                        specialEndPos=0.5;
+                        hasSpecialEndPos=true;
+                    }
+                    else if (tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true)
+                    {
+                        t.deathCause=Tank::HitTank;
+                        specialEndPos=0.25;
+                        hasSpecialEndPos=true;
+                    }
+
+                    //if tank hit wall or drove into other tank, we calculate a position half inside the
+                    //next square before start explosion.
+                    if (hasSpecialEndPos)
                     {
                         //didnt know this before, calculate a special end position inside wall
                         switch (t.moveDirection)
                         {
                         case LeftHeading:
-                            t.position.setX(t.position.x()-0.5);
+                            t.position.setX(t.position.x()-specialEndPos);
                             break;
                         case RightHeading:
-                            t.position.setX(t.position.x()+0.5);
+                            t.position.setX(t.position.x()+specialEndPos);
                             break;
                         case UpHeading:
-                            t.position.setY(t.position.y()-0.5);
+                            t.position.setY(t.position.y()-specialEndPos);
                             break;
                         case DownHeading:
-                            t.position.setY(t.position.y()+0.5);
+                            t.position.setY(t.position.y()+specialEndPos);
                             break;
                         case None:
                             break;
                         }
-
-                        t.deathCause=Tank::HitWall;
 
                         continue;
                     }

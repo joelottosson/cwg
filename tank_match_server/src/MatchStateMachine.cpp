@@ -176,6 +176,9 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     auto tank2Direction=(tankPos2.x<width/2) ? cwg::Direction::Right : cwg::Direction::Left;
 
     cwg::GameStatePtr game=cwg::GameState::Create();
+    game->GameTime()=m_state->GameTime().GetVal();
+    game->NextMove()=0;
+    game->ElapsedTime()=0;
     game->Width()=width;
     game->Height()=height;
     game->GamePace()=1.0f; //1 second per move
@@ -184,8 +187,7 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     game->PlayerTwoId()=m_state->PlayerTwoId();
     game->PlayerOnePoints()=0;
     game->PlayerTwoPoints()=0;
-    game->GameTime()=m_state->GameTime().GetVal();
-    game->ElapsedTime()=0;
+    game->Survivor()=cwg::Winner::Unknown;
     game->Winner()=cwg::Winner::Unknown;
 
     //create tanks
@@ -194,19 +196,21 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank1->PlayerId()=game->PlayerOneId();
     tank1->Fire()=false;
     tank1->InFlames()=false;
-    tank1->HitMine()=false;
-    tank1->Fire()=false;
     tank1->HitWall()=false;
-    tank1->TookFlag()=false;
+    tank1->HitMine()=false;
+    tank1->HitMissile()=false;
+    tank1->HitTank()=false;
+    tank1->TookFlag()=false;    
 
     cwg::TankPtr tank2=cwg::Tank::Create();
     tank2->TankId()=1;
     tank2->PlayerId()=game->PlayerTwoId();
     tank2->Fire()=false;
     tank2->InFlames()=false;
-    tank2->HitMine()=false;
-    tank2->Fire()=false;
     tank2->HitWall()=false;
+    tank2->HitMine()=false;
+    tank2->HitMissile()=false;
+    tank2->HitTank()=false;
     tank2->TookFlag()=false;
 
     if (!reversedPlayers)
