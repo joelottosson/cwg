@@ -144,6 +144,7 @@ namespace TankEngine
                 }
 
                 game->Winner().SetVal(Consoden::TankGame::Winner::Unknown);   
+                game->Survivor().SetVal(Consoden::TankGame::Winner::Unknown);   
 
                 // Store object in the Dob.
                 m_connection.SetAll(game, instanceId, m_HandlerId);
