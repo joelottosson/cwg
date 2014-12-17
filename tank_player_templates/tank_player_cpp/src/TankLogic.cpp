@@ -14,6 +14,8 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 {
     //TODO: implement your own tank logic and call SetJoystick
 
+    // std::cout << "Got new game state, time left til readout " << GameMap::TimeUntilNextJoystickReadout(gameState->NextMove()) << std::endl;
+
     //-------------------------------------------------------
     //Example of a stupid tank logic:
     //Remove it and write your own brilliant version!
@@ -44,7 +46,8 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     bool fire=true;
 
     //Sometimes we also drop a mine
-    bool dropMine=(currentPosition.first+currentPosition.second)%4==0;
+    int elapsedTime = gameState->ElapsedTime().GetVal();
+    bool dropMine=(elapsedTime % 3)==0;
 
 //    std::wcout<<std::boolalpha<<L"Joystick: move: "<<Consoden::TankGame::Direction::ToString(moveDirection)<<
 //                L", tower: "<<Consoden::TankGame::Direction::ToString(towerDirection)<<
@@ -52,4 +55,6 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 
     //Move our joystick.
     SetJoystick(moveDirection, towerDirection, fire, dropMine);
+
+    // std::cout << gameState->Counter() << " " << k << c << " Joystick was set, time left til readout " << GameMap::TimeUntilNextJoystickReadout(gameState->NextMove()) << std::endl;    
 }

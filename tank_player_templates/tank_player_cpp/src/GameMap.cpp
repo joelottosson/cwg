@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 #include <map>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include "GameMap.h"
 
 GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr) :
@@ -188,3 +190,24 @@ unsigned int GameMap::Elapsed() const
     boost::chrono::high_resolution_clock::duration elapsed=boost::chrono::high_resolution_clock::now()-m_creationTime;
     return boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed).count();
 }
+
+int GameMap::TimeUntilNextJoystickReadout(int timestamp)
+{
+    // Get current time from the clock, using microseconds resolution
+    const boost::posix_time::ptime now = 
+        boost::posix_time::microsec_clock::local_time();
+
+    // Get the time offset in current day
+    const boost::posix_time::time_duration td = now.time_of_day();
+
+    int total_milliseconds = td.total_milliseconds();
+
+    // We ignore midnight to keep it simple
+    if (timestamp < total_milliseconds) {
+        return -1; // Time is passed
+    } else {
+        return timestamp - total_milliseconds; // Time left
+    }
+
+}    
+

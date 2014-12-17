@@ -66,6 +66,7 @@ void Player::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
                 joystick->Counter()=0;
                 m_connection.SetAll(joystick, m_myJoystickId, m_myHandlerId);
                 m_logic.reset(new TankLogic(m_currentTankId, boost::bind(&Player::SetJoystick, this, _1, _2, _3, _4)));
+                /* Don't move, the game has not started yet
                 try
                 {
                     m_logic->MakeMove(gameState);
@@ -74,6 +75,7 @@ void Player::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
                 {
                     std::cout<<"Caught unhandled exception in TankLogic!"<<std::endl;
                 }
+                */
                 break;
             }
         }

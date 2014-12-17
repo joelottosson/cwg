@@ -70,6 +70,11 @@ public:
     unsigned int Elapsed() const;
 
     /**
+     * Retuns numer of milliseconds left until next joystick readout.
+     */
+    static int TimeUntilNextJoystickReadout(int timestamp);
+
+    /**
      * For debugging assistance, prints out the parsed map
      */
     void PrintMap() const;
