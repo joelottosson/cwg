@@ -16,7 +16,7 @@
         <member>
             <summary>Time point when the joysticks are read next time</summary>
             <name>NextMove</name>
-            <type>Second32</type>
+            <type>Int32</type>
         </member>
         <member>
             <summary>Board width, number of squares</summary>
