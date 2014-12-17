@@ -42,6 +42,7 @@ GameWorld::GameWorld(int updateInterval)
     ,m_explosionMediaPlayer1()
     ,m_fireMediaPlayer2()
     ,m_explosionMediaPlayer2()
+    ,m_captureFlag()
 {
     InitMediaPlayers();
 
@@ -159,10 +160,30 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
 
     m_matchState.gameState.mines.clear();
-    m_matchState.gameState.flags.clear();
 
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
+    //m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
+
+    if (boardParser.Flags().size()!=m_matchState.gameState.flags.size())
+    {
+        if (m_matchState.gameState.flags.empty())
+        {
+            //first time after start, immediately place flags on board
+            m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
+        }
+        else
+        {
+            //flag has changed, we do the update after a halfSquare-time to make it look nicer.
+            m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
+            {
+                m_captureFlag.stop();
+                m_captureFlag.play();
+                m_matchState.gameState.flags.clear();
+                m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
+            }));
+        }
+    }
     m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
 
     //Remove missiles that are removed
@@ -233,7 +254,12 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     {
         if (!game->Tanks()[i].IsNull())
         {
-            const Consoden::TankGame::TankConstPtr& tank=game->Tanks()[i].GetPtr();            
+            const Consoden::TankGame::TankConstPtr& tank=game->Tanks()[i].GetPtr();
+
+//            std::wcout<<"Tank_"<<i<<" pos: ("<<tank->PosX().GetVal()<<", "<<tank->PosY().GetVal()<<") move: "<<
+//                       Consoden::TankGame::Direction::ToString(tank->MoveDirection())<<std::boolalpha<<
+//                       ", inFlames: "<<tank->InFlames().GetVal()<<", hitWall: "<<tank->HitWall()<<", hitTank: "<<tank->HitTank()<<std::endl;
+
             Tank& t=m_matchState.gameState.tanks[i];
             t.moveDirection=ToDirection(tank->MoveDirection());
             t.fires=tank->Fire().GetVal();
@@ -247,7 +273,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
                 {
                     t.explosion=SetInFlames;
 
-                    if (t.deathCause==Tank::HitWall)
+                    if (t.deathCause==Tank::HitWall || t.deathCause==Tank::HitTank)
                     {
                         continue;
                     }
@@ -255,28 +281,43 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
                     t.paintPosition=t.position;
                     t.position=QPointF(tank->PosX().GetVal(), tank->PosY().GetVal());
 
+                    bool hasSpecialEndPos=false;
+                    qreal specialEndPos=0;
                     if (tank->HitWall().IsNull()==false && tank->HitWall().GetVal()==true)
+                    {
+                        t.deathCause=Tank::HitWall;
+                        specialEndPos=0.5;
+                        hasSpecialEndPos=true;
+                    }
+                    else if (tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true)
+                    {
+                        t.deathCause=Tank::HitTank;
+                        specialEndPos=0.25;
+                        hasSpecialEndPos=true;
+                    }
+
+                    //if tank hit wall or drove into other tank, we calculate a position half inside the
+                    //next square before start explosion.
+                    if (hasSpecialEndPos)
                     {
                         //didnt know this before, calculate a special end position inside wall
                         switch (t.moveDirection)
                         {
                         case LeftHeading:
-                            t.position.setX(t.position.x()-0.5);
+                            t.position.setX(t.position.x()-specialEndPos);
                             break;
                         case RightHeading:
-                            t.position.setX(t.position.x()+0.5);
+                            t.position.setX(t.position.x()+specialEndPos);
                             break;
                         case UpHeading:
-                            t.position.setY(t.position.y()-0.5);
+                            t.position.setY(t.position.y()-specialEndPos);
                             break;
                         case DownHeading:
-                            t.position.setY(t.position.y()+0.5);
+                            t.position.setY(t.position.y()+specialEndPos);
                             break;
                         case None:
                             break;
                         }
-
-                        t.deathCause=Tank::HitWall;
 
                         continue;
                     }
@@ -584,6 +625,7 @@ void GameWorld::InitMediaPlayers()
     m_explosionMediaPlayer1.setVolume(80);
     m_fireMediaPlayer2.setVolume(40);
     m_explosionMediaPlayer2.setVolume(80);
+    m_captureFlag.setVolume(80);
 
     const char* runtime=getenv("SAFIR_RUNTIME");
     QString path=QDir::cleanPath(QString(runtime)+QDir::separator()+"data"+QDir::separator()+"tank_game"+QDir::separator()+"sounds");
@@ -591,11 +633,13 @@ void GameWorld::InitMediaPlayers()
     QString explostionPath=QDir::cleanPath(path+QDir::separator()+"explosion.mp3");
     QString gunPath=QDir::cleanPath(path+QDir::separator()+"gun.mp3");
     QString bigBombPath=QDir::cleanPath(path+QDir::separator()+"big_bomb.mp3");
+    QString captureFlag=QDir::cleanPath(path+QDir::separator()+"capture_flag.mp3");
 
     m_fireMediaPlayer1.setMedia(QUrl::fromLocalFile(firePath));
     m_explosionMediaPlayer1.setMedia(QUrl::fromLocalFile(explostionPath));
     m_fireMediaPlayer2.setMedia(QUrl::fromLocalFile(gunPath));
     m_explosionMediaPlayer2.setMedia(QUrl::fromLocalFile(bigBombPath));
+    m_captureFlag.setMedia(QUrl::fromLocalFile(captureFlag));
 }
 
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)
