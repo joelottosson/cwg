@@ -27,6 +27,7 @@
 
 #include <vector>
 #include <Consoden/TankGame/GameState.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace TankEngine
 {
@@ -70,6 +71,12 @@ namespace TankEngine
         void SetChanges();
 
         void Print();
+
+        //-----------------------------------------------------------------------------
+        // Gets the current time in milliseconds from midnight
+        //-----------------------------------------------------------------------------
+        static int TimerTimeout(boost::posix_time::time_duration time_left);
+
 
     private:
 

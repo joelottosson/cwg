@@ -82,8 +82,12 @@ namespace TankEngine
         void UpdateState();
         void Evaluate();
         void ScheduleMissileCleanup();
-        void AddPoints(int points, Safir::Dob::Typesystem::InstanceId player_id, Consoden::TankGame::GameStatePtr game_ptr);
+        //void AddPoints(int points, Safir::Dob::Typesystem::InstanceId player_id, Consoden::TankGame::GameStatePtr game_ptr);
+        void AddPoints(int points, int tank_id, Consoden::TankGame::GameStatePtr game_ptr);
         void SetWinner(Consoden::TankGame::GameStatePtr game_ptr);
+        Consoden::TankGame::Winner::Enumeration TankIdToWinner(int tank_id) { if (tank_id == mPlayerOneTankId) { return Consoden::TankGame::Winner::PlayerOne; } else { return Consoden::TankGame::Winner::PlayerTwo; } }
+        int  OpponentTankId(int tank_id) { if (tank_id == mPlayerOneTankId) { return mPlayerTwoTankId; } else { return mPlayerOneTankId; } }
+
 
         bool mGamePrepare;
         bool mGameRunning;
@@ -93,6 +97,10 @@ namespace TankEngine
         int mMaxGameTime;
         int mPlayerOneCounter;
         int mPlayerTwoCounter;
+        int mPlayerOneTankId;
+        int mPlayerTwoTankId;
+        int mPlayerOneTankIndex;
+        int mPlayerTwoTankIndex;
         Safir::Dob::Typesystem::EntityId m_GameEntityId;
         Safir::Dob::Typesystem::HandlerId m_HandlerId;
         JoystickEntityHandler m_JoystickHandler;

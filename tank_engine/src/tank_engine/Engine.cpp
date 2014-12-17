@@ -53,6 +53,10 @@ namespace TankEngine
         mMaxGameTime(0),
         mPlayerOneCounter(0),
         mPlayerTwoCounter(0),
+        mPlayerOneTankId(-1),
+        mPlayerTwoTankId(-1),
+        mPlayerOneTankIndex(-1),
+        mPlayerTwoTankIndex(-1),
         m_JoystickHandler(this),
         m_cyclicTimeout(JOYSTICK_TIMEOUT)
     {
@@ -90,6 +94,14 @@ namespace TankEngine
 
             const Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
+
+            if (game_ptr->PlayerOneId() == tank_ptr->PlayerId()) {
+                mPlayerOneTankId = tank_ptr->TankId();
+                mPlayerOneTankIndex = tank_index;
+            } else {
+                mPlayerTwoTankId = tank_ptr->TankId();
+                mPlayerTwoTankIndex = tank_index;
+            }
 
             m_JoystickWaitIds.push_back(tank_ptr->TankId().GetVal());
         }
@@ -142,8 +154,8 @@ namespace TankEngine
                 GameMap gm(game_ptr);
 
                 // Draw game, both players get one point
-                AddPoints(1, game_ptr->PlayerOneId(), game_ptr);
-                AddPoints(1, game_ptr->PlayerTwoId(), game_ptr);
+                AddPoints(1, mPlayerOneTankId, game_ptr);
+                AddPoints(1, mPlayerTwoTankId, game_ptr);
 
                 game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::Draw);
                 SetWinner(game_ptr);
@@ -173,24 +185,15 @@ namespace TankEngine
         Consoden::TankGame::GameStatePtr game_ptr =
             boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
 
-        // Find all tanks and cache their joysticks
-        for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
-             tank_index < game_ptr->TanksArraySize(); 
-             tank_index++) {
+        Safir::Dob::Typesystem::EntityId joystickEntityId1 = m_JoystickEntityMap[mPlayerOneTankIndex];
+        Consoden::TankGame::JoystickPtr joystick_ptr1 =
+            boost::static_pointer_cast<Consoden::TankGame::Joystick>(m_connection.Read(joystickEntityId1).GetEntity());
+        m_JoystickCacheMap[mPlayerOneTankIndex] = joystick_ptr1;
 
-            if (game_ptr->Tanks()[tank_index].IsNull()) {
-                // Reached last tank
-                break;
-            }
-
-            Consoden::TankGame::TankPtr tank_ptr = 
-                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
-        
-            Safir::Dob::Typesystem::EntityId joystickEntityId = m_JoystickEntityMap[tank_ptr->TankId().GetVal()];
-            Consoden::TankGame::JoystickPtr joystick_ptr =
-                boost::static_pointer_cast<Consoden::TankGame::Joystick>(m_connection.Read(joystickEntityId).GetEntity());
-            m_JoystickCacheMap[tank_ptr->TankId().GetVal()] = joystick_ptr;
-        }
+        Safir::Dob::Typesystem::EntityId joystickEntityId2 = m_JoystickEntityMap[mPlayerTwoTankIndex];
+        Consoden::TankGame::JoystickPtr joystick_ptr2 =
+            boost::static_pointer_cast<Consoden::TankGame::Joystick>(m_connection.Read(joystickEntityId2).GetEntity());
+        m_JoystickCacheMap[mPlayerTwoTankIndex] = joystick_ptr2;
     }
 
     void Engine::UpdateTimerExpired(const boost::system::error_code& e)
@@ -214,13 +217,6 @@ namespace TankEngine
     {
         // Evaluate and publish new state
         Evaluate();
-
-        // Evaluate may stop the game
-        if (mGameRunning) {
-            // Wait for joystick readout            
-            mTimer.expires_at(mTimer.expires_at() + boost::posix_time::milliseconds(JOYSTICK_TIMEOUT));
-            mTimer.async_wait(boost::bind(&Engine::JoystickTimerExpired, this, boost::asio::placeholders::error));        
-        }
     }  
 
     void Engine::ScheduleMissileCleanup()
@@ -331,12 +327,21 @@ namespace TankEngine
                 tank_id_string += (*it).first;
 
                 if (mGameRunning) {
-                    std::cout << "Joystick left before game was over! Stopping game. Tank id: " << (*it).first << std::endl;
+                    StopGame();                
+
+                    std::cout << "Joystick left before game was over. Walk over by Tank id: " << (*it).first << std::endl;
 
                     Safir::Logging::SendSystemLog(Safir::Logging::Informational,
-                                              L"Joystick (" + tank_id_string + L", " + (*it).second.ToString() + L") deleted, shutting down!");
+                                              L"Joystick (" + tank_id_string + L", " + (*it).second.ToString() + L") deleted, walk over!");
 
-                    StopGame();                
+                    Consoden::TankGame::GameStatePtr game_ptr =
+                        boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
+                    // Walk over, 5 point to opponent
+                    int loser_tank_id = (*it).first;
+                    AddPoints(5, OpponentTankId(loser_tank_id), game_ptr);
+                    game_ptr->Survivor().SetVal(TankIdToWinner(OpponentTankId(loser_tank_id)));
+                    SetWinner(game_ptr);
+                    m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
                 }
             }
         }
@@ -354,6 +359,12 @@ namespace TankEngine
         mCounter = 0;
         mTimer.expires_from_now(boost::posix_time::milliseconds(JOYSTICK_TIMEOUT));
         mTimer.async_wait(boost::bind(&Engine::JoystickTimerExpired, this, boost::asio::placeholders::error));        
+
+        // Game started, set NextMove time
+        Consoden::TankGame::GameStatePtr game_ptr =
+            boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
+        game_ptr->NextMove().SetVal(GameMap::TimerTimeout(mTimer.expires_from_now()));
+        m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
     }
 
     void Engine::Evaluate()
@@ -423,8 +434,14 @@ namespace TankEngine
                     if (tank_tank_collission) {
                         tank_ptr->InFlames() = true;
                         tank_ptr->HitTank() = true;
+                        tank_ptr->MoveDirection() = joystick_ptr->MoveDirection();
+                        tank_ptr->Fire() = false;
+                        tank_ptr->TookFlag() = false;
                         tank2_ptr->InFlames() = true;
                         tank2_ptr->HitTank() = true;
+                        tank2_ptr->MoveDirection() = tank2_ptr->MoveDirection();
+                        tank2_ptr->Fire() = false;
+                        tank2_ptr->TookFlag() = false;
                     }                    
                 }
             }
@@ -438,6 +455,9 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
         
+            tank_ptr->Fire() = false;
+            tank_ptr->TookFlag() = false;
+
             if (tank_ptr->InFlames()) {
                 // Dead tank, go to next
                 continue;
@@ -529,7 +549,7 @@ namespace TankEngine
                     // Check if something in the way!!
                     if (!gm.WallSquare(request_pos_x, request_pos_y)) {
                         // Moving,  place mine in last position?
-                        if (!joystick_ptr->MineDrop().IsNull() && joystick_ptr->MineDrop()) {
+                        if (joystick_ptr->MineDrop().IsNull() || joystick_ptr->MineDrop()) {
                             gm.AddMine(tank_ptr->PosX(), tank_ptr->PosY());
                         }
                         tank_ptr->PosX() = request_pos_x;
@@ -628,12 +648,7 @@ namespace TankEngine
             if (gm.IsTankHit(tank_ptr->PosX(), tank_ptr->PosY())) {
                 // BOOM!
                 // Hit by missile awards two points to opponent
-                Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
-                Safir::Dob::Typesystem::InstanceId opponent_player_id = game_ptr->PlayerOneId();
-                if (joystick_ptr->PlayerId() == game_ptr->PlayerOneId()) {
-                    opponent_player_id = game_ptr->PlayerTwoId();
-                }
-                AddPoints(2, opponent_player_id, game_ptr);
+                AddPoints(2, OpponentTankId(tank_ptr->TankId()), game_ptr);
 
                 tank_ptr->InFlames() = true;
                 tank_ptr->HitMissile() = true;
@@ -663,8 +678,11 @@ namespace TankEngine
                     gm.TakeFlag(tank_ptr->PosX(), tank_ptr->PosY());
 
                     // One point for flag capture
-                    Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
-                    AddPoints(1, joystick_ptr->PlayerId(), game_ptr);
+                    AddPoints(1, tank_ptr->TankId(), game_ptr);
+                    tank_ptr->TookFlag() = true;
+                } else {
+                    // Clear flag flag :)
+                    tank_ptr->TookFlag() = false;                    
                 }
             }
         }
@@ -691,8 +709,8 @@ namespace TankEngine
 
         if (player_one_in_flames && player_two_in_flames) {
             // Draw game, both players get one point
-            AddPoints(1, game_ptr->PlayerOneId(), game_ptr);
-            AddPoints(1, game_ptr->PlayerTwoId(), game_ptr);
+            AddPoints(1, mPlayerOneTankId, game_ptr);
+            AddPoints(1, mPlayerTwoTankId, game_ptr);
 
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::Draw);
             SetWinner(game_ptr);
@@ -707,7 +725,7 @@ namespace TankEngine
 
         } else if (player_one_in_flames) {
             // One player survives, three points
-            AddPoints(3, game_ptr->PlayerTwoId(), game_ptr);
+            AddPoints(3, mPlayerTwoTankId, game_ptr);
 
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::PlayerTwo);
             SetWinner(game_ptr);
@@ -722,7 +740,7 @@ namespace TankEngine
 
         } else if (player_two_in_flames) {
             // One player survives, three points
-            AddPoints(3, game_ptr->PlayerOneId(), game_ptr);
+            AddPoints(3, mPlayerOneTankId, game_ptr);
 
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::PlayerOne);
             SetWinner(game_ptr);
@@ -743,11 +761,27 @@ namespace TankEngine
         //gm.Print();
         gm.SetChanges();
 
+        if (mGameRunning) {
+            // Wait for joystick readout            
+            mTimer.expires_from_now(boost::posix_time::milliseconds(JOYSTICK_TIMEOUT));
+            mTimer.async_wait(boost::bind(&Engine::JoystickTimerExpired, this, boost::asio::placeholders::error));        
+        }
+        game_ptr->NextMove().SetVal(GameMap::TimerTimeout(mTimer.expires_from_now()));
+
         m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
     }
 
+/*
     void Engine::AddPoints(int points, Safir::Dob::Typesystem::InstanceId player_id, Consoden::TankGame::GameStatePtr game_ptr) {
         if (game_ptr->PlayerOneId().GetVal() == player_id) {
+            game_ptr->PlayerOnePoints().SetVal(game_ptr->PlayerOnePoints().GetVal() + points);
+        } else {
+            game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);            
+        }
+    }
+*/
+    void Engine::AddPoints(int points, int tank_id, Consoden::TankGame::GameStatePtr game_ptr) {
+        if (mPlayerOneTankId == tank_id) {
             game_ptr->PlayerOnePoints().SetVal(game_ptr->PlayerOnePoints().GetVal() + points);
         } else {
             game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);            

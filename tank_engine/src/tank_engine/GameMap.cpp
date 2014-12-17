@@ -26,6 +26,7 @@
 
 #include <iostream>
 
+
 #include <Consoden/TankGame/GameState.h>
 
 namespace TankEngine
@@ -334,4 +335,19 @@ namespace TankEngine
             std::cout << std::endl;
         }        
     }
+
+    //-----------------------------------------------------------------------------
+    // Gets the current time in milliseconds from midnight
+    //-----------------------------------------------------------------------------
+    int GameMap::TimerTimeout(boost::posix_time::time_duration time_left) 
+    {
+        const boost::posix_time::ptime now = 
+            boost::posix_time::microsec_clock::local_time();
+
+        // Get the time offset in current day
+        const boost::posix_time::time_duration td = now.time_of_day();
+
+        return td.total_milliseconds() + time_left.total_milliseconds();
+    }    
+
  };
