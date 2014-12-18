@@ -36,7 +36,6 @@ Player::Player(const std::wstring &playerName, boost::asio::io_service& ioServic
     player->Name()=playerName;
     m_connection.SetAll(player, m_myPlayerId, m_myHandlerId);
 
-    //run the game player
     std::wcout<<playerName<<L" is running"<<std::endl;
 }
 

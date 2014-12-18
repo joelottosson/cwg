@@ -37,6 +37,7 @@ MatchServer::MatchServer(boost::asio::io_service& ioService)
     m_connection.RegisterEntityHandler(cwg::Match::ClassTypeId, m_defaultHandler, sd::InstanceIdPolicy::HandlerDecidesInstanceId, this);
     m_connection.SubscribeEntity(cwg::GameState::ClassTypeId, this);
     m_boardHandler.Init();
+    std::wcout<<L"tank_match_server is running"<<std::endl;
 }
 
 //-------------------------------------
@@ -77,7 +78,7 @@ void MatchServer::OnCreateRequest(const sd::EntityRequestProxy entityRequestProx
     }
 
     //everything seems to be ok, start a new match
-    m_currentMatch=boost::make_shared<MatchStateMachine>(m, [=](cwg::GameStatePtr gs){OnStartNewGame(gs);}, [=]{OnMatchFinished();});
+    m_currentMatch=boost::make_shared<MatchStateMachine>(m, [=](cwg::GameStatePtr gs){OnStartNewGame(gs);}, [=]{OnMatchUpdate();});
     m_work->get_io_service().post([=]{m_currentMatch->Start();});
 
     auto ok=sd::SuccessResponse::Create();
@@ -253,15 +254,13 @@ bool MatchServer::VerifyMatchRequest(cwg::MatchPtr m, sd::ResponseSenderPtr resp
     return true;
 }
 
-void MatchServer::OnMatchFinished()
+void MatchServer::OnMatchUpdate()
 {
     m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->MatchEntityId().GetInstanceId(), m_defaultHandler);
 }
 
 void MatchServer::OnStartNewGame(Consoden::TankGame::GameStatePtr gameState)
 {
-    m_connection.SetAll(m_currentMatch->CurrentState(), m_currentMatch->MatchEntityId().GetInstanceId(), m_defaultHandler);
-
     if (m_currentMatch->CurrentState()->CurrentGameNumber()==1)
     {
         m_startNewGameTimer.expires_from_now(boost::chrono::milliseconds(500));

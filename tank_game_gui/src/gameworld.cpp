@@ -163,7 +163,6 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
-    //m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
 
     if (boardParser.Flags().size()!=m_matchState.gameState.flags.size())
     {
@@ -184,7 +183,6 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             }));
         }
     }
-    m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
 
     //Remove missiles that are removed
     for (MissileMap::const_iterator it=m_matchState.gameState.missiles.begin(); it!=m_matchState.gameState.missiles.end(); )
@@ -401,8 +399,10 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             break;
         }
 
-        m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+2*m_matchState.gameState.pace, [&]
+        auto paintGameEndTime=m_matchState.gameState.lastUpdate+2*m_matchState.gameState.pace;
+        m_eventQueue.insert(WorldEvents::value_type(paintGameEndTime, [&]
         {
+            //set paint winner, and then set a new event to remove text after 3 sec
             m_matchState.gameState.paintWinner=true;
         }));
     }

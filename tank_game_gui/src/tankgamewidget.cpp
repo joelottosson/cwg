@@ -316,16 +316,13 @@ void TankGameWidget::PaintWinner(QPainter& painter)
 
         if (winner)
         {
-            sl.append("Winner is: "+winner->name);
+            sl.append("Current game winner: "+winner->name);
 
             if (loser && loserTank)
             {
                 QString loserTxt=loser->name;
                 switch (loserTank->deathCause)
                 {
-                case Tank::None:
-                    loserTxt+=" dead by unknown reason!";
-                    break;
                 case Tank::HitMissile:
                     loserTxt+=" was hit by a missile!";
                     break;
@@ -337,6 +334,9 @@ void TankGameWidget::PaintWinner(QPainter& painter)
                     break;
                 case Tank::HitWall:
                     loserTxt+=" drove into a wall!";
+                    break;
+                case Tank::None:
+                    loserTxt="Time limit expired.";
                     break;
                 }
                 sl.append(loserTxt);
