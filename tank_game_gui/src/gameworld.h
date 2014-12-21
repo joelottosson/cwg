@@ -20,6 +20,7 @@
 
 #include "gamemodel.h"
 #include "sprite.h"
+#include "boardparser.h"
 
 class GameWorld
 {
@@ -77,6 +78,7 @@ private:
     std::vector<Sprite> m_sprites;
     SpriteData m_explosion;
     SpriteData m_tankFire;
+    SpriteData m_coin;
     QStringList m_textBig;
     QStringList m_textSmall;
 
@@ -92,6 +94,7 @@ private:
     QMediaPlayer m_captureFlag;
 
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
+    inline void UpdateFlags(const Board& board);
 
     template <class T>
     inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item)

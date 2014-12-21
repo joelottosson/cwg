@@ -34,7 +34,7 @@ private:
     QPixmap m_missile;
     QPixmap m_tankWreck;
     QPixmap m_mine;
-    QPixmap m_flag;
+    QPixmap m_poison;
 
     boost::shared_ptr<QPixmap> m_backgroundPixmap;
     boost::shared_ptr<QPainter> m_backgroundPainter;
@@ -56,7 +56,7 @@ private:
     void PaintGrid(QPainter& painter);
     void PaintWalls(QPainter& painter);
     void PaintMines(QPainter& painter);
-    void PaintFlags(QPainter& painter);
+    void PaintPoison(QPainter& painter);
     void PaintTank(const Tank& tank, bool blue, QPainter& painter);
     void PaintMissile(const Missile& missile, QPainter& painter);
     void PaintSprite(const Sprite& sprite, QPainter& painter);

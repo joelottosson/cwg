@@ -22,7 +22,7 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     ,m_missile(":/images/missile.png")
     ,m_tankWreck(":/images/panzerIV_wreck.png")
     ,m_mine(":/images/mine.png")
-    ,m_flag(":/images/flag.png")
+    ,m_poison(":/images/poison.png")
 {
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     Reset();
@@ -70,7 +70,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     QPainter painter(&tmp);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    PaintFlags(painter);
+    PaintPoison(painter);
 
     //Paint tanks
     int blueTank=true;
@@ -168,11 +168,11 @@ void TankGameWidget::PaintMines(QPainter& painter)
     }
 }
 
-void TankGameWidget::PaintFlags(QPainter& painter)
+void TankGameWidget::PaintPoison(QPainter& painter)
 {
-    for (const auto& flag : m_world.GetGameState().flags)
+    for (const auto& pos : m_world.GetGameState().poison)
     {
-        painter.drawPixmap(ToScreen(flag, 0, 0), m_flag);
+        painter.drawPixmap(ToScreen(pos, 0, 0), m_poison);
     }
 }
 

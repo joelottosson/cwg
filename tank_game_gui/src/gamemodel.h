@@ -134,6 +134,7 @@ struct GameState
     PointVec walls{};
     PointVec mines{};
     PointVec flags{};
+    PointVec poison{};
     MissileMap missiles{};
     TankVec tanks{};
     JoystickMap joystics{};

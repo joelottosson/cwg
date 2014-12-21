@@ -14,6 +14,8 @@ Board::Board(const std::string& filepath)
     ,m_tanks()
     ,m_walls()
     ,m_mines()
+    ,m_flags()
+    ,m_poison()
 {
     std::ifstream is;
     is.open(filepath.c_str());
@@ -51,6 +53,8 @@ Board::Board(const char* binary, int xSize, int ySize)
     ,m_tanks()
     ,m_walls()
     ,m_mines()
+    ,m_flags()
+    ,m_poison()
 {
     Parse(binary);
 }
@@ -83,6 +87,11 @@ void Board::ToBinary(std::vector<char>& bin) const
     {
         size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
         bin[index]='f';
+    }
+    for (const auto& pos : m_poison)
+    {
+        size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
+        bin[index]='p';
     }
 }
 
@@ -140,6 +149,12 @@ void Board::Parse(const char* data)
             case 'f': //flag
             {
                 m_flags.push_back(QPointF(x, y));
+            }
+                break;
+
+            case 'p': //poison
+            {
+                m_poison.push_back(QPointF(x, y));
             }
                 break;
 

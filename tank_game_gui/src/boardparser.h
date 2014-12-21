@@ -41,6 +41,7 @@ public:
     const PointVec& Walls() const {return m_walls;}
     const PointVec& Mines() const {return m_mines;}
     const PointVec& Flags() const {return m_flags;}
+    const PointVec& Poison() const {return m_poison;}
 
     void ReverseTanks();
     void ToBinary(std::vector<char>& bin) const;    
@@ -53,6 +54,7 @@ private:
     PointVec m_walls;
     PointVec m_mines;
     PointVec m_flags;
+    PointVec m_poison;
 
     void Parse(const char* data);
 };

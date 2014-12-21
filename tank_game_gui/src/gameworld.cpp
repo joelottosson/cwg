@@ -6,7 +6,6 @@
 *
 *******************************************************************************/
 #include "gameworld.h"
-#include "boardparser.h"
 
 namespace
 {
@@ -60,18 +59,27 @@ GameWorld::GameWorld(int updateInterval)
     {
         m_tankFire.fragments.push_back(QRectF(i*72, 0, 72, 72));
     }
+
+    m_coin.image=QPixmap(":/images/coin_sheet.png");
+    m_coin.lifeTime=1000;
+    for (int i=0; i<8; ++i)
+    {
+        m_coin.fragments.push_back(QRectF(i*72, 0, 72, 72));
+    }
 }
 
 void GameWorld::Clear()
 {
     m_matchState=MatchState();
     m_matchState.finished=true;
+    m_sprites.clear();
 }
 
 void GameWorld::ClearGameState()
 {
     m_matchState.gameState=GameState();
     m_matchState.gameState.finished=true;
+    m_sprites.clear();
 }
 
 void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t id)
@@ -80,7 +88,8 @@ void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t 
     m_matchState.machId=id;
     m_matchState.players[0]=match->PlayerOneId().GetVal().GetRawValue();
     m_matchState.players[1]=match->PlayerTwoId().GetVal().GetRawValue();
-    m_matchState.totalNumberOfGames=match->TotalNumberOfGames();    
+    m_matchState.totalNumberOfGames=match->TotalNumberOfGames();
+    m_sprites.clear();
     Update(match);
 
     if (m_matchState.currentGameNumber==1 && !m_matchState.finished)
@@ -96,6 +105,7 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_matchState.gameState=GameState();
     m_matchState.gameState.gameId=id;
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
+    m_sprites.clear();
 
     if (!game->GamePace().IsNull())
     {
@@ -155,6 +165,54 @@ void GameWorld::Update(const Consoden::TankGame::MatchPtr& match)
     }
 }
 
+void  GameWorld::UpdateFlags(const Board& boardParser)
+{
+    if (boardParser.Flags().size()!=m_matchState.gameState.flags.size())
+    {
+        if (m_matchState.gameState.flags.empty())
+        {
+            //first time after start, immediately place flags on board
+            m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
+
+            for (auto pos : m_matchState.gameState.flags)
+            {
+                m_sprites.push_back(Sprite(m_coin, pos, QDateTime::currentMSecsSinceEpoch(), 0));
+            }
+        }
+        else
+        {
+            //flag has changed, we do the update after a halfSquare-time to make it look nicer.
+            m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
+            {
+                //update flag positions
+                m_matchState.gameState.flags.clear();
+                m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
+
+                //remove
+                std::remove_if(m_sprites.begin(),
+                               m_sprites.end(),
+                               [&](const Sprite& sprite)
+                {
+                    if (sprite.Data()==&m_coin) //we only compare to coins sprites
+                    {
+                        auto it=std::find_if(m_matchState.gameState.flags.begin(),
+                                     m_matchState.gameState.flags.end(),
+                                     [&](const QPointF& p){return sprite.Position()==p;});
+
+                        return it==m_matchState.gameState.flags.end();
+                    }
+                   return false;
+                });
+
+                //play sound
+                m_captureFlag.stop();
+                m_captureFlag.play();
+            }));
+        }
+    }
+
+}
+
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 {
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
@@ -164,25 +222,9 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
-    if (boardParser.Flags().size()!=m_matchState.gameState.flags.size())
-    {
-        if (m_matchState.gameState.flags.empty())
-        {
-            //first time after start, immediately place flags on board
-            m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
-        }
-        else
-        {
-            //flag has changed, we do the update after a halfSquare-time to make it look nicer.
-            m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
-            {
-                m_captureFlag.stop();
-                m_captureFlag.play();
-                m_matchState.gameState.flags.clear();
-                m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
-            }));
-        }
-    }
+    m_matchState.gameState.poison.insert(m_matchState.gameState.poison.begin(), boardParser.Poison().begin(), boardParser.Poison().end());
+
+    UpdateFlags(boardParser);
 
     //Remove missiles that are removed
     for (MissileMap::const_iterator it=m_matchState.gameState.missiles.begin(); it!=m_matchState.gameState.missiles.end(); )
@@ -445,10 +487,10 @@ void GameWorld::Update()
         if (tank.explosion==SetInFlames)
         {
             //new explosion sprite
-            m_sprites.push_back(Sprite(m_explosion, tank.position, now+timeToNextUpdate));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+0.3f, tank.position.y()+0.3f), now+timeToNextUpdate+300));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()-0.2f, tank.position.y()+0.2f), now+timeToNextUpdate+500));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()-0.3f, tank.position.y()-0.3f), now+timeToNextUpdate+800));
+            m_sprites.push_back(Sprite(m_explosion, tank.position, now+timeToNextUpdate, 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+0.3f, tank.position.y()+0.3f), now+timeToNextUpdate+300, 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()-0.2f, tank.position.y()+0.2f), now+timeToNextUpdate+500, 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()-0.3f, tank.position.y()-0.3f), now+timeToNextUpdate+800, 1));
             tank.explosion=Burning;
             m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [&]
             {
@@ -508,7 +550,7 @@ void GameWorld::Update()
                 break;
             }
 
-            m_sprites.push_back(Sprite(m_tankFire, firePos, animationMoveSpeed, DirectionToAngle(missile.moveDirection), nextUpdate));
+            m_sprites.push_back(Sprite(m_tankFire, firePos, animationMoveSpeed, DirectionToAngle(missile.moveDirection), nextUpdate, 1));
             missile.paintFire=false;
 
             qint64 missilePlayerId=m_matchState.gameState.tanks[missile.tankId].playerId;
@@ -536,7 +578,7 @@ void GameWorld::Update()
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
-            m_sprites.push_back(Sprite(m_explosion, missile.position, nextUpdate));
+            m_sprites.push_back(Sprite(m_explosion, missile.position, nextUpdate, 1));
             missile.explosion=Burning;
 
             qint64 missilePlayerId=m_matchState.gameState.tanks[missile.tankId].playerId;
@@ -579,7 +621,7 @@ void GameWorld::Update()
 
 bool GameWorld::MatchFinished() const
 {
-    return m_matchState.finished && m_sprites.empty() && m_eventQueue.empty();
+    return m_matchState.finished && m_eventQueue.empty();
 }
 
 void GameWorld::AddPlayer(const Consoden::TankGame::PlayerConstPtr player, qint64 id)

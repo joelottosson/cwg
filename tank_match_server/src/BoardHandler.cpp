@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 #include <Consoden/TankGame/Boards.h>
 #include "BoardHandler.h"
 
@@ -102,7 +103,7 @@ bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std
         for (size_t i=0; i<line.size(); ++i)
         {
             char c=line[i];
-            if (c=='.' || c=='o' || c=='f' || c=='x')
+            if (c=='.' || c=='o' || c=='f' || c=='p' || c=='x')
             {
                 continue;
             }
@@ -161,6 +162,12 @@ std::string BoardHandler::GenerateRandomFile()
         board[rand()%size]='f';
     }
 
+    int numPoison=size*static_cast<double>((rand()%15)/100.0); //at most 15% poison
+    for (int i=0; i<numPoison; ++i)
+    {
+        board[rand()%size]='p';
+    }
+
     for(;;)
     {
         int t1=rand()%size;
@@ -192,44 +199,6 @@ std::string BoardHandler::GenerateRandomFile()
 
     return fileName;
 }
-
-//void BoardHandler::GenerateRandom(int &xSize, int &ySize, std::vector<char> &board, Point &tank1, Point &tank2)
-//{
-//    xSize=10+rand()%5;
-//    ySize=10+rand()%3;
-//    size_t size=xSize*ySize;
-//    board.clear();
-//    board.resize(size, '.');
-//    int numWalls=size*static_cast<double>((rand()%50)/100.0); //at most 50% walls
-//    for (int i=0; i<numWalls; ++i)
-//    {
-//        board[rand()%size]='x';
-//    }
-
-//    int numFlags=size*static_cast<double>((rand()%25)/100.0); //at most 25% flags
-//    for (int i=0; i<numFlags; ++i)
-//    {
-//        board[rand()%size]='f';
-//    }
-
-//    // ensure that there always are two tanks
-//    for(;;)
-//    {
-//        int t1=rand()%size;
-//        int t2=rand()%size;
-//        if (t1==t2)
-//        {
-//            continue; //same start positions, generate new
-//        }
-
-//        //set tank start positions to be empty squares
-//        board[static_cast<size_t>(t1)]='.';
-//        board[static_cast<size_t>(t2)]='.';
-//        tank1=Point(t1%xSize, t1/xSize);
-//        tank2=Point(t2%xSize, t2/xSize);
-//        break;
-//    }
-//}
 
 bool BoardHandler::ValidFile(const std::string &file) const
 {
@@ -279,6 +248,7 @@ void BoardHandler::Refresh()
 // Get current date/time, format is YYYY-MM-DD.HH:mm:ss
 std::string BoardHandler::CreateFileName()
 {
+    static int counter=0;
     time_t     now = time(0);
     struct tm  tstruct;
     char       buf[100];
@@ -288,7 +258,7 @@ std::string BoardHandler::CreateFileName()
     strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
 
     auto base=Safir::Dob::Typesystem::Utilities::ToUtf8(Consoden::TankGame::Boards::Path());
-    auto leaf=std::string("random_")+std::string(buf)+".txt";
+    auto leaf=std::string("random_")+std::string(buf)+"_"+boost::lexical_cast<std::string>(++counter)+".txt";
     auto randomDir=boost::filesystem::path(base)/boost::filesystem::path("random")/boost::filesystem::path(leaf);
     return randomDir.string();
 }
