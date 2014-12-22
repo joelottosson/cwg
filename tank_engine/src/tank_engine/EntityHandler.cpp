@@ -177,32 +177,6 @@ namespace TankEngine
 
         //StartRemoveInExercise
         bool bOk = false;
-        //StopRemoveInExercise
-        /*
-        //StartRemoveInSolution
-        //const Consoden::TankGame::GameStatePtr receivedVehicle =
-        //    boost::static_pointer_cast<Consoden::TankGame::GameState>(entityRequestProxy.GetRequest());
-        //StopRemoveInSolution
-
-        //StartRemoveInExercise
-        const Consoden::TankGame::GameStatePtr receivedVehicle =
-            boost::static_pointer_cast<Consoden::TankGame::GameState>(entityRequestProxy.GetRequest());
-
-        if (m_connection.IsCreated(entityRequestProxy.GetEntityId()))
-        {
-
-            // Don't allow the identification to be updated.
-            if(!receivedVehicle -> Identification().IsChanged())
-            {
-                // Update the stored vehicle with the received one.
-                m_connection.SetChanges(
-                    receivedVehicle,
-                    entityRequestProxy.GetInstanceId(),
-                    Safir::Dob::Typesystem::HandlerId());
-                bOk = true;
-            }
-        }
-        */
         if (bOk)
         {
             responseSender -> Send(Safir::Dob::SuccessResponse::Create());

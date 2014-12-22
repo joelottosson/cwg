@@ -42,7 +42,6 @@ namespace TankEngine
         // Attach to the secondary Dob connection.
         m_secDobConnection.Attach();
 
-        // Subscribe for vehicle.
         m_secDobConnection.SubscribeEntity(Consoden::TankGame::Joystick::ClassTypeId, this);
         m_gameId = gameId;
     }

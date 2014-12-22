@@ -18,11 +18,6 @@
 
 namespace TankEngine
 {
-    /** 
-     * Defines a vehicle owner. This class handles the
-     * registration as a data owner and processes request
-     * on that data.
-     */
     class Engine :
         public JoystickEngineIF
     {

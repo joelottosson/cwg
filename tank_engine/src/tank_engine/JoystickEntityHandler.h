@@ -45,7 +45,7 @@ namespace TankEngine
         virtual ~JoystickEntityHandler();
 
         /**
-        *  Setup vehicle table and subscribe for Vehicle entity changes.
+        *  Do some initialization.
         */      
         void Init(Safir::Dob::Typesystem::InstanceId gameId);
 
