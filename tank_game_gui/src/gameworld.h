@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -91,10 +91,12 @@ private:
     QMediaPlayer m_explosionMediaPlayer1;
     QMediaPlayer m_fireMediaPlayer2;
     QMediaPlayer m_explosionMediaPlayer2;
-    QMediaPlayer m_captureFlag;
+    QMediaPlayer m_tookCoinMediaPlayer;
+    QMediaPlayer m_wilhelmScreamMediaPlayer;
 
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
-    inline void UpdateFlags(const Board& board);
+    inline void UpdateCoins(const Board& board);
+    inline void UpdatePoison(const Board& board);
 
     template <class T>
     inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item)

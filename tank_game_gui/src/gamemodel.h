@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -70,7 +70,6 @@ struct Tank
     Direction moveDirection;
     Direction towerDirection;
     bool fires;
-    bool tookFlag;
     ExplosionStatus explosion;
     Death deathCause;
 
@@ -86,7 +85,6 @@ struct Tank
         ,moveDirection(direction)
         ,towerDirection(direction)
         ,fires(false)
-        ,tookFlag(false)
         ,explosion(NotInFlames)
         ,deathCause(None)
         ,paintPosition(pos)
@@ -133,7 +131,7 @@ struct GameState
     int pace{1000}; //milliseconds per square
     PointVec walls{};
     PointVec mines{};
-    PointVec flags{};
+    PointVec coins{};
     PointVec poison{};
     MissileMap missiles{};
     TankVec tanks{};

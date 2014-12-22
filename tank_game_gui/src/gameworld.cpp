@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -41,7 +41,8 @@ GameWorld::GameWorld(int updateInterval)
     ,m_explosionMediaPlayer1()
     ,m_fireMediaPlayer2()
     ,m_explosionMediaPlayer2()
-    ,m_captureFlag()
+    ,m_tookCoinMediaPlayer()
+    ,m_wilhelmScreamMediaPlayer()
 {
     InitMediaPlayers();
 
@@ -116,6 +117,7 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_matchState.gameState.size.setX(boardParser.GetXSize());
     m_matchState.gameState.size.setY(boardParser.GetYSize());
     m_matchState.gameState.walls.insert(m_matchState.gameState.walls.begin(), boardParser.Walls().begin(), boardParser.Walls().end());
+    m_matchState.gameState.poison.insert(m_matchState.gameState.poison.begin(), boardParser.Poison().begin(), boardParser.Poison().end());
 
     for (int i=0; i<game->TanksArraySize(); ++i)
     {
@@ -165,28 +167,27 @@ void GameWorld::Update(const Consoden::TankGame::MatchPtr& match)
     }
 }
 
-void  GameWorld::UpdateFlags(const Board& boardParser)
+void  GameWorld::UpdateCoins(const Board& boardParser)
 {
-    if (boardParser.Flags().size()!=m_matchState.gameState.flags.size())
+    if (boardParser.Coins().size()!=m_matchState.gameState.coins.size())
     {
-        if (m_matchState.gameState.flags.empty())
+        if (m_matchState.gameState.coins.empty())
         {
-            //first time after start, immediately place flags on board
-            m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
-
-            for (auto pos : m_matchState.gameState.flags)
+            //first time after start, immediately place coins on board
+            m_matchState.gameState.coins.insert(m_matchState.gameState.coins.begin(), boardParser.Coins().begin(), boardParser.Coins().end());
+            for (auto pos : m_matchState.gameState.coins)
             {
                 m_sprites.push_back(Sprite(m_coin, pos, QDateTime::currentMSecsSinceEpoch(), 0));
             }
         }
         else
         {
-            //flag has changed, we do the update after a halfSquare-time to make it look nicer.
+            //coin has changed, we do the update after a halfSquare-time to make it look nicer.
             m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
             {
-                //update flag positions
-                m_matchState.gameState.flags.clear();
-                m_matchState.gameState.flags.insert(m_matchState.gameState.flags.begin(), boardParser.Flags().begin(), boardParser.Flags().end());
+                //update coin positions
+                m_matchState.gameState.coins.clear();
+                m_matchState.gameState.coins.insert(m_matchState.gameState.coins.begin(), boardParser.Coins().begin(), boardParser.Coins().end());
 
                 //remove
                 std::remove_if(m_sprites.begin(),
@@ -195,22 +196,38 @@ void  GameWorld::UpdateFlags(const Board& boardParser)
                 {
                     if (sprite.Data()==&m_coin) //we only compare to coins sprites
                     {
-                        auto it=std::find_if(m_matchState.gameState.flags.begin(),
-                                     m_matchState.gameState.flags.end(),
+                        auto it=std::find_if(m_matchState.gameState.coins.begin(),
+                                     m_matchState.gameState.coins.end(),
                                      [&](const QPointF& p){return sprite.Position()==p;});
 
-                        return it==m_matchState.gameState.flags.end();
+                        return it==m_matchState.gameState.coins.end();
                     }
                    return false;
                 });
 
                 //play sound
-                m_captureFlag.stop();
-                m_captureFlag.play();
+                m_tookCoinMediaPlayer.stop();
+                m_tookCoinMediaPlayer.play();
             }));
         }
     }
+}
 
+void  GameWorld::UpdatePoison(const Board& boardParser)
+{
+    if (boardParser.Poison().size()!=m_matchState.gameState.poison.size())
+    {
+        //coin has changed, we do the update after a halfSquare-time to make it look nicer.
+        m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
+        {
+            //update coin positions
+            m_matchState.gameState.poison.clear();
+            m_matchState.gameState.poison.insert(m_matchState.gameState.poison.begin(), boardParser.Poison().begin(), boardParser.Poison().end());
+            //play sound
+            m_wilhelmScreamMediaPlayer.stop();
+            m_wilhelmScreamMediaPlayer.play();
+        }));
+    }
 }
 
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
@@ -222,9 +239,13 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
-    m_matchState.gameState.poison.insert(m_matchState.gameState.poison.begin(), boardParser.Poison().begin(), boardParser.Poison().end());
+    UpdateCoins(boardParser);
 
-    UpdateFlags(boardParser);
+    //if hit poison gas square, play a terrible sound
+    if (game->Tanks()[0].GetPtr()->HitPoisonGas()==true || game->Tanks()[1].GetPtr()->HitPoisonGas()==true)
+    {
+        UpdatePoison(boardParser);
+    }
 
     //Remove missiles that are removed
     for (MissileMap::const_iterator it=m_matchState.gameState.missiles.begin(); it!=m_matchState.gameState.missiles.end(); )
@@ -663,11 +684,12 @@ void GameWorld::HandleEventQueue(qint64 time)
 
 void GameWorld::InitMediaPlayers()
 {
-    m_fireMediaPlayer1.setVolume(40);
+    m_fireMediaPlayer1.setVolume(35);
     m_explosionMediaPlayer1.setVolume(80);
-    m_fireMediaPlayer2.setVolume(40);
+    m_fireMediaPlayer2.setVolume(35);
     m_explosionMediaPlayer2.setVolume(80);
-    m_captureFlag.setVolume(80);
+    m_tookCoinMediaPlayer.setVolume(100);
+    m_wilhelmScreamMediaPlayer.setVolume(80);
 
     const char* runtime=getenv("SAFIR_RUNTIME");
     QString path=QDir::cleanPath(QString(runtime)+QDir::separator()+"data"+QDir::separator()+"tank_game"+QDir::separator()+"sounds");
@@ -675,13 +697,15 @@ void GameWorld::InitMediaPlayers()
     QString explostionPath=QDir::cleanPath(path+QDir::separator()+"explosion.mp3");
     QString gunPath=QDir::cleanPath(path+QDir::separator()+"gun.mp3");
     QString bigBombPath=QDir::cleanPath(path+QDir::separator()+"big_bomb.mp3");
-    QString captureFlag=QDir::cleanPath(path+QDir::separator()+"capture_flag.mp3");
+    QString tookCoin=QDir::cleanPath(path+QDir::separator()+"coin.mp3");
+    QString wilhelmScream=QDir::cleanPath(path+QDir::separator()+"wilhelm_scream.mp3");
 
     m_fireMediaPlayer1.setMedia(QUrl::fromLocalFile(firePath));
     m_explosionMediaPlayer1.setMedia(QUrl::fromLocalFile(explostionPath));
     m_fireMediaPlayer2.setMedia(QUrl::fromLocalFile(gunPath));
     m_explosionMediaPlayer2.setMedia(QUrl::fromLocalFile(bigBombPath));
-    m_captureFlag.setMedia(QUrl::fromLocalFile(captureFlag));
+    m_tookCoinMediaPlayer.setMedia(QUrl::fromLocalFile(tookCoin));
+    m_wilhelmScreamMediaPlayer.setMedia(QUrl::fromLocalFile(wilhelmScream));
 }
 
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)

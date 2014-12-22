@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -14,7 +14,7 @@ Board::Board(const std::string& filepath)
     ,m_tanks()
     ,m_walls()
     ,m_mines()
-    ,m_flags()
+    ,m_coins()
     ,m_poison()
 {
     std::ifstream is;
@@ -53,7 +53,7 @@ Board::Board(const char* binary, int xSize, int ySize)
     ,m_tanks()
     ,m_walls()
     ,m_mines()
-    ,m_flags()
+    ,m_coins()
     ,m_poison()
 {
     Parse(binary);
@@ -83,10 +83,10 @@ void Board::ToBinary(std::vector<char>& bin) const
         size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
         bin[index]='o';
     }
-    for (const auto& pos : m_flags)
+    for (const auto& pos : m_coins)
     {
         size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
-        bin[index]='f';
+        bin[index]='$';
     }
     for (const auto& pos : m_poison)
     {
@@ -146,9 +146,9 @@ void Board::Parse(const char* data)
             }
                 break;
                 
-            case 'f': //flag
+            case '$': //coin
             {
-                m_flags.push_back(QPointF(x, y));
+                m_coins.push_back(QPointF(x, y));
             }
                 break;
 

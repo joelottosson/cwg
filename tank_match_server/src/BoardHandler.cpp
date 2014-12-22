@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -103,7 +103,7 @@ bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std
         for (size_t i=0; i<line.size(); ++i)
         {
             char c=line[i];
-            if (c=='.' || c=='o' || c=='f' || c=='p' || c=='x')
+            if (c=='.' || c=='o' || c=='$' || c=='p' || c=='x')
             {
                 continue;
             }
@@ -156,10 +156,10 @@ std::string BoardHandler::GenerateRandomFile()
         board[rand()%size]='x';
     }
 
-    int numFlags=size*static_cast<double>((rand()%25)/100.0); //at most 25% flags
-    for (int i=0; i<numFlags; ++i)
+    int numCoins=size*static_cast<double>((rand()%25)/100.0); //at most 25% coins
+    for (int i=0; i<numCoins; ++i)
     {
-        board[rand()%size]='f';
+        board[rand()%size]='$';
     }
 
     int numPoison=size*static_cast<double>((rand()%15)/100.0); //at most 15% poison

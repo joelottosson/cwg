@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -40,7 +40,7 @@ public:
     const PointVec& Tanks() const {return m_tanks;}
     const PointVec& Walls() const {return m_walls;}
     const PointVec& Mines() const {return m_mines;}
-    const PointVec& Flags() const {return m_flags;}
+    const PointVec& Coins() const {return m_coins;}
     const PointVec& Poison() const {return m_poison;}
 
     void ReverseTanks();
@@ -53,7 +53,7 @@ private:
     PointVec m_tanks;
     PointVec m_walls;
     PointVec m_mines;
-    PointVec m_flags;
+    PointVec m_coins;
     PointVec m_poison;
 
     void Parse(const char* data);

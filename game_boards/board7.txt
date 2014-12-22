@@ -1,10 +1,10 @@
 x....txxx.x.
 ....x.xx.x..
-..f........x
-.xf...x.x..x
-.xx.x...fxx.
+..$........x
+.x$...x.x..x
+.xx.x...$xx.
 .xxx.t..x...
 ..xxx..x.xx.
 ..x.x...x.x.
-.f.x..xfx..x
+.$.x..x$x..x
 xx.x...x.x.x

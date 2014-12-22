@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -55,8 +55,8 @@ private:
 
     void PaintGrid(QPainter& painter);
     void PaintWalls(QPainter& painter);
-    void PaintMines(QPainter& painter);
     void PaintPoison(QPainter& painter);
+    void PaintMines(QPainter& painter);
     void PaintTank(const Tank& tank, bool blue, QPainter& painter);
     void PaintMissile(const Missile& missile, QPainter& painter);
     void PaintSprite(const Sprite& sprite, QPainter& painter);

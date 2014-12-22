@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -207,7 +207,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank1->HitMine()=false;
     tank1->HitMissile()=false;
     tank1->HitTank()=false;
-    tank1->TookFlag()=false;    
+    tank1->TookCoin()=false;
+    tank1->HitPoisonGas()=false;
 
     cwg::TankPtr tank2=cwg::Tank::Create();
     tank2->TankId()=1;
@@ -218,7 +219,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank2->HitMine()=false;
     tank2->HitMissile()=false;
     tank2->HitTank()=false;
-    tank2->TookFlag()=false;
+    tank2->TookCoin()=false;
+    tank2->HitPoisonGas()=false;
 
     if (!reversedPlayers)
     {

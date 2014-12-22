@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -80,16 +80,16 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         blueTank=!blueTank;
     }
 
-    //Paint missiles
-    for (auto& vt : m_world.GetGameState().missiles)
-    {
-        PaintMissile(vt.second, painter);
-    }
-
     //Paint sprites
     for (auto& s : m_world.Sprites())
     {
         PaintSprite(s, painter);
+    }
+
+    //Paint missiles
+    for (auto& vt : m_world.GetGameState().missiles)
+    {
+        PaintMissile(vt.second, painter);
     }
 
     if (m_world.GetGameState().paintWinner)
@@ -160,19 +160,19 @@ void TankGameWidget::PaintWalls(QPainter& painter)
     }
 }
 
-void TankGameWidget::PaintMines(QPainter& painter)
-{    
-    for (const auto& mine : m_world.GetGameState().mines)
-    {
-        painter.drawPixmap(ToScreen(mine, 0, 0), m_mine);
-    }
-}
-
 void TankGameWidget::PaintPoison(QPainter& painter)
 {
     for (const auto& pos : m_world.GetGameState().poison)
     {
         painter.drawPixmap(ToScreen(pos, 0, 0), m_poison);
+    }
+}
+
+void TankGameWidget::PaintMines(QPainter& painter)
+{    
+    for (const auto& mine : m_world.GetGameState().mines)
+    {
+        painter.drawPixmap(ToScreen(mine, 0, 0), m_mine);
     }
 }
 
