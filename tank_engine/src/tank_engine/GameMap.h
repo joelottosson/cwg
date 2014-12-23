@@ -1,26 +1,10 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015
 *
-* Created by: Petter Lönnstedt / stpeln
+* Created by: Björn Weström / bjws
 *
-*******************************************************************************
-*
-* This file is part of Safir SDK Core.
-*
-* Safir SDK Core is free software: you can redistribute it and/or modify
-* it under the terms of version 3 of the GNU General Public License as
-* published by the Free Software Foundation.
-*
-* Safir SDK Core is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
-*
-******************************************************************************/
+*******************************************************************************/
 
 #ifndef __GAMEMAP_H
 #define __GAMEMAP_H
@@ -31,11 +15,6 @@
 
 namespace TankEngine
 {
-    /** 
-     * Defines a vehicle owner. This class handles the
-     * registration as a data owner and processes request
-     * on that data.
-     */
     class GameMap 
     {
     public:
@@ -50,9 +29,11 @@ namespace TankEngine
 
         bool MineSquare(int pos_x, int pos_y);
 
-        bool FlagSquare(int pos_x, int pos_y);
+        bool CoinSquare(int pos_x, int pos_y);
 
-        void TakeFlag(int pos_x, int pos_y);
+        bool PoisonSquare(int pos_x, int pos_y);
+
+        void ClearSquare(int pos_x, int pos_y);
 
         bool IsTankHit(int pos_x, int pos_y);
 

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -20,7 +20,7 @@ class MatchStateMachine
 public:
     MatchStateMachine(cwg::MatchPtr matchRequest,
                std::function<void(cwg::GameStatePtr)> onStartNewGame,
-               std::function<void()> onMatchFinished);
+               std::function<void()> onUpdateMatchState);
 
     void Start();
     void Reset();
@@ -36,18 +36,20 @@ private:
     cwg::MatchPtr m_state;
     sdt::EntityId m_matchEid;
     std::function<void (cwg::GameStatePtr)> m_onStartNewGame;
-    std::function<void ()> m_onMatchFinished;
+    std::function<void ()> m_onUpdateMatchState;
     std::vector<cwg::GameStatePtr> m_games;
     int m_repetion;
-    cwg::GameStatePtr m_lastGameState;
+    cwg::GameStatePtr m_currentGameState;
     bool m_running;
     bool m_currentGameStateHasFinished;
+    int m_player1PointsAccumulated;
+    int m_player2PointsAccumulated;
 
     void CreateBoards();
     cwg::GameStatePtr CreateGameState(const std::string& boardFile, bool reversedPlayers) const;
-    void StartNextGame();
-    void UpdatePoints(const cwg::GameStatePtr& updatedState);
-    bool HasGameFinished(const cwg::GameStatePtr& game) const;
+    void StartNextGame();    
+    void UpdatePoints();
+    bool HasGameFinished() const;
     bool HasMatchFinished() const;
     void HandleMatchFinished();
 };

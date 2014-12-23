@@ -52,7 +52,11 @@
             <type>Boolean</type>
         </member>
         <member>
-            <name>TookFlag</name>
+            <name>HitPoisonGas</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <name>TookCoin</name>
             <type>Boolean</type>
         </member>
     </members>

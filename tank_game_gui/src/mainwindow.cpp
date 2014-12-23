@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -216,11 +216,15 @@ void MainWindow::MatchFinished()
     m_updateTimer.stop();
     QStringList sl;
     sl.append("Match Over!");
-    auto winner=m_world.GetPlayerById(m_world.GetGameState().winnerPlayerId);
+    auto winner=m_world.GetPlayerById(m_world.GetMatchState().winnerPlayerId);
     if (winner)
     {
         sl.append("...and the winner is...");
         sl.append(winner->name+"!");
+    }
+    else
+    {
+        sl.append("Draw");
     }
     m_world.SetTextBig(sl);
 }

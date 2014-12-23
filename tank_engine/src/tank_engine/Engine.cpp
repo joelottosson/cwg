@@ -1,26 +1,10 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015
 *
-* Created by: Petter Lönnstedt / stpeln
+* Created by: Björn Weström / bjws
 *
-*******************************************************************************
-*
-* This file is part of Safir SDK Core.
-*
-* Safir SDK Core is free software: you can redistribute it and/or modify
-* it under the terms of version 3 of the GNU General Public License as
-* published by the Free Software Foundation.
-*
-* Safir SDK Core is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
-*
-******************************************************************************/
+*******************************************************************************/
 
 // Comment this out to deny null movements!
 //#define ALLOW_NULL_MOVE
@@ -436,12 +420,14 @@ namespace TankEngine
                         tank_ptr->HitTank() = true;
                         tank_ptr->MoveDirection() = joystick_ptr->MoveDirection();
                         tank_ptr->Fire() = false;
-                        tank_ptr->TookFlag() = false;
+                        tank_ptr->TookCoin() = false;
+                        tank_ptr->HitPoisonGas() = false;
                         tank2_ptr->InFlames() = true;
                         tank2_ptr->HitTank() = true;
                         tank2_ptr->MoveDirection() = tank2_ptr->MoveDirection();
                         tank2_ptr->Fire() = false;
-                        tank2_ptr->TookFlag() = false;
+                        tank2_ptr->TookCoin() = false;
+                        tank2_ptr->HitPoisonGas() = false;
                     }                    
                 }
             }
@@ -456,7 +442,8 @@ namespace TankEngine
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
         
             tank_ptr->Fire() = false;
-            tank_ptr->TookFlag() = false;
+            tank_ptr->TookCoin() = false;
+            tank_ptr->HitPoisonGas() = false;
 
             if (tank_ptr->InFlames()) {
                 // Dead tank, go to next
@@ -673,16 +660,23 @@ namespace TankEngine
             }
 
             if (!tank_tank_collission) {
-                // Check for flag
-                if (gm.FlagSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
-                    gm.TakeFlag(tank_ptr->PosX(), tank_ptr->PosY());
+                // Check for coin
+                if (gm.CoinSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
+                    gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //take the coin
 
-                    // One point for flag capture
+                    // One point for taking a coin
                     AddPoints(1, tank_ptr->TankId(), game_ptr);
-                    tank_ptr->TookFlag() = true;
+                    tank_ptr->TookCoin() = true;
+                } else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
+                    // Take one point away for driving into poison gas. Are we gonna allow less than zero points?
+                    gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
+                    AddPoints(-1, tank_ptr->TankId(), game_ptr);
+                    tank_ptr->HitPoisonGas() = true;
+
                 } else {
-                    // Clear flag flag :)
-                    tank_ptr->TookFlag() = false;                    
+                    // Clear took coin and gas
+                    tank_ptr->TookCoin() = false;
+                    tank_ptr->HitPoisonGas() = false;
                 }
             }
         }
@@ -783,8 +777,13 @@ namespace TankEngine
     void Engine::AddPoints(int points, int tank_id, Consoden::TankGame::GameStatePtr game_ptr) {
         if (mPlayerOneTankId == tank_id) {
             game_ptr->PlayerOnePoints().SetVal(game_ptr->PlayerOnePoints().GetVal() + points);
+            if (game_ptr->PlayerOnePoints()<0)
+                game_ptr->PlayerOnePoints()=0;
+
         } else {
-            game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);            
+            game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);
+            if (game_ptr->PlayerTwoPoints()<0)
+                game_ptr->PlayerTwoPoints()=0;
         }
     }
 

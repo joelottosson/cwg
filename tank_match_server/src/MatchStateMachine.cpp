@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -11,16 +11,18 @@
 
 MatchStateMachine::MatchStateMachine(cwg::MatchPtr matchRequest,
                        std::function<void (Consoden::TankGame::GameStatePtr)> onStartNewGame,
-                       std::function<void ()> onMatchFinished)
+                       std::function<void ()> onUpdateMatchState)
     :m_state(matchRequest)
     ,m_matchEid(cwg::Match::ClassTypeId, sdt::InstanceId::GenerateRandom())
     ,m_onStartNewGame(onStartNewGame)
-    ,m_onMatchFinished(onMatchFinished)
+    ,m_onUpdateMatchState(onUpdateMatchState)
     ,m_games()
     ,m_repetion(0)
-    ,m_lastGameState()
+    ,m_currentGameState()
     ,m_running(false)
     ,m_currentGameStateHasFinished(false)
+    ,m_player1PointsAccumulated(0)
+    ,m_player2PointsAccumulated(0)
 {
     CreateBoards();
     m_state->TotalNumberOfGames()=m_state->RepeatBoardSequence().GetVal()*static_cast<int>(m_games.size());
@@ -40,15 +42,23 @@ void MatchStateMachine::Reset()
     m_matchEid=sdt::EntityId(cwg::Match::ClassTypeId, sdt::InstanceId::GenerateRandom());
     m_running=false;
     m_currentGameStateHasFinished=false;
+    m_player1PointsAccumulated=0;
+    m_player2PointsAccumulated=0;
     m_state->CurrentGameNumber()=0;
     m_state->PlayerOneTotalPoints()=0;
     m_state->PlayerTwoTotalPoints()=0;
     m_state->Winner()=cwg::Winner::Unknown;
-    m_lastGameState.reset();
+    m_currentGameState.reset();
 }
 
 void MatchStateMachine::OnNewGameState(const cwg::GameStatePtr gameState)
 {
+    //accumulate points from previous game
+    if (m_currentGameState)
+    {
+        m_player1PointsAccumulated+=m_currentGameState->PlayerOnePoints();
+        m_player2PointsAccumulated+=m_currentGameState->PlayerTwoPoints();
+    }
      m_running=true;
     m_currentGameStateHasFinished=false;
     OnUpdatedGameState(gameState);
@@ -61,10 +71,9 @@ void MatchStateMachine::OnUpdatedGameState(const cwg::GameStatePtr gameState)
         return;
     }
 
-    UpdatePoints(gameState);
-    m_lastGameState=gameState;
-
-    if (HasGameFinished(m_lastGameState))
+    m_currentGameState=gameState;
+    UpdatePoints();
+    if (HasGameFinished())
     {
         m_currentGameStateHasFinished=true;
 
@@ -77,21 +86,18 @@ void MatchStateMachine::OnUpdatedGameState(const cwg::GameStatePtr gameState)
             StartNextGame();
         }
     }
-}
-
-void MatchStateMachine::UpdatePoints(const Consoden::TankGame::GameStatePtr &updatedState)
-{
-    if (m_lastGameState)
-    {
-        int diffP1=updatedState->PlayerOnePoints()-m_lastGameState->PlayerOnePoints();
-        int diffP2=updatedState->PlayerTwoPoints()-m_lastGameState->PlayerTwoPoints();
-        m_state->PlayerOneTotalPoints()+=diffP1;
-        m_state->PlayerTwoTotalPoints()+=diffP2;
-    }
     else
     {
-        m_state->PlayerOneTotalPoints()+=updatedState->PlayerOnePoints().GetVal();
-        m_state->PlayerTwoTotalPoints()+=updatedState->PlayerTwoPoints().GetVal();
+        m_onUpdateMatchState();
+    }
+}
+
+void MatchStateMachine::UpdatePoints()
+{
+    if (m_currentGameState)
+    {
+        m_state->PlayerOneTotalPoints()=m_player1PointsAccumulated+m_currentGameState->PlayerOnePoints();
+        m_state->PlayerTwoTotalPoints()=m_player2PointsAccumulated+m_currentGameState->PlayerTwoPoints();
     }
 }
 
@@ -100,11 +106,11 @@ bool MatchStateMachine::HasMatchFinished() const
     return (m_state->CurrentGameNumber()==m_state->TotalNumberOfGames()) && m_currentGameStateHasFinished;
 }
 
-bool MatchStateMachine::HasGameFinished(const Consoden::TankGame::GameStatePtr &game) const
+bool MatchStateMachine::HasGameFinished() const
 {
-    if (game)
+    if (m_currentGameState)
     {
-        return (!game->Winner().IsNull() && game->Winner()!=cwg::Winner::Unknown) && !m_currentGameStateHasFinished;
+        return (!m_currentGameState->Winner().IsNull() && m_currentGameState->Winner()!=cwg::Winner::Unknown) && !m_currentGameStateHasFinished;
     }
     return false;
 }
@@ -126,7 +132,7 @@ void MatchStateMachine::HandleMatchFinished()
         m_state->Winner()=cwg::Winner::Draw;
     }
 
-    m_onMatchFinished();
+    m_onUpdateMatchState();
 }
 
 void MatchStateMachine::StartNextGame()
@@ -134,7 +140,8 @@ void MatchStateMachine::StartNextGame()
     auto gameIndex=static_cast<size_t>(m_state->CurrentGameNumber().GetVal())%m_games.size();    
     auto gameState=m_games[gameIndex];
     m_state->CurrentGameNumber()++;
-    m_lastGameState.reset();
+    m_currentGameState.reset();
+    m_onUpdateMatchState();
     m_onStartNewGame(gameState);
 }
 
@@ -200,7 +207,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank1->HitMine()=false;
     tank1->HitMissile()=false;
     tank1->HitTank()=false;
-    tank1->TookFlag()=false;    
+    tank1->TookCoin()=false;
+    tank1->HitPoisonGas()=false;
 
     cwg::TankPtr tank2=cwg::Tank::Create();
     tank2->TankId()=1;
@@ -211,7 +219,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank2->HitMine()=false;
     tank2->HitMissile()=false;
     tank2->HitTank()=false;
-    tank2->TookFlag()=false;
+    tank2->TookCoin()=false;
+    tank2->HitPoisonGas()=false;
 
     if (!reversedPlayers)
     {

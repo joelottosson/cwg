@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Björn Weström / bjwe
 *
@@ -51,12 +51,12 @@ GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr) :
 bool GameMap::IsEmpty(const std::pair<int, int>& pos) const
 {
     char c=m_GamePtr->Board().GetVal()[Index(pos)];
-    return c=='.' || c=='f';
+    return c=='.' || c=='$' || c=='p';
 }
 
 bool GameMap::IsFlag(const std::pair<int, int>& pos) const
 {
-    return m_GamePtr->Board().GetVal()[Index(pos)]=='f';
+    return m_GamePtr->Board().GetVal()[Index(pos)]=='$';
 }
 
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const

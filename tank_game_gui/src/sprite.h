@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -22,7 +22,10 @@ struct SpriteData
 class Sprite
 {
 public:
-    Sprite(const SpriteData& spriteData, const QPointF& position, qint64 startTime)
+    Sprite(const SpriteData& spriteData,
+           const QPointF& position,
+           qint64 startTime,
+           int repetitions) //0 repetitions means forever
         :m_spriteData(&spriteData)
         ,m_currentFragment(0)
         ,m_pos(position)
@@ -31,11 +34,17 @@ public:
         ,m_startTime(startTime)
         ,m_timeSlice(spriteData.lifeTime/spriteData.fragments.size())
         ,m_lastUpdated(QDateTime::currentMSecsSinceEpoch())
+        ,m_repetitions(repetitions)
     {
     }
 
     //square per millisec
-    Sprite(const SpriteData& spriteData, const QPointF& position, const QPointF& speed, qreal rotation, qint64 startTime)
+    Sprite(const SpriteData& spriteData,
+           const QPointF& position,
+           const QPointF& speed,
+           qreal rotation,
+           qint64 startTime,
+           int repetitions) //0 repetitions means forever
         :m_spriteData(&spriteData)
         ,m_currentFragment(0)
         ,m_pos(position)
@@ -44,6 +53,7 @@ public:
         ,m_startTime(startTime)
         ,m_timeSlice(spriteData.lifeTime/spriteData.fragments.size())
         ,m_lastUpdated(QDateTime::currentMSecsSinceEpoch())
+        ,m_repetitions(repetitions)
     {
     }
 
@@ -54,7 +64,13 @@ public:
     const QRectF& Fragment() const {return m_spriteData->fragments[m_currentFragment];}
     const qreal Rotation() const {return m_rotation;}
     bool Started() const {return QDateTime::currentMSecsSinceEpoch()>=m_startTime;}
-    bool Finished() const {return QDateTime::currentMSecsSinceEpoch()>m_startTime+m_spriteData->lifeTime;}
+    bool Finished() const
+    {
+        if (m_repetitions==0)
+            return false;
+        else
+            return QDateTime::currentMSecsSinceEpoch()>m_startTime+m_repetitions*m_spriteData->lifeTime;
+    }
 
     void Update()
     {
@@ -62,7 +78,12 @@ public:
         if (Started())
         {
             m_currentFragment=(now-m_startTime)/m_timeSlice;
-            if (m_currentFragment>=m_spriteData->fragments.size())
+
+            if (m_repetitions==0 || m_currentFragment<m_spriteData->fragments.size()*m_repetitions)
+            {
+                m_currentFragment=m_currentFragment%m_spriteData->fragments.size();
+            }
+            else
             {
                 m_currentFragment=m_spriteData->fragments.size()-1;
             }
@@ -75,6 +96,7 @@ public:
         m_lastUpdated=now;
     }
 
+    const SpriteData* Data() const {return m_spriteData;}
 
 private:
     const SpriteData* m_spriteData;
@@ -85,6 +107,7 @@ private:
     qint64 m_startTime;
     qint64 m_timeSlice;
     qint64 m_lastUpdated;
+    int m_repetitions;
 };
 
 #endif

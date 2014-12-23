@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -22,7 +22,7 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     ,m_missile(":/images/missile.png")
     ,m_tankWreck(":/images/panzerIV_wreck.png")
     ,m_mine(":/images/mine.png")
-    ,m_flag(":/images/flag.png")
+    ,m_poison(":/images/poison.png")
 {
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     Reset();
@@ -70,7 +70,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     QPainter painter(&tmp);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    PaintFlags(painter);
+    PaintPoison(painter);
 
     //Paint tanks
     int blueTank=true;
@@ -80,16 +80,16 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         blueTank=!blueTank;
     }
 
-    //Paint missiles
-    for (auto& vt : m_world.GetGameState().missiles)
-    {
-        PaintMissile(vt.second, painter);
-    }
-
     //Paint sprites
     for (auto& s : m_world.Sprites())
     {
         PaintSprite(s, painter);
+    }
+
+    //Paint missiles
+    for (auto& vt : m_world.GetGameState().missiles)
+    {
+        PaintMissile(vt.second, painter);
     }
 
     if (m_world.GetGameState().paintWinner)
@@ -160,19 +160,19 @@ void TankGameWidget::PaintWalls(QPainter& painter)
     }
 }
 
+void TankGameWidget::PaintPoison(QPainter& painter)
+{
+    for (const auto& pos : m_world.GetGameState().poison)
+    {
+        painter.drawPixmap(ToScreen(pos, 0, 0), m_poison);
+    }
+}
+
 void TankGameWidget::PaintMines(QPainter& painter)
 {    
     for (const auto& mine : m_world.GetGameState().mines)
     {
         painter.drawPixmap(ToScreen(mine, 0, 0), m_mine);
-    }
-}
-
-void TankGameWidget::PaintFlags(QPainter& painter)
-{
-    for (const auto& flag : m_world.GetGameState().flags)
-    {
-        painter.drawPixmap(ToScreen(flag, 0, 0), m_flag);
     }
 }
 
@@ -316,16 +316,13 @@ void TankGameWidget::PaintWinner(QPainter& painter)
 
         if (winner)
         {
-            sl.append("Winner is: "+winner->name);
+            sl.append("Current game winner: "+winner->name);
 
             if (loser && loserTank)
             {
                 QString loserTxt=loser->name;
                 switch (loserTank->deathCause)
                 {
-                case Tank::None:
-                    loserTxt+=" dead by unknown reason!";
-                    break;
                 case Tank::HitMissile:
                     loserTxt+=" was hit by a missile!";
                     break;
@@ -337,6 +334,9 @@ void TankGameWidget::PaintWinner(QPainter& painter)
                     break;
                 case Tank::HitWall:
                     loserTxt+=" drove into a wall!";
+                    break;
+                case Tank::None:
+                    loserTxt="Time limit expired.";
                     break;
                 }
                 sl.append(loserTxt);

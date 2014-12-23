@@ -1,0 +1,10 @@
+xxxxxxxxxx
+xt.$.p.$.x
+x$.p.$.p.x
+x.p.$.p.$x
+x$.p.$.p.x
+x.p.$.p.$x
+x$.p.$.p.x
+x.p.$.p.$x
+x.$.p.$.tx
+xxxxxxxxxx

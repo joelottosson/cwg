@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014
+* Copyright Consoden AB, 2015
 *
 * Created by: Joel Ottosson / joot
 *
@@ -55,7 +55,7 @@ private:
     bool VerifyMatchRequest(cwg::MatchPtr m, sd::ResponseSenderPtr responseSender);
     void DeleteMatch();
     void RestartMatch();
-    void OnMatchFinished();
+    void OnMatchUpdate();
     void OnStartNewGame(cwg::GameStatePtr gameState);
 
 };
