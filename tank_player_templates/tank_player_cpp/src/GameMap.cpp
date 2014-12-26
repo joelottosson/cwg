@@ -16,47 +16,56 @@
 
 GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr) :
     m_TankId(tankId),
-    m_GamePtr(gamePtr),
-    m_SizeX(gamePtr->Width().GetVal()),
-    m_SizeY(gamePtr->Height().GetVal()),
+    m_gamePtr(gamePtr),
+    m_sizeX(gamePtr->Width().GetVal()),
+    m_sizeY(gamePtr->Height().GetVal()),
     m_creationTime(boost::chrono::high_resolution_clock::now())
 {
     // Locate tanks
     Safir::Dob::Typesystem::ArrayIndex tankIndex;
 
     for (tankIndex = 0;
-         tankIndex < m_GamePtr->TanksArraySize();
+         tankIndex < m_gamePtr->TanksArraySize();
          tankIndex++) {
 
-        if (m_GamePtr->Tanks()[tankIndex].IsNull()) {
+        if (m_gamePtr->Tanks()[tankIndex].IsNull()) {
             // empty tank slot, found last tank
             break;
         }
 
         Consoden::TankGame::TankPtr tankPtr =
-                boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_GamePtr->Tanks()[tankIndex].GetPtr());
+                boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_gamePtr->Tanks()[tankIndex].GetPtr());
 
         std::pair<int, int> pos = std::make_pair(tankPtr->PosX().GetVal(), tankPtr->PosY().GetVal());
 
         if (tankPtr->TankId().GetVal() == m_TankId) {
             // This is our tank!
-            m_OwnPos = pos;
+            m_ownPos = pos;
         } else {
             // The enemy
-            m_EnemyPos = pos;
+            m_enemyPos = pos;
         }
     }
 }
 
-bool GameMap::IsEmpty(const std::pair<int, int>& pos) const
+bool GameMap::IsWall(const std::pair<int, int>& pos) const
 {
-    char c=m_GamePtr->Board().GetVal()[Index(pos)];
-    return c=='.' || c=='$' || c=='p';
+    return m_gamePtr->Board().GetVal()[Index(pos)]=='x';
 }
 
-bool GameMap::IsFlag(const std::pair<int, int>& pos) const
+bool GameMap::IsMine(const std::pair<int, int>& pos) const
 {
-    return m_GamePtr->Board().GetVal()[Index(pos)]=='$';
+    return m_gamePtr->Board().GetVal()[Index(pos)]=='o';
+}
+
+bool GameMap::IsCoin(const std::pair<int, int>& pos) const
+{
+    return m_gamePtr->Board().GetVal()[Index(pos)]=='$';
+}
+
+bool GameMap::IsPoisonGas(const std::pair<int, int>& pos) const
+{
+    return m_gamePtr->Board().GetVal()[Index(pos)]=='p';
 }
 
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const
@@ -64,16 +73,16 @@ bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const
     Safir::Dob::Typesystem::ArrayIndex missileIndex;
 
     for (missileIndex = 0;
-         missileIndex < m_GamePtr->MissilesArraySize();
+         missileIndex < m_gamePtr->MissilesArraySize();
          missileIndex++) {
 
-        if (m_GamePtr->Missiles()[missileIndex].IsNull()) {
+        if (m_gamePtr->Missiles()[missileIndex].IsNull()) {
             // empty missile slot
             continue;
         }
 
         Consoden::TankGame::MissilePtr missilePtr =
-                boost::dynamic_pointer_cast<Consoden::TankGame::Missile>(m_GamePtr->Missiles()[missileIndex].GetPtr());
+                boost::dynamic_pointer_cast<Consoden::TankGame::Missile>(m_gamePtr->Missiles()[missileIndex].GetPtr());
 
         std::pair<int, int> head = std::make_pair(missilePtr->HeadPosX().GetVal(), missilePtr->HeadPosY().GetVal());
         std::pair<int, int> tail = std::make_pair(missilePtr->TailPosX().GetVal(), missilePtr->TailPosY().GetVal());
@@ -86,11 +95,61 @@ bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const
     return false;
 }
 
+std::pair<int, int> GameMap::Move(const std::pair<int, int>& pos,
+                                  Consoden::TankGame::Direction::Enumeration direction) const
+{
+    switch (direction)
+    {
+    case Consoden::TankGame::Direction::Left:
+        return std::make_pair((pos.first - 1 + m_sizeX) % m_sizeX, pos.second);
+
+    case Consoden::TankGame::Direction::Right:
+        return std::make_pair((pos.first + 1) % m_sizeX, pos.second);
+
+    case Consoden::TankGame::Direction::Up:
+        return std::make_pair(pos.first, (pos.second - 1 + m_sizeY) % m_sizeY);
+
+    case Consoden::TankGame::Direction::Down:
+        return std::make_pair(pos.first, (pos.second + 1) % m_sizeY);
+
+    case Consoden::TankGame::Direction::Neutral:
+        return pos;
+    }
+
+    return pos;
+}
+
+unsigned int GameMap::Elapsed() const
+{
+    boost::chrono::high_resolution_clock::duration elapsed=boost::chrono::high_resolution_clock::now()-m_creationTime;
+    return boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed).count();
+}
+
+int GameMap::TimeUntilNextJoystickReadout(int timestamp)
+{
+    // Get current time from the clock, using microseconds resolution
+    const boost::posix_time::ptime now = 
+        boost::posix_time::microsec_clock::local_time();
+
+    // Get the time offset in current day
+    const boost::posix_time::time_duration td = now.time_of_day();
+
+    int total_milliseconds = td.total_milliseconds();
+
+    // We ignore midnight to keep it simple
+    if (timestamp < total_milliseconds) {
+        return -1; // Time is passed
+    } else {
+        return timestamp - total_milliseconds; // Time left
+    }
+
+}    
+
 void GameMap::PrintMap() const
 {
-    for (int y = 0; y < m_SizeY; y++) {
-        for (int x = 0; x < m_SizeX; x++) {
-            std::cout << m_GamePtr->Board().GetVal()[Index(x, y)];
+    for (int y = 0; y < m_sizeY; y++) {
+        for (int x = 0; x < m_sizeX; x++) {
+            std::cout << m_gamePtr->Board().GetVal()[Index(x, y)];
         }
         std::cout << std::endl;
     }
@@ -110,16 +169,16 @@ void GameMap::PrintState() const
     Safir::Dob::Typesystem::ArrayIndex missileIndex;
 
     for (missileIndex = 0;
-         missileIndex < m_GamePtr->MissilesArraySize();
+         missileIndex < m_gamePtr->MissilesArraySize();
          missileIndex++) {
 
-        if (m_GamePtr->Missiles()[missileIndex].IsNull()) {
+        if (m_gamePtr->Missiles()[missileIndex].IsNull()) {
             // empty missile slot
             continue;
         }
 
         Consoden::TankGame::MissilePtr missilePtr =
-                boost::dynamic_pointer_cast<Consoden::TankGame::Missile>(m_GamePtr->Missiles()[missileIndex].GetPtr());
+                boost::dynamic_pointer_cast<Consoden::TankGame::Missile>(m_gamePtr->Missiles()[missileIndex].GetPtr());
 
         std::pair<int, int> head = std::make_pair(missilePtr->HeadPosX().GetVal(), missilePtr->HeadPosY().GetVal());
         std::pair<int, int> tail = std::make_pair(missilePtr->TailPosX().GetVal(), missilePtr->TailPosY().GetVal());
@@ -151,63 +210,4 @@ void GameMap::PrintState() const
 
     std::cout << std::endl;
 }
-
-
-std::pair<int, int> GameMap::MoveLeft(const std::pair<int, int>& pos) const
-{
-    int next_x = (pos.first - 1 + m_SizeX) % m_SizeX;
-    int next_y = pos.second;
-
-    return std::make_pair(next_x, next_y);
-}
-
-std::pair<int, int> GameMap::MoveRight(const std::pair<int, int>& pos) const
-{
-    int next_x = (pos.first + 1) % m_SizeX;
-    int next_y = pos.second;
-
-    return std::make_pair(next_x, next_y);
-}
-
-std::pair<int, int> GameMap::MoveUp(const std::pair<int, int>& pos) const
-{
-    int next_x = pos.first;
-    int next_y = (pos.second - 1 + m_SizeY) % m_SizeY;
-
-    return std::make_pair(next_x, next_y);
-}
-
-std::pair<int, int> GameMap::MoveDown(const std::pair<int, int>& pos) const
-{
-    int next_x = pos.first;
-    int next_y = (pos.second + 1) % m_SizeY;
-
-    return std::make_pair(next_x, next_y);
-}
-
-unsigned int GameMap::Elapsed() const
-{
-    boost::chrono::high_resolution_clock::duration elapsed=boost::chrono::high_resolution_clock::now()-m_creationTime;
-    return boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed).count();
-}
-
-int GameMap::TimeUntilNextJoystickReadout(int timestamp)
-{
-    // Get current time from the clock, using microseconds resolution
-    const boost::posix_time::ptime now = 
-        boost::posix_time::microsec_clock::local_time();
-
-    // Get the time offset in current day
-    const boost::posix_time::time_duration td = now.time_of_day();
-
-    int total_milliseconds = td.total_milliseconds();
-
-    // We ignore midnight to keep it simple
-    if (timestamp < total_milliseconds) {
-        return -1; // Time is passed
-    } else {
-        return timestamp - total_milliseconds; // Time left
-    }
-
-}    
 

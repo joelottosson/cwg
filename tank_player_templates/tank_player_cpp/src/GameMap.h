@@ -27,29 +27,38 @@ public:
     /**
      * Get the x and y size of the game board.
      */
-    int SizeX() const { return m_SizeX; }
-    int SizeY() const { return m_SizeY; }
-
-    /**
-     * Is this square empty? Only checks for walls and mines.
-     * Flags and missiles are ignored.
-     */
-    bool IsEmpty(const std::pair<int, int>& pos) const;
-
-    /**
-     * Check if there is a flag in this square.
-     */
-    bool IsFlag(const std::pair<int, int>& pos) const;
+    int SizeX() const {return m_sizeX;}
+    int SizeY() const {return m_sizeY;}
 
     /**
      * Location of the players tank
      */
-    std::pair<int, int> OwnPosition() const {return m_OwnPos; }
+    std::pair<int, int> OwnPosition() const {return m_ownPos;}
 
     /**
      * Location of the enemys tank
      */
-    std::pair<int, int> EnemyPosition() const {return m_EnemyPos; }
+    std::pair<int, int> EnemyPosition() const {return m_enemyPos;}
+
+    /**
+     * Check if square is a wall.
+     */
+    bool IsWall(const std::pair<int, int>& pos) const;
+
+    /**
+     * Check if there is a mine in this square.
+     */
+    bool IsMine(const std::pair<int, int>& pos) const;
+
+    /**
+     * Check if there is a coin in this square.
+     */
+    bool IsCoin(const std::pair<int, int>& pos) const;
+
+    /**
+     * Check if there is poson gas in this square.
+     */
+    bool IsPoisonGas(const std::pair<int, int>& pos) const;
 
     /**
      * Is there a missile in this position right now?
@@ -57,12 +66,11 @@ public:
     bool IsMissileInPosition(const std::pair<int, int>& pos) const;
 
     /**
-     * Helper functions that moves one step in the indicated direction
+     * Helper functions that moves pos one step in the indicated direction.
+     * Returns a new positon after the move operation.
      */
-    std::pair<int, int> MoveLeft(const std::pair<int, int>& pos) const;
-    std::pair<int, int> MoveRight(const std::pair<int, int>& pos) const;
-    std::pair<int, int> MoveUp(const std::pair<int, int>& pos) const;
-    std::pair<int, int> MoveDown(const std::pair<int, int>& pos) const;
+    std::pair<int, int> Move(const std::pair<int, int>& pos,
+                             Consoden::TankGame::Direction::Enumeration direction) const;
 
     /**
      * Returns number of milliseconds elapsed since this GameMap was created.
@@ -71,6 +79,7 @@ public:
 
     /**
      * Retuns numer of milliseconds left until next joystick readout.
+     * If last readout has been missed, -1 is returned.
      */
     static int TimeUntilNextJoystickReadout(int timestamp);
 
@@ -86,15 +95,15 @@ public:
 
 private:
     int m_TankId; // The tank id for the player
-    Consoden::TankGame::GameStatePtr m_GamePtr;
-    int m_SizeX;
-    int m_SizeY;
+    Consoden::TankGame::GameStatePtr m_gamePtr;
+    int m_sizeX;
+    int m_sizeY;
     // Current positions of player and enemy
-    std::pair<int, int> m_OwnPos;
-    std::pair<int, int> m_EnemyPos;
+    std::pair<int, int> m_ownPos;
+    std::pair<int, int> m_enemyPos;
     boost::chrono::high_resolution_clock::time_point m_creationTime;
 
-    inline int Index(int x, int y) const {return x+y*m_SizeX;}
+    inline int Index(int x, int y) const {return x+y*m_sizeX;}
     inline int Index(const std::pair<int, int>& pos) const {return Index(pos.first, pos.second);}
 };
 
