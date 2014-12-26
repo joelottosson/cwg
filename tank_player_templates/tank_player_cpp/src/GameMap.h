@@ -73,13 +73,7 @@ public:
                              Consoden::TankGame::Direction::Enumeration direction) const;
 
     /**
-     * Returns number of milliseconds elapsed since this GameMap was created.
-     */
-    unsigned int Elapsed() const;
-
-    /**
      * Retuns numer of milliseconds left until next joystick readout.
-     * If last readout has been missed, -1 is returned.
      */
     static int TimeUntilNextJoystickReadout(int timestamp);
 
@@ -101,7 +95,6 @@ private:
     // Current positions of player and enemy
     std::pair<int, int> m_ownPos;
     std::pair<int, int> m_enemyPos;
-    boost::chrono::high_resolution_clock::time_point m_creationTime;
 
     inline int Index(int x, int y) const {return x+y*m_sizeX;}
     inline int Index(const std::pair<int, int>& pos) const {return Index(pos.first, pos.second);}

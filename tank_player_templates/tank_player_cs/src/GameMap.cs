@@ -13,11 +13,16 @@ namespace tank_player_cs
 	{
 		public int X;
 		public int Y;
+
+		Position(int x, int y)
+		{
+			X = x;
+			Y = y;
+		}
 	}
 
 	class GameMap
 	{
-		private DateTime startTime = DateTime.Now;
 		private int tankId;
 		private Consoden.TankGame.GameState gameState;
 
@@ -41,13 +46,6 @@ namespace tank_player_cs
 			}
 		}
 
-		//Is position an empty square. No walls or mines. Missiles and other tanks are not regarded here.
-		public bool IsEmpty (Position p)
-		{
-			int i = ToIndex (p);
-			return gameState.Board.Val [i] == Convert.ToByte ('.');
-		}
-
 		//Own tank position
 		public Position OwnPosition {
 			get {
@@ -69,6 +67,34 @@ namespace tank_player_cs
 			}
 		}
 
+		//Check if square is a wall.
+		public bool IsWall (Position p)
+		{
+			int i = ToIndex (p);
+			return gameState.Board.Val [i] == Convert.ToByte ('x');
+		}
+
+		//Check if there is a mine in this square.
+		public bool IsMine (Position p)
+		{
+			int i = ToIndex (p);
+			return gameState.Board.Val [i] == Convert.ToByte ('o');
+		}
+
+		//Check if there is a coin in this square.
+		public bool IsCoin (Position p)
+		{
+			int i = ToIndex (p);
+			return gameState.Board.Val [i] == Convert.ToByte ('$');
+		}
+
+		//Check if there is poson gas in this square.
+		public bool IsPoisonGas (Position p)
+		{
+			int i = ToIndex (p);
+			return gameState.Board.Val [i] == Convert.ToByte ('p');
+		}
+
 		//Is there a missile in this square
 		public bool IsMissileInPosition (Position p)
 		{
@@ -85,39 +111,41 @@ namespace tank_player_cs
 			return false;
 		}
 
-		//Move p one step left. Handles wrap araound.
-		public Position MoveLeft (Position p)
+		//Move p one step in specified direction and returns the new position.
+		public Position Move(Position p, Consoden.TankGame.Direction.Enumeration d)
 		{
-			p.X = (p.X - 1 + SizeX) % SizeX;
-			return p;
-		}
-
-		//Move p one step right. Handles wrap araound.
-		public Position MoveRight (Position p)
-		{
-			p.X = (p.X + 1) % SizeX;
-			return p;
-		}
-
-		//Move p one step up. Handles wrap araound.
-		public Position MoveUp (Position p)
-		{
-			p.Y = (p.Y - 1 + SizeY) % SizeY;
-			return p;
-		}
-
-		//Move p one step down. Handles wrap araound.
-		public Position MoveDown (Position p)
-		{
-			p.Y = (p.Y + 1) % SizeY;
-			return p;
-		}
-
-		//Milliseconds elapsed since creation of this instance
-		public long Elapsed {
-			get {
-				return (int)((DateTime.Now - startTime).TotalMilliseconds);
+			switch (d) {
+			case Consoden.TankGame.Direction.Enumeration.Left:
+				{
+				p.X = (p.X - 1 + SizeX) % SizeX;
+				return p;
+				}
+			case Consoden.TankGame.Direction.Enumeration.Right:
+				{
+				p.X = (p.X + 1) % SizeX;
+				return p;
+				}
+			case Consoden.TankGame.Direction.Enumeration.Up:
+				{
+				p.Y = (p.Y - 1 + SizeY) % SizeY;
+				return p;
+				}
+			case Consoden.TankGame.Direction.Enumeration.Down:
+				{
+				p.Y = (p.Y + 1) % SizeY;
+				return p;
+				}
+			default:
+				return p;
 			}
+		}
+
+		//Time left until the joystick will be readout next time.
+		public int TimeToNextMove()
+		{
+			DateTime now = DateTime.Now;
+			TimeSpan elapsedToday = now - new DateTime (now.Year, now.Month, now.Day);
+			return gameState.NextMove.Val - (int)elapsedToday.TotalMilliseconds;
 		}
 
 		//Print game map

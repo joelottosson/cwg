@@ -14,12 +14,11 @@
 
 #include "GameMap.h"
 
-GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr) :
-    m_TankId(tankId),
-    m_gamePtr(gamePtr),
-    m_sizeX(gamePtr->Width().GetVal()),
-    m_sizeY(gamePtr->Height().GetVal()),
-    m_creationTime(boost::chrono::high_resolution_clock::now())
+GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr)
+    :m_TankId(tankId)
+    ,m_gamePtr(gamePtr)
+    ,m_sizeX(gamePtr->Width().GetVal())
+    ,m_sizeY(gamePtr->Height().GetVal())
 {
     // Locate tanks
     Safir::Dob::Typesystem::ArrayIndex tankIndex;
@@ -119,12 +118,6 @@ std::pair<int, int> GameMap::Move(const std::pair<int, int>& pos,
     return pos;
 }
 
-unsigned int GameMap::Elapsed() const
-{
-    boost::chrono::high_resolution_clock::duration elapsed=boost::chrono::high_resolution_clock::now()-m_creationTime;
-    return boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed).count();
-}
-
 int GameMap::TimeUntilNextJoystickReadout(int timestamp)
 {
     // Get current time from the clock, using microseconds resolution
@@ -137,12 +130,7 @@ int GameMap::TimeUntilNextJoystickReadout(int timestamp)
     int total_milliseconds = td.total_milliseconds();
 
     // We ignore midnight to keep it simple
-    if (timestamp < total_milliseconds) {
-        return -1; // Time is passed
-    } else {
-        return timestamp - total_milliseconds; // Time left
-    }
-
+    return timestamp - total_milliseconds;
 }    
 
 void GameMap::PrintMap() const
