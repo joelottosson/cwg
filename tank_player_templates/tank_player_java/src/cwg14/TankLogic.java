@@ -15,7 +15,7 @@ class TankLogic {
 	public interface JoystickHandler {
 		public void setJoystick(consoden.tankgame.Direction moveDirection,
 								consoden.tankgame.Direction towerDirection,
-								boolean fire);
+								boolean fire, boolean dropMine);
 	}
 		
 	private int tankId;
@@ -38,27 +38,38 @@ class TankLogic {
 
 		Position currentPosition = gm.getOwnPosition(); //this is our current tank position
 
-		//Find an empty sqaure we can move to, otherwize move downwards
-		consoden.tankgame.Direction moveDirection = consoden.tankgame.Direction.DOWN;
-		if (gm.isEmpty(gm.moveLeft(currentPosition))) {
-			moveDirection = consoden.tankgame.Direction.LEFT;
-		} 
-		else if (gm.isEmpty(gm.moveRight(currentPosition))) {
-			moveDirection = consoden.tankgame.Direction.RIGHT;
-		} 
-		else if (gm.isEmpty(gm.moveUp(currentPosition))) {
-			moveDirection = consoden.tankgame.Direction.UP;
+		//Find an empty square we can move to, otherwize move downwards
+		consoden.tankgame.Direction moveDirection = consoden.tankgame.Direction.NEUTRAL;
+		
+		if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.LEFT)) &&
+			!gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.LEFT))) {
+			moveDirection=consoden.tankgame.Direction.LEFT;
+		}
+		else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.RIGHT)) &&
+				 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.RIGHT))) {
+			moveDirection=consoden.tankgame.Direction.RIGHT;
+		}
+		else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.UP)) &&
+				 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.UP))) {
+			moveDirection=consoden.tankgame.Direction.UP;
+		}
+		else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.DOWN)) &&
+				 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.DOWN))) {
+			moveDirection=consoden.tankgame.Direction.DOWN;
 		}
 
 		//Advanced tower aim stategy
 		consoden.tankgame.Direction towerDirection = 
-				consoden.tankgame.Direction.values()[(currentPosition.x + currentPosition.y) % 4];			
+				consoden.tankgame.Direction.values()[(1 + currentPosition.x + currentPosition.y) % 4];			
 
 		//Of course we always want to fire
 		boolean fire = true;
+		
+		//Sometimes we also drop a mine
+	    boolean dropMine=((gameState.elapsedTime().getVal().intValue()) % 3)==0;
 
 		//Move our joystick.
-		joystickHandler.setJoystick(moveDirection, towerDirection, fire);
+		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine);
 	}
 	
 	

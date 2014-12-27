@@ -118,7 +118,7 @@ std::pair<int, int> GameMap::Move(const std::pair<int, int>& pos,
     return pos;
 }
 
-int GameMap::TimeUntilNextJoystickReadout(int timestamp)
+int GameMap::TimeToNextMove() const
 {
     // Get current time from the clock, using microseconds resolution
     const boost::posix_time::ptime now = 
@@ -130,7 +130,7 @@ int GameMap::TimeUntilNextJoystickReadout(int timestamp)
     int total_milliseconds = td.total_milliseconds();
 
     // We ignore midnight to keep it simple
-    return timestamp - total_milliseconds;
+    return m_gamePtr->NextMove().GetVal() - total_milliseconds;
 }    
 
 void GameMap::PrintMap() const
@@ -174,26 +174,7 @@ void GameMap::PrintState() const
 
         std::cout << "Missile position - head " << head.first << "," << head.second << std::endl;
         std::cout << "Missile position - tail " << tail.first << "," << tail.second << std::endl;
-        std::cout << "Missile direction ";
-
-        switch (direction) {
-        case Consoden::TankGame::Direction::Left:
-            std::cout << "Left";
-            break;
-        case Consoden::TankGame::Direction::Right:
-            std::cout << "Right";
-            break;
-        case Consoden::TankGame::Direction::Up:
-            std::cout << "Up";
-            break;
-        case Consoden::TankGame::Direction::Down:
-            std::cout << "Down";
-            break;
-        case Consoden::TankGame::Direction::Neutral:
-            std::cout << "Neutral";
-            break;
-        }
-        std::cout << std::endl;
+        std::cout << "Missile direction "<<Consoden::TankGame::Direction::ToString(direction).c_str()<<std::endl;
     }
 
     std::cout << std::endl;

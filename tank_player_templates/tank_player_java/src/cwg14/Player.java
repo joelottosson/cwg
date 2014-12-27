@@ -187,16 +187,16 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
     }
     
 	@Override
-	public void setJoystick(Direction moveDirection, Direction towerDirection, boolean fire) {
+	public void setJoystick(Direction moveDirection, Direction towerDirection, boolean fire, boolean dropMine) {
 
 	    if (myJoystickId==null) {
 	        return; //we are not active in a game
 	    }
 	    
 	    if (moveDirection==null)
-	        moveDirection=consoden.tankgame.Direction.LEFT;
+	        moveDirection=consoden.tankgame.Direction.NEUTRAL;
         if (towerDirection==null)
-	        towerDirection=consoden.tankgame.Direction.LEFT;
+	        towerDirection=consoden.tankgame.Direction.NEUTRAL;
 
 	    consoden.tankgame.Joystick joystick=new consoden.tankgame.Joystick();
 		joystick.playerId().setVal(myPlayerId);
@@ -206,6 +206,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
 		joystick.moveDirection().setVal(moveDirection);
 		joystick.towerDirection().setVal(towerDirection);
 		joystick.fire().setVal(fire);
+		joystick.mineDrop().setVal(dropMine);
 		dobConnection.setAll(joystick, myJoystickId, myHandlerId);
 	}
 	

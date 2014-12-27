@@ -88,7 +88,7 @@ namespace tank_player_cs
 			return gameState.Board.Val [i] == Convert.ToByte ('$');
 		}
 
-		//Check if there is poson gas in this square.
+                //Check if there is poison gas in this square.
 		public bool IsPoisonGas (Position p)
 		{
 			int i = ToIndex (p);
@@ -203,6 +203,9 @@ namespace tank_player_cs
 		        case Consoden.TankGame.Direction.Enumeration.Down:
 		            Console.WriteLine ("Down");
 		            break;
+                        case Consoden.TankGame.Direction.Enumeration.Neutral:
+                            Console.WriteLine ("Neutral");
+                            break;
 		        }
 		        Console.WriteLine ();
 		    }

@@ -56,7 +56,7 @@ public:
     bool IsCoin(const std::pair<int, int>& pos) const;
 
     /**
-     * Check if there is poson gas in this square.
+     * Check if there is poison gas in this square.
      */
     bool IsPoisonGas(const std::pair<int, int>& pos) const;
 
@@ -73,9 +73,9 @@ public:
                              Consoden::TankGame::Direction::Enumeration direction) const;
 
     /**
-     * Retuns numer of milliseconds left until next joystick readout.
+     * Time left (milliseconds) until the joystick will be readout next time.
      */
-    static int TimeUntilNextJoystickReadout(int timestamp);
+    int TimeToNextMove() const;
 
     /**
      * For debugging assistance, prints out the parsed map
