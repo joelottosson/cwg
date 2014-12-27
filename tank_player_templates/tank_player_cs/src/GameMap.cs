@@ -25,6 +25,7 @@ namespace tank_player_cs
 	{
 		private int tankId;
 		private Consoden.TankGame.GameState gameState;
+		private DateTime startOfDay = new DateTime (DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
 
 		public GameMap (int tankId, Consoden.TankGame.GameState gameState)
 		{
@@ -143,8 +144,7 @@ namespace tank_player_cs
 		//Time left until the joystick will be readout next time.
 		public int TimeToNextMove()
 		{
-			DateTime now = DateTime.Now;
-			TimeSpan elapsedToday = now - new DateTime (now.Year, now.Month, now.Day);
+			TimeSpan elapsedToday = DateTime.Now - startOfDay;
 			return gameState.NextMove.Val - (int)elapsedToday.TotalMilliseconds;
 		}
 

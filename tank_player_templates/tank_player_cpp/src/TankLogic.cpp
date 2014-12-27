@@ -55,9 +55,4 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 
     //Move our joystick.
     SetJoystick(moveDirection, towerDirection, fire, dropMine);
-
-    //print last move
-    //    std::wcout<<std::boolalpha<<L"Joystick: move: "<<Consoden::TankGame::Direction::ToString(moveDirection)<<
-    //                L", tower: "<<Consoden::TankGame::Direction::ToString(towerDirection)<<
-    //                L", fire: "<<fire<<L", dropMine: "<<dropMine<<std::endl;
 }

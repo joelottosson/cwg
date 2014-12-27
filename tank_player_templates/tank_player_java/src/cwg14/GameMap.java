@@ -7,11 +7,15 @@
 ******************************************************************************/
 package cwg14;
 
+import java.util.Calendar;
+import java.util.Date;
+
 class GameMap {
 
 	private long startTime;
 	private int tankId;
 	private consoden.tankgame.GameState gameState;
+	private Calendar startOfDay;
 	
 	private byte mine=(byte)'o';
 	private byte wall=(byte)'x';
@@ -23,6 +27,13 @@ class GameMap {
 		this.startTime=System.nanoTime();
 		this.tankId=tankId;
 		this.gameState=gameState;
+		
+		startOfDay=Calendar.getInstance();
+		int year=startOfDay.get(Calendar.YEAR);
+		int month=startOfDay.get(Calendar.MONTH);
+		int date=startOfDay.get(Calendar.DATE);
+		startOfDay.clear();
+		startOfDay.set(year, month, date);
 	}
 	
 	//X size of game field
@@ -108,8 +119,8 @@ class GameMap {
 	}
 	
 	public long timeToNextMove() {
-		
-		return 0; //TODO
+		long time=Calendar.getInstance().getTimeInMillis()-startOfDay.getTimeInMillis();
+		return gameState.nextMove().getVal().longValue()-time;
 	}
 	
 	//Print game map
