@@ -668,7 +668,7 @@ namespace TankEngine
                     AddPoints(1, tank_ptr->TankId(), game_ptr);
                     tank_ptr->TookCoin() = true;
                 } else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
-                    // Take one point away for driving into poison gas. Are we gonna allow less than zero points?
+                    // Take one point away for driving into poison gas. 
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
                     AddPoints(-1, tank_ptr->TankId(), game_ptr);
                     tank_ptr->HitPoisonGas() = true;
@@ -765,25 +765,22 @@ namespace TankEngine
         m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
     }
 
-/*
-    void Engine::AddPoints(int points, Safir::Dob::Typesystem::InstanceId player_id, Consoden::TankGame::GameStatePtr game_ptr) {
-        if (game_ptr->PlayerOneId().GetVal() == player_id) {
-            game_ptr->PlayerOnePoints().SetVal(game_ptr->PlayerOnePoints().GetVal() + points);
-        } else {
-            game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);            
-        }
-    }
-*/
     void Engine::AddPoints(int points, int tank_id, Consoden::TankGame::GameStatePtr game_ptr) {
         if (mPlayerOneTankId == tank_id) {
             game_ptr->PlayerOnePoints().SetVal(game_ptr->PlayerOnePoints().GetVal() + points);
-            if (game_ptr->PlayerOnePoints()<0)
+            if (game_ptr->PlayerOnePoints()<0) {
+                // Give the negative points to the other player
+                game_ptr->PlayerTwoPoints() += -(game_ptr->PlayerOnePoints());
                 game_ptr->PlayerOnePoints()=0;
+            }
 
         } else {
             game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);
-            if (game_ptr->PlayerTwoPoints()<0)
+            if (game_ptr->PlayerTwoPoints()<0) {
+                // Give the negative points to the other player
+                game_ptr->PlayerOnePoints() += -(game_ptr->PlayerTwoPoints());
                 game_ptr->PlayerTwoPoints()=0;
+            }
         }
     }
 
