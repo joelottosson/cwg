@@ -696,9 +696,9 @@ namespace TankEngine
                     AddPoints(1, tank_ptr->TankId(), game_ptr);
                     tank_ptr->TookCoin() = true;
                 } else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
-                    // Take one point away for driving into poison gas. 
+                    // Give one point to the opponent for driving into poison gas. 
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
-                    AddPoints(-1, tank_ptr->TankId(), game_ptr);
+                    AddPoints(1, OpponentTankId(tank_ptr->TankId()), game_ptr);
                     tank_ptr->HitPoisonGas() = true;
 
                 } else {
