@@ -61,7 +61,7 @@ namespace TankEngine
         void Evaluate();
         void ScheduleMissileCleanup();
 
-        std::wstring FindPlayerName(Safir::Dob::Typesystem::InstanceId playerId);
+        std::string FindPlayerName(Safir::Dob::Typesystem::InstanceId playerId);
 
         void AddPoints(int points, int tank_id, Consoden::TankGame::GameStatePtr game_ptr);
         void SetWinner(Consoden::TankGame::GameStatePtr game_ptr);
@@ -81,8 +81,8 @@ namespace TankEngine
         int mPlayerTwoTankId;
         int mPlayerOneTankIndex;
         int mPlayerTwoTankIndex;
-        std::wstring mPlayerOneName;
-        std::wstring mPlayerTwoName;
+        std::string mPlayerOneName;
+        std::string mPlayerTwoName;
         Safir::Dob::Typesystem::EntityId m_GameEntityId;
         Safir::Dob::Typesystem::HandlerId m_HandlerId;
         JoystickEntityHandler m_JoystickHandler;
