@@ -7,6 +7,7 @@
 *******************************************************************************/
 #include "TankLogic.h"
 #include "GameMap.h"
+#include "BfsHelper.h"
 
 const std::wstring TankLogic::PlayerName = L"tank_player_cpp"; //TODO: change to your team name
 
@@ -14,7 +15,7 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 {
     //TODO: implement your own tank logic and call SetJoystick
 
-    // std::cout << "Got new game state, time left til readout " << GameMap::TimeUntilNextJoystickReadout(gameState->NextMove()) << std::endl;
+    //std::cout << "Got new game state, time left til readout " << GameMap::TimeUntilNextJoystickReadout(gameState->NextMove()) << std::endl;
 
     //-------------------------------------------------------
     //Example of a stupid tank logic:
@@ -22,20 +23,30 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     //-------------------------------------------------------
     GameMap gm(m_ownTankId, gameState);
     auto currentPosition=gm.OwnPosition();
+    auto enemyPosition=gm.EnemyPosition();
+    BfsHelper bfs(gameState, currentPosition);
+    Consoden::TankGame::Direction::Enumeration moveDirection;
 
-    //Find an empty sqaure we can move to, otherwize move downwards
-    Consoden::TankGame::Direction::Enumeration moveDirection=Consoden::TankGame::Direction::Down;
-    if (gm.IsEmpty(gm.MoveLeft(currentPosition)))
-    {
-        moveDirection=Consoden::TankGame::Direction::Left;
-    }
-    else if (gm.IsEmpty(gm.MoveRight(currentPosition)))
-    {
-        moveDirection=Consoden::TankGame::Direction::Right;
-    }
-    else if (gm.IsEmpty(gm.MoveUp(currentPosition)))
-    {
-        moveDirection=Consoden::TankGame::Direction::Up;
+    if (bfs.CanReachSquare(enemyPosition)) {
+        // It is possible to move all the way to the enemy, do it
+        moveDirection=bfs.FindDirection(currentPosition, bfs.BacktrackFromSquare(enemyPosition));
+        std::cout << "Move to enemy, distance " << bfs.StepsToSquare(enemyPosition) << std::endl;
+
+    } else {
+        //Find an empty sqaure we can move to, otherwise move downwards
+        moveDirection=Consoden::TankGame::Direction::Down;
+        if (gm.IsEmpty(gm.MoveLeft(currentPosition)))
+        {
+            moveDirection=Consoden::TankGame::Direction::Left;
+        }
+        else if (gm.IsEmpty(gm.MoveRight(currentPosition)))
+        {
+            moveDirection=Consoden::TankGame::Direction::Right;
+        }
+        else if (gm.IsEmpty(gm.MoveUp(currentPosition)))
+        {
+            moveDirection=Consoden::TankGame::Direction::Up;
+        }        
     }
 
     //Advanced tower aim stategy
@@ -56,5 +67,5 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     //Move our joystick.
     SetJoystick(moveDirection, towerDirection, fire, dropMine);
 
-    // std::cout << gameState->Counter() << " " << k << c << " Joystick was set, time left til readout " << GameMap::TimeUntilNextJoystickReadout(gameState->NextMove()) << std::endl;    
+    // std::cout << gameState->Counter() << " Joystick was set, time left til readout " << GameMap::TimeUntilNextJoystickReadout(gameState->NextMove()) << std::endl;    
 }

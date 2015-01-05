@@ -37,9 +37,14 @@ public:
     bool IsEmpty(const std::pair<int, int>& pos) const;
 
     /**
-     * Check if there is a flag in this square.
+     * Check if there is a coin in this square.
      */
-    bool IsFlag(const std::pair<int, int>& pos) const;
+    bool IsCoin(const std::pair<int, int>& pos) const;
+
+    /**
+     * Check if there is posion gas in this square.
+     */
+    bool IsPoision(const std::pair<int, int>& pos) const;
 
     /**
      * Location of the players tank

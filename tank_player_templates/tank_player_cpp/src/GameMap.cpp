@@ -54,9 +54,14 @@ bool GameMap::IsEmpty(const std::pair<int, int>& pos) const
     return c=='.' || c=='$' || c=='p';
 }
 
-bool GameMap::IsFlag(const std::pair<int, int>& pos) const
+bool GameMap::IsCoin(const std::pair<int, int>& pos) const
 {
     return m_GamePtr->Board().GetVal()[Index(pos)]=='$';
+}
+
+bool GameMap::IsPoision(const std::pair<int, int>& pos) const
+{
+    return m_GamePtr->Board().GetVal()[Index(pos)]=='p';
 }
 
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const
