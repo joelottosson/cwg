@@ -21,6 +21,7 @@
 #include "gamemodel.h"
 #include "sprite.h"
 #include "boardparser.h"
+#include "screentext.h"
 
 class GameWorld
 {
@@ -62,11 +63,8 @@ public:
     const GameState& GetGameState() const {return m_matchState.gameState;}
     const std::vector<Sprite>& Sprites() const {return m_sprites;}
 
-    void SetTextBig(const QStringList& lines) {m_textBig=lines;}
-    const QStringList& GetTextBig() const {return m_textBig;}
-
-    void SetTextSmall(const QStringList& lines) {m_textSmall=lines;}
-    const QStringList& GetTextSmall() const {return m_textSmall;}
+    void SetTextBig(const QStringList& lines);
+    const std::vector<ScreenText>& ScreenTexts() const {return m_screenText;}
 
 private:
     MatchState m_matchState;
@@ -79,8 +77,7 @@ private:
     SpriteData m_explosion;
     SpriteData m_tankFire;
     SpriteData m_coin;
-    QStringList m_textBig;
-    QStringList m_textSmall;
+    std::vector<ScreenText> m_screenText;
 
     typedef std::multimap<qint64, boost::function<void()> > WorldEvents;
     WorldEvents m_eventQueue;
@@ -94,9 +91,13 @@ private:
     QMediaPlayer m_tookCoinMediaPlayer;
     QMediaPlayer m_wilhelmScreamMediaPlayer;
 
+    void SetTextSmall(const QStringList& lines);
+    void SetTextPlayer(int playerNumber, const QStringList& lines);
+
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
     inline void UpdateCoins(const Board& board);
     inline void UpdatePoison(const Board& board);
+    inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
 
     template <class T>
     inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item)
