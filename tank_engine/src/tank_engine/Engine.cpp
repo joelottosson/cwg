@@ -12,6 +12,7 @@
 #include "Engine.h"
 
 #include <Consoden/TankGame/GameState.h>
+#include <Consoden/TankGame/Player.h>
 
 #include <Safir/Logging/Log.h>
 #include <Safir/Dob/SuccessResponse.h>
@@ -102,7 +103,7 @@ namespace TankEngine
         {
             // This means that all joysticks were not created during initial timeout - fail
             Safir::Logging::SendSystemLog(Safir::Logging::Critical,
-                                          L"Game engine timed out before all required joystick were registered. Please restart.");
+                                          L"Game engine timed out before all required joystick were registered. Please make sure both players are running. Waiting...");
         }
     }
 
@@ -141,6 +142,9 @@ namespace TankEngine
                 AddPoints(1, mPlayerOneTankId, game_ptr);
                 AddPoints(1, mPlayerTwoTankId, game_ptr);
 
+                std::cout << "Both tanks survived, game timeout." << std::endl;
+                Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Both tanks survived, game timeout.");
+
                 game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::Draw);
                 SetWinner(game_ptr);
                 StopGame();
@@ -148,9 +152,6 @@ namespace TankEngine
                     mMissileCleanupRunning = true;
                     ScheduleMissileCleanup();
                 }
-
-                std::cout << "The game is a draw." << std::endl;
-                Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"The game is a draw.");
 
                 game_ptr->ElapsedTime().SetVal(mCounter);
 
@@ -255,13 +256,27 @@ namespace TankEngine
         mMissileCleanupRunning = false;
     }
 
+    std::string Engine::FindPlayerName(Safir::Dob::Typesystem::InstanceId playerId)
+    {
+        for (Safir::Dob::EntityIterator it = m_connection.GetEntityIterator
+                 (Consoden::TankGame::Player::ClassTypeId,true);
+             it != Safir::Dob::EntityIterator(); ++it)
+        {
+            if (playerId == (*it).GetInstanceId()) 
+            {
+                Consoden::TankGame::PlayerPtr player_ptr =
+                   boost::static_pointer_cast<Consoden::TankGame::Player>((*it).GetEntity());
+                return Safir::Dob::Typesystem::Utilities::ToUtf8(player_ptr->Name().GetVal().c_str());
+            }
+        }
+
+        return "ERROR, could not find player instance";        
+    }
+
     void Engine::NewJoystickCB(int tankId, Safir::Dob::Typesystem::EntityId entityId)
     {
         if (mGameRunning) return; // Ignore new tanks when live
         if (!mGamePrepare) return; // Ignore new tanks when not in startup
-
-        std::wstring tank_id_str;
-        tank_id_str += tankId;
 
         Consoden::TankGame::GameStatePtr game_ptr =
             boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
@@ -273,9 +288,14 @@ namespace TankEngine
         if (game_ptr->PlayerOneId().GetVal() == joystick_ptr->PlayerId().GetVal()) {
             player_str = "Player One";
             mPlayerOneCounter = joystick_ptr->Counter().GetVal();
+            mPlayerOneName = FindPlayerName(game_ptr->PlayerOneId());
+            player_str += " (" + mPlayerOneName + ")";
+
         } else if (game_ptr->PlayerTwoId().GetVal() == joystick_ptr->PlayerId().GetVal()) {
             player_str = "Player Two";
             mPlayerTwoCounter = joystick_ptr->Counter().GetVal();
+            mPlayerTwoName = FindPlayerName(game_ptr->PlayerTwoId());
+            player_str += " (" + mPlayerTwoName + ")";
         }
 
         std::vector<int>::iterator tit;
@@ -286,9 +306,9 @@ namespace TankEngine
                 m_JoystickWaitIds.erase(tit);
                 m_JoystickEntityMap[tankId] = entityId;
 
-                std::cout << player_str << " Joystick joined our game. Tank id: " << tankId << std::endl;
+                std::cout << player_str << " Joystick joined our game. Tank id: " << boost::lexical_cast<std::string>(tankId) << std::endl;
                 Safir::Logging::SendSystemLog(Safir::Logging::Informational,
-                                      L"Joystick joined our game. Tank id: " + tank_id_str + L", joystick " + entityId.ToString());
+                                      L"Joystick joined our game. Tank id: " + boost::lexical_cast<std::wstring>(tankId) + L", joystick " + entityId.ToString());
 
                 if (m_JoystickWaitIds.empty()) {
                     // All players are in
@@ -298,7 +318,7 @@ namespace TankEngine
             }
         }
         Safir::Logging::SendSystemLog(Safir::Logging::Critical,
-                                      L"Found joystick with bad (or duplicate) tank id!" + tank_id_str);
+                                      L"Found joystick with bad (or duplicate) tank id: " + boost::lexical_cast<std::wstring>(tankId));
     }
 
     void Engine::DeleteJoystickCB(Safir::Dob::Typesystem::EntityId entityId)
@@ -313,7 +333,12 @@ namespace TankEngine
                 if (mGameRunning) {
                     StopGame();                
 
-                    std::cout << "Joystick left before game was over. Walk over by Tank id: " << (*it).first << std::endl;
+                    std::cout << "Joystick left before game was over. Walk over by ";
+                    if ((*it).first == mPlayerOneTankId) {
+                        std::cout << "Player One (" << mPlayerOneName << ")" << std::endl;
+                    } else {
+                        std::cout << "Player Two (" << mPlayerTwoName << ")" << std::endl;                        
+                    }
 
                     Safir::Logging::SendSystemLog(Safir::Logging::Informational,
                                               L"Joystick (" + tank_id_string + L", " + (*it).second.ToString() + L") deleted, walk over!");
@@ -455,8 +480,8 @@ namespace TankEngine
             // Player one made a move?
             if (game_ptr->PlayerOneId().GetVal() == joystick_ptr->PlayerId().GetVal()) {
                 if (mPlayerOneCounter == joystick_ptr->Counter().GetVal()) {
-                    std::cout << "Player one didn't make a move in time! ElapsedTime: " << mCounter << std::endl;
-                    Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                    std::cout << "Player One (" << mPlayerOneName << ") didn't make a move in time! ElapsedTime: " << mCounter << std::endl;
+                    Safir::Logging::SendSystemLog(Safir::Logging::Informational,
                                             L"Player one didn't make a move in time!");
                     // Treat as neutral move
                     joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
@@ -470,8 +495,8 @@ namespace TankEngine
             // Player two made a move?
             if (game_ptr->PlayerTwoId().GetVal() == joystick_ptr->PlayerId().GetVal()) {
                 if (mPlayerTwoCounter == joystick_ptr->Counter().GetVal()) {
-                    std::cout << "Player two didn't make a move in time! ElapsedTime: " << mCounter << std::endl;
-                    Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                    std::cout << "Player Two (" << mPlayerTwoName << ") didn't make a move in time! ElapsedTime: " << mCounter << std::endl;
+                    Safir::Logging::SendSystemLog(Safir::Logging::Informational,
                                             L"Player two didn't make a move in time!");
                     // Treat as neutral move
                     joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
@@ -668,9 +693,9 @@ namespace TankEngine
                     AddPoints(1, tank_ptr->TankId(), game_ptr);
                     tank_ptr->TookCoin() = true;
                 } else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
-                    // Take one point away for driving into poison gas. Are we gonna allow less than zero points?
+                    // Give one point to the opponent for driving into poison gas. 
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
-                    AddPoints(-1, tank_ptr->TankId(), game_ptr);
+                    AddPoints(1, OpponentTankId(tank_ptr->TankId()), game_ptr);
                     tank_ptr->HitPoisonGas() = true;
 
                 } else {
@@ -706,6 +731,9 @@ namespace TankEngine
             AddPoints(1, mPlayerOneTankId, game_ptr);
             AddPoints(1, mPlayerTwoTankId, game_ptr);
 
+            std::cout << "Both players died." << std::endl;
+            Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Both players died.");
+
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::Draw);
             SetWinner(game_ptr);
             StopGame();
@@ -714,12 +742,13 @@ namespace TankEngine
                 ScheduleMissileCleanup();
             }
 
-            std::cout << "The game is a draw." << std::endl;
-            Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"The game is a draw.");
 
         } else if (player_one_in_flames) {
             // One player survives, three points
             AddPoints(3, mPlayerTwoTankId, game_ptr);
+
+            std::cout << "Player Two (" << mPlayerTwoName << ") survives!" << std::endl;
+            Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Player two survives!");
 
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::PlayerTwo);
             SetWinner(game_ptr);
@@ -729,12 +758,13 @@ namespace TankEngine
                 ScheduleMissileCleanup();
             }
 
-            std::cout << "Player two survives!" << std::endl;
-            Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Player two survives!");
 
         } else if (player_two_in_flames) {
             // One player survives, three points
             AddPoints(3, mPlayerOneTankId, game_ptr);
+
+            std::cout << "Player One (" << mPlayerOneName << ") survives!" << std::endl;
+            Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Player one survives!.");
 
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::PlayerOne);
             SetWinner(game_ptr);
@@ -743,9 +773,6 @@ namespace TankEngine
                 mMissileCleanupRunning = true;
                 ScheduleMissileCleanup();
             }
-
-            std::cout << "Player one survives!" << std::endl;
-            Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Player one survives!.");
         }
 
         game_ptr->Counter() = game_ptr->Counter() + 1;
@@ -765,35 +792,39 @@ namespace TankEngine
         m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
     }
 
-/*
-    void Engine::AddPoints(int points, Safir::Dob::Typesystem::InstanceId player_id, Consoden::TankGame::GameStatePtr game_ptr) {
-        if (game_ptr->PlayerOneId().GetVal() == player_id) {
-            game_ptr->PlayerOnePoints().SetVal(game_ptr->PlayerOnePoints().GetVal() + points);
-        } else {
-            game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);            
-        }
-    }
-*/
     void Engine::AddPoints(int points, int tank_id, Consoden::TankGame::GameStatePtr game_ptr) {
         if (mPlayerOneTankId == tank_id) {
             game_ptr->PlayerOnePoints().SetVal(game_ptr->PlayerOnePoints().GetVal() + points);
-            if (game_ptr->PlayerOnePoints()<0)
+            if (game_ptr->PlayerOnePoints()<0) {
+                // Give the negative points to the other player
+                game_ptr->PlayerTwoPoints() += -(game_ptr->PlayerOnePoints());
                 game_ptr->PlayerOnePoints()=0;
+            }
 
         } else {
             game_ptr->PlayerTwoPoints().SetVal(game_ptr->PlayerTwoPoints().GetVal() + points);
-            if (game_ptr->PlayerTwoPoints()<0)
+            if (game_ptr->PlayerTwoPoints()<0) {
+                // Give the negative points to the other player
+                game_ptr->PlayerOnePoints() += -(game_ptr->PlayerTwoPoints());
                 game_ptr->PlayerTwoPoints()=0;
+            }
         }
     }
 
     void Engine::SetWinner(Consoden::TankGame::GameStatePtr game_ptr) {
+        std::cout << "Game score: " << game_ptr->PlayerOnePoints() << "-" << game_ptr->PlayerTwoPoints() << ". ";
+
         if (game_ptr->PlayerOnePoints().GetVal() > game_ptr->PlayerTwoPoints().GetVal()) {
             game_ptr->Winner().SetVal(Consoden::TankGame::Winner::PlayerOne);
+            std::cout << "Player One (" << mPlayerOneName << ") wins!" << std::endl;
+
         } else if (game_ptr->PlayerOnePoints().GetVal() < game_ptr->PlayerTwoPoints().GetVal()) {
             game_ptr->Winner().SetVal(Consoden::TankGame::Winner::PlayerTwo);
+            std::cout << "Player Two (" << mPlayerTwoName << ") wins!" << std::endl;
+
         } else {
             game_ptr->Winner().SetVal(Consoden::TankGame::Winner::Draw);
+            std::cout << "The game is a draw." << std::endl;
         }
     }
  };
