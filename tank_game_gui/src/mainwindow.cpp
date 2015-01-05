@@ -172,7 +172,7 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     {
         //updated match
         m_world.Update(match);
-        QTimer::singleShot(m_world.GetMatchState().gameState.pace/2, this, SLOT(UpdatePoints()));
+        QTimer::singleShot(m_world.GetMatchState().gameState.pace, this, SLOT(UpdatePoints()));
     }
 }
 
