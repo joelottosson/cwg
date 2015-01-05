@@ -35,8 +35,6 @@ Player::Player(const std::wstring &playerName, boost::asio::io_service& ioServic
     Consoden::TankGame::PlayerPtr player=Consoden::TankGame::Player::Create();
     player->Name()=playerName;
     m_connection.SetAll(player, m_myPlayerId, m_myHandlerId);
-
-    std::wcout<<playerName<<L" is running"<<std::endl;
 }
 
 void Player::OnStopOrder()

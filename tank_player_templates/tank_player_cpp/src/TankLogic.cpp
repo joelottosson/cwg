@@ -7,6 +7,7 @@
 *******************************************************************************/
 #include "TankLogic.h"
 #include "GameMap.h"
+#include "BfsHelper.h"
 
 const std::wstring TankLogic::PlayerName = L"tank_player_cpp"; //TODO: change to your team name
 
@@ -20,28 +21,38 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     //-------------------------------------------------------
     GameMap gm(m_ownTankId, gameState);
     auto currentPosition=gm.OwnPosition();
+    auto enemyPosition=gm.EnemyPosition();
+    BfsHelper bfs(gameState, currentPosition);
+    Consoden::TankGame::Direction::Enumeration moveDirection;
 
-    //Find an empty sqaure we can move to, if no emtpy square can be found we just dont move at all
-    auto moveDirection=Consoden::TankGame::Direction::Neutral;
-    if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Left)) &&
-        !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Left)))
-    {
-        moveDirection=Consoden::TankGame::Direction::Left;
-    }
-    else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Right)) &&
-             !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Right)))
-    {
-        moveDirection=Consoden::TankGame::Direction::Right;
-    }
-    else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Up)) &&
-             !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Up)))
-    {
-        moveDirection=Consoden::TankGame::Direction::Up;
-    }
-    else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Down)) &&
-             !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Down)))
-    {
-        moveDirection=Consoden::TankGame::Direction::Down;
+    if (bfs.CanReachSquare(enemyPosition)) {
+        // It is possible to move all the way to the enemy, do it
+        moveDirection=bfs.FindDirection(currentPosition, bfs.BacktrackFromSquare(enemyPosition));
+        std::cout << "Move to enemy, distance " << bfs.StepsToSquare(enemyPosition) << std::endl;
+
+    } else {
+        //Find an empty sqaure we can move to, otherwise move downwards
+        moveDirection=Consoden::TankGame::Direction::Neutral;
+        if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Left)) &&
+            !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Left)))
+        {
+            moveDirection=Consoden::TankGame::Direction::Left;
+        }
+        else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Right)) &&
+                 !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Right)))
+        {
+            moveDirection=Consoden::TankGame::Direction::Right;
+        }
+        else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Up)) &&
+                 !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Up)))
+        {
+            moveDirection=Consoden::TankGame::Direction::Up;
+        }
+        else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Down)) &&
+                 !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Down)))
+        {
+            moveDirection=Consoden::TankGame::Direction::Down;
+        }
     }
 
     //Advanced tower aim stategy

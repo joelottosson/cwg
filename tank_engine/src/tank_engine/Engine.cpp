@@ -384,6 +384,7 @@ namespace TankEngine
         GameMap gm(game_ptr);
 
         gm.MoveMissiles();
+        bool tank_tank_collission = false;
 
         // Move all tanks according to rules and evaluate resutls
 
@@ -396,8 +397,6 @@ namespace TankEngine
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
-
-            bool tank_tank_collission = false;
 
             for (Safir::Dob::Typesystem::ArrayIndex tank2_index = tank_index + 1;
                  (tank2_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank2_index].IsNull());
@@ -666,7 +665,6 @@ namespace TankEngine
                 tank_ptr->HitMissile() = true;
             }
 
-            bool tank_tank_collission = false;
             for (Safir::Dob::Typesystem::ArrayIndex tank2_index = tank_index + 1;
                  (tank2_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank2_index].IsNull());
                  tank2_index++) {
@@ -692,6 +690,7 @@ namespace TankEngine
                     // One point for taking a coin
                     AddPoints(1, tank_ptr->TankId(), game_ptr);
                     tank_ptr->TookCoin() = true;
+
                 } else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
                     // Give one point to the opponent for driving into poison gas. 
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
