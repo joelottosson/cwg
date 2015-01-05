@@ -97,14 +97,9 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         PaintWinner(painter);
     }
 
-    if (!m_world.GetTextBig().isEmpty())
+    for (auto& t : m_world.ScreenTexts())
     {
-        PaintText(m_world.GetTextBig(), 30, 8, 0, painter);
-    }
-
-    if (!m_world.GetTextSmall().isEmpty())
-    {
-        PaintText(m_world.GetTextSmall(), 18, 3, m_const.boardPixelSize.y()/2, painter);
+        PaintText(t, painter);
     }
 
     //Paint everything on screen
@@ -253,26 +248,43 @@ void TankGameWidget::PaintSprite(const Sprite& sprite, QPainter& painter)
     }
 }
 
-void TankGameWidget::PaintText(const QStringList& sl, int pixelSize, int penWidth, int offset, QPainter& painter)
+void TankGameWidget::PaintText(const ScreenText& txt, QPainter& painter)
 {
+    if (txt.Finished())
+    {
+        return; //shall not be rendered now
+    }
+
     painter.save();
-    QPen pen;
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(penWidth);
-    pen.setBrush(Qt::yellow);
-    painter.setPen(pen);
+    painter.setPen(txt.Pen());
     QFont font=painter.font();
-    font.setPixelSize(pixelSize);
+    font.setPixelSize(txt.FontSize());
     font.setBold(true);
     painter.setFont(font);
 
-    int rowStep=3*pixelSize;
-    QRect rect(0, offset, m_const.boardPixelSize.x(), pixelSize);
+    int rowStep=3*txt.FontSize();
 
-    for (const QString& s : sl)
+    if (txt.Position().x()<0 || txt.Position().y()<0)
     {
-        painter.drawText(rect, Qt::AlignCenter, s);
-        rect.setY(rect.y()+rowStep);
+        int xPos=txt.Position().x();
+        int yPos=txt.Position().y();
+        if (xPos<0) xPos=0;
+        if (yPos<0) yPos=0;
+        QRect rect(xPos, yPos, m_const.boardPixelSize.x(), txt.FontSize());
+        for (const QString& s : txt.Text())
+        {
+            painter.drawText(rect, Qt::AlignCenter, s);
+            rect.setY(rect.y()+rowStep);
+        }
+    }
+    else
+    {
+        auto pos=ToScreen(txt.Position(), 0, 0);
+        for (const QString& s : txt.Text())
+        {
+            painter.drawText(pos, s);
+            pos.setY(pos.y()+rowStep);
+        }
     }
 
     painter.restore();
@@ -280,73 +292,73 @@ void TankGameWidget::PaintText(const QStringList& sl, int pixelSize, int penWidt
 
 void TankGameWidget::PaintWinner(QPainter& painter)
 {
-    QStringList sl;
+//    QStringList sl;
 
-    if (m_world.GetGameState().winnerPlayerId==0)
-    {
-        sl.append("Game was a draw");
-    }
-    else
-    {
-        const Player* p1=m_world.GetPlayerOne();
-        const Player* p2=m_world.GetPlayerTwo();
-        if (!p1 || !p2)
-        {
-            return;
-        }
+//    if (m_world.GetGameState().winnerPlayerId==0)
+//    {
+//        sl.append("Game was a draw");
+//    }
+//    else
+//    {
+//        const Player* p1=m_world.GetPlayerOne();
+//        const Player* p2=m_world.GetPlayerTwo();
+//        if (!p1 || !p2)
+//        {
+//            return;
+//        }
 
-        const Player* winner=NULL;
-        const Player* loser=NULL;
-        const Tank* loserTank=NULL;
+//        const Player* winner=NULL;
+//        const Player* loser=NULL;
+//        const Tank* loserTank=NULL;
 
-        if (m_world.GetGameState().winnerPlayerId==p1->id)
-        {
-            //player 1 won
-            winner=p1;
-            loser=p2;
-            loserTank=m_world.GetTankTwo();
-        }
-        else if (m_world.GetGameState().winnerPlayerId==p2->id)
-        {
-            //player 2 won
-            winner=p2;
-            loser=p1;
-            loserTank=m_world.GetTankOne();
-        }
+//        if (m_world.GetGameState().winnerPlayerId==p1->id)
+//        {
+//            //player 1 won
+//            winner=p1;
+//            loser=p2;
+//            loserTank=m_world.GetTankTwo();
+//        }
+//        else if (m_world.GetGameState().winnerPlayerId==p2->id)
+//        {
+//            //player 2 won
+//            winner=p2;
+//            loser=p1;
+//            loserTank=m_world.GetTankOne();
+//        }
 
-        if (winner)
-        {
-            sl.append("Current game winner: "+winner->name);
+//        if (winner)
+//        {
+//            sl.append("Current game winner: "+winner->name);
 
-            if (loser && loserTank)
-            {
-                QString loserTxt=loser->name;
-                switch (loserTank->deathCause)
-                {
-                case Tank::HitMissile:
-                    loserTxt+=" was hit by a missile!";
-                    break;
-                case Tank::HitMine:
-                    loserTxt+=" hit a mine!";
-                    break;
-                case Tank::HitTank:
-                    loserTxt+=" drove into another tank!";
-                    break;
-                case Tank::HitWall:
-                    loserTxt+=" drove into a wall!";
-                    break;
-                case Tank::None:
-                    loserTxt="Time limit expired.";
-                    break;
-                }
-                sl.append(loserTxt);
-            }
-        }
-        else
-        {
-            sl.append("Winner has an unknown player id!");
-        }
-    }
+//            if (loser && loserTank)
+//            {
+//                QString loserTxt=loser->name;
+//                switch (loserTank->deathCause)
+//                {
+//                case Tank::HitMissile:
+//                    loserTxt+=" was hit by a missile!";
+//                    break;
+//                case Tank::HitMine:
+//                    loserTxt+=" hit a mine!";
+//                    break;
+//                case Tank::HitTank:
+//                    loserTxt+=" drove into another tank!";
+//                    break;
+//                case Tank::HitWall:
+//                    loserTxt+=" drove into a wall!";
+//                    break;
+//                case Tank::None:
+//                    loserTxt="Time limit expired.";
+//                    break;
+//                }
+//                sl.append(loserTxt);
+//            }
+//        }
+//        else
+//        {
+//            sl.append("Winner has an unknown player id!");
+//        }
+//    }
 
-    PaintText(sl, 18, 3, m_const.boardPixelSize.y()/2, painter);
+//    PaintText(sl, 18, 3, m_const.boardPixelSize.y()/2, painter);
 }

@@ -156,10 +156,6 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     Consoden::TankGame::GameStatePtr game=boost::dynamic_pointer_cast<Consoden::TankGame::GameState>(entityProxy.GetEntity());
     if (game && entityProxy.GetInstanceId().GetRawValue()==m_world.GameId())
     {
-        if (!m_world.GetTextBig().isEmpty())
-        {
-            m_world.SetTextBig(QStringList());
-        }
         m_world.Update(game);
     }
 

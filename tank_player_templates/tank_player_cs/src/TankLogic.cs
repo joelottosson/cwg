@@ -11,7 +11,7 @@ namespace tank_player_cs
 {
 	delegate void SetJoystick (	Consoden.TankGame.Direction.Enumeration moveDirection,
 	                            Consoden.TankGame.Direction.Enumeration towerDirection,
-	                           	bool fire);
+	                           	bool fire, bool dropMine);
 
 	//This class implements the tank logic.
 	class TankLogic
@@ -43,27 +43,41 @@ namespace tank_player_cs
 
 			Position currentPosition = gm.OwnPosition; //this is our current tank position
 
-			//Find an empty sqaure we can move to, otherwize move downwards
-			Consoden.TankGame.Direction.Enumeration moveDirection = Consoden.TankGame.Direction.Enumeration.Down;
-			if (gm.IsEmpty (gm.MoveLeft (currentPosition))) {
-				moveDirection = Consoden.TankGame.Direction.Enumeration.Left;
-			} 
-			else if (gm.IsEmpty (gm.MoveRight (currentPosition))) {
-				moveDirection = Consoden.TankGame.Direction.Enumeration.Right;
-			} 
-			else if (gm.IsEmpty (gm.MoveUp (currentPosition))) {
-				moveDirection = Consoden.TankGame.Direction.Enumeration.Up;
+			//Find an empty sqaure we can move to, if no emtpy square can be found we just dont move at all
+			Consoden.TankGame.Direction.Enumeration moveDirection = Consoden.TankGame.Direction.Enumeration.Neutral;
+			if (!gm.IsWall(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Left)) &&
+			    !gm.IsMine(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Left)))
+			{
+				moveDirection=Consoden.TankGame.Direction.Enumeration.Left;
+			}
+			else if (!gm.IsWall(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Right)) &&
+			         !gm.IsMine(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Right)))
+			{
+				moveDirection=Consoden.TankGame.Direction.Enumeration.Right;
+			}
+			else if (!gm.IsWall(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Up)) &&
+			         !gm.IsMine(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Up)))
+			{
+				moveDirection=Consoden.TankGame.Direction.Enumeration.Up;
+			}
+			else if (!gm.IsWall(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Down)) &&
+			         !gm.IsMine(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Down)))
+			{
+				moveDirection=Consoden.TankGame.Direction.Enumeration.Down;
 			}
 
 			//Advanced tower aim stategy
 			Consoden.TankGame.Direction.Enumeration towerDirection = 
-				(Consoden.TankGame.Direction.Enumeration)((currentPosition.X + currentPosition.Y) % 4);
+				(Consoden.TankGame.Direction.Enumeration)((1 + currentPosition.X + currentPosition.Y) % 4);
 
 			//Of course we always want to fire
 			bool fire = true;
 
+			//Sometimes we also drop a mine
+			bool dropMine=((int)(gameState.ElapsedTime.Val) % 3)==0;
+
 			//Move our joystick.
-			setJoystick (moveDirection, towerDirection, fire);
+			setJoystick (moveDirection, towerDirection, fire, dropMine);
 		}
 	}
 }

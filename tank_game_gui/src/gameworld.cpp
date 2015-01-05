@@ -74,6 +74,7 @@ void GameWorld::Clear()
     m_matchState=MatchState();
     m_matchState.finished=true;
     m_sprites.clear();
+    m_screenText.clear();
 }
 
 void GameWorld::ClearGameState()
@@ -81,6 +82,7 @@ void GameWorld::ClearGameState()
     m_matchState.gameState=GameState();
     m_matchState.gameState.finished=true;
     m_sprites.clear();
+    m_screenText.clear();
 }
 
 void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t id)
@@ -91,6 +93,7 @@ void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t 
     m_matchState.players[1]=match->PlayerTwoId().GetVal().GetRawValue();
     m_matchState.totalNumberOfGames=match->TotalNumberOfGames();
     m_sprites.clear();
+    m_screenText.clear();
     Update(match);
 
     if (m_matchState.currentGameNumber==1 && !m_matchState.finished)
@@ -107,6 +110,7 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_matchState.gameState.gameId=id;
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
     m_sprites.clear();
+    m_screenText.clear();
 
     if (!game->GamePace().IsNull())
     {
@@ -148,13 +152,33 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     Update(game);
 }
 
+void GameWorld::UpdatePoints(const Consoden::TankGame::MatchPtr& match)
+{
+    int p1Diff=match->PlayerOneTotalPoints()-m_matchState.playerOnePoints;
+    int p2Diff=match->PlayerTwoTotalPoints()-m_matchState.playerTwoPoints;
+    m_matchState.playerOnePoints=match->PlayerOneTotalPoints();
+    m_matchState.playerTwoPoints=match->PlayerTwoTotalPoints();
+
+    if (p1Diff!=0 || p2Diff!=0)
+    {
+        m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
+        {
+            //set player point text
+            if (p1Diff!=0)
+                SetTextPlayer(1, {QString("+")+QString::number(p1Diff)});
+            if (p2Diff!=0)
+                SetTextPlayer(2, {QString("+")+QString::number(p2Diff)});
+        }));
+    }
+}
+
 void GameWorld::Update(const Consoden::TankGame::MatchPtr& match)
 {
     //Update if game is finished and if we have a winner
     m_matchState.finished=match->Winner().GetVal()!=Consoden::TankGame::Winner::Unknown;
     m_matchState.currentGameNumber=match->CurrentGameNumber();
-    m_matchState.playerOnePoints=match->PlayerOneTotalPoints();
-    m_matchState.playerTwoPoints=match->PlayerTwoTotalPoints();
+
+    UpdatePoints(match);
 
     if (m_matchState.finished)
     {
@@ -242,7 +266,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     UpdateCoins(boardParser);
 
     //if hit poison gas square, play a terrible sound
-    if (game->Tanks()[0].GetPtr()->HitPoisonGas()==true || game->Tanks()[1].GetPtr()->HitPoisonGas()==true)
+    if (game->Tanks()[0].GetPtr()->HitPoisonGas().GetVal() || game->Tanks()[1].GetPtr()->HitPoisonGas().GetVal())
     {
         UpdatePoison(boardParser);
     }
@@ -637,6 +661,19 @@ void GameWorld::Update()
         }
     }
 
+    for (auto it=m_screenText.begin(); it!=m_screenText.end();)
+    {
+        if (it->Finished())
+        {
+            it=m_screenText.erase(it);
+        }
+        else
+        {
+            it->Update();
+            ++it;
+        }
+    }
+
     m_lastAnimationUpdate=QDateTime::currentMSecsSinceEpoch();
 }
 
@@ -807,4 +844,40 @@ const Tank* GameWorld::GetTankTwo() const
         return &(*tankIt);
     }
     return nullptr;
+}
+
+void GameWorld::SetTextBig(const QStringList& lines)
+{
+    m_screenText.emplace_back(lines, QPointF(-1, 0), Qt::yellow, 30, 8, QPointF(0, 0), false, 3000);
+
+}
+
+void GameWorld::SetTextSmall(const QStringList& lines)
+{
+    m_screenText.emplace_back(lines, QPointF(-1, -1), Qt::yellow, 18, 3, QPointF(0, 0), false, 3000);
+}
+
+void GameWorld::SetTextPlayer(int playerNumber, const QStringList& lines)
+{
+    const Tank* t=nullptr;
+    if (playerNumber==1)
+    {
+        t=GetTankOne();
+    }
+    else
+    {
+        t=GetTankTwo();
+    }
+
+    if (t)
+    {
+        m_screenText.emplace_back(lines,
+                                  QPointF(t->position.x()+0.4, t->position.y()),
+                                  Qt::yellow,
+                                  30,
+                                  8,
+                                  QPointF(0, -0.5/1000),
+                                  true,
+                                  1000);
+    }
 }

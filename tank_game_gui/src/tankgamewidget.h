@@ -60,7 +60,7 @@ private:
     void PaintTank(const Tank& tank, bool blue, QPainter& painter);
     void PaintMissile(const Missile& missile, QPainter& painter);
     void PaintSprite(const Sprite& sprite, QPainter& painter);
-    void PaintText(const QStringList& sl, int pixelSize, int penWidth, int offset, QPainter& painter);
+    void PaintText(const ScreenText& txt, QPainter& painter);
     void PaintWinner(QPainter& painter);
 };
 
