@@ -83,7 +83,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Movement</string>
+    <string>Move</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
