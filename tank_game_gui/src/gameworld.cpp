@@ -680,7 +680,20 @@ void GameWorld::Update()
 
 bool GameWorld::MatchFinished() const
 {
-    return m_matchState.finished && m_eventQueue.empty();
+    if (m_matchState.finished && m_eventQueue.empty())
+    {
+        for (auto& sprite : m_sprites)
+        {
+            bool spriteFinished=sprite.Repetitions()==0 || sprite.Finished();
+            if (!spriteFinished)
+            {
+                return false; //there are still sprites that will not run forever that has not finished
+            }
+        }
+
+        return true; //all sprites that are not forever have finished
+    }
+    return false;
 }
 
 void GameWorld::AddPlayer(const Consoden::TankGame::PlayerConstPtr player, qint64 id)

@@ -61,6 +61,7 @@ public:
 
     const MatchState& GetMatchState() const {return m_matchState;}
     const GameState& GetGameState() const {return m_matchState.gameState;}
+
     const std::vector<Sprite>& Sprites() const {return m_sprites;}
 
     void SetTextBig(const QStringList& lines);
