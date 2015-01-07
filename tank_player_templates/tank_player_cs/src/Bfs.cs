@@ -10,7 +10,7 @@ using System;
 namespace tank_player_cs
 {
 	//Implementation of a breadth first algorithm
-	//Helpfull to find out if a square is reachable and get the shortest path.
+	//Helpful to find out if a square is reachable and get the shortest path.
 	class Bfs
 	{
 		private Consoden.TankGame.GameState gameState;
@@ -110,7 +110,7 @@ namespace tank_player_cs
 			return new Position (-1, -1);	
 		}
 
-		private void EvaluateShortestPathsHelper(Position currentPos, Position nextPos, int steps) 
+		private void EvaluateShortestPathsHelper(Position nextPos, int steps) 
 		{
 			char next = RawVal (nextPos.X, nextPos.Y);
 			bool isEmpty=next=='.' || next=='$' || next=='p';
@@ -125,10 +125,10 @@ namespace tank_player_cs
 
 		private void EvaluateShortestPaths(Position pos, int steps)
 		{
-			EvaluateShortestPathsHelper(pos, Move(pos, Consoden.TankGame.Direction.Enumeration.Left), steps);
-			EvaluateShortestPathsHelper(pos, Move(pos, Consoden.TankGame.Direction.Enumeration.Right), steps);
-			EvaluateShortestPathsHelper(pos, Move(pos, Consoden.TankGame.Direction.Enumeration.Up), steps);
-			EvaluateShortestPathsHelper(pos, Move(pos, Consoden.TankGame.Direction.Enumeration.Down), steps);
+			EvaluateShortestPathsHelper(Move(pos, Consoden.TankGame.Direction.Enumeration.Left), steps);
+			EvaluateShortestPathsHelper(Move(pos, Consoden.TankGame.Direction.Enumeration.Right), steps);
+			EvaluateShortestPathsHelper(Move(pos, Consoden.TankGame.Direction.Enumeration.Up), steps);
+			EvaluateShortestPathsHelper(Move(pos, Consoden.TankGame.Direction.Enumeration.Down), steps);
 		}
 
 		//X size of game field

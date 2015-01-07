@@ -5,7 +5,7 @@
 * Created by: Joel Ottosson / joot
 *
 ******************************************************************************/
-package cwg14;
+package cwg;
 
 import com.saabgroup.safir.dob.typesystem.*;
 import com.saabgroup.safir.dob.ErrorResponse;
