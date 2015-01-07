@@ -47,6 +47,8 @@
     <Compile Include="Player.cs" />
     <Compile Include="TankLogic.cs" />
     <Compile Include="GameMap.cs" />
+    <Compile Include="Bfs.cs" />
+    <Compile Include="Position.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
