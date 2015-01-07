@@ -97,6 +97,7 @@ private slots:
     void OnActionNewGame();
     void OnActionRestartGame();
     void OnActionStopGame();
+    void UpdatePoints();
 };
 
 

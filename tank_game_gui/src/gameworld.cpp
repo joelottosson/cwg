@@ -176,6 +176,7 @@ void GameWorld::Update(const Consoden::TankGame::MatchPtr& match)
 {
     //Update if game is finished and if we have a winner
     m_matchState.finished=match->Winner().GetVal()!=Consoden::TankGame::Winner::Unknown;
+
     m_matchState.currentGameNumber=match->CurrentGameNumber();
 
     UpdatePoints(match);

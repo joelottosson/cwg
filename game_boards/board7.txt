@@ -1,9 +1,9 @@
-x....txxx.x.
+xp...txxx.x.
 ....x.xx.x..
 ..$........x
 .x$...x.x..x
 .xx.x...$xx.
-.xxx.t..x...
+.xxx.t.px...
 ..xxx..x.xx.
 ..x.x...x.x.
 .$.x..x$x..x

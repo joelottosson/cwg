@@ -118,10 +118,9 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
         {
             m_tankInfoWidget[0]->SetName(player1->name);
             m_tankInfoWidget[0]->Update(m_world.GetJoystickOne());
-            m_tankInfoWidget[0]->SetPoints(m_world.GetPlayerOneTotalPoints());
             m_tankInfoWidget[1]->SetName(player2->name);
             m_tankInfoWidget[1]->Update(m_world.GetJoystickTwo());
-            m_tankInfoWidget[1]->SetPoints(m_world.GetPlayerTwoTotalPoints());
+            UpdatePoints();
         }
         return;
     }
@@ -173,8 +172,7 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     {
         //updated match
         m_world.Update(match);
-        m_tankInfoWidget[0]->SetPoints(m_world.GetPlayerOneTotalPoints());
-        m_tankInfoWidget[1]->SetPoints(m_world.GetPlayerTwoTotalPoints());
+        QTimer::singleShot(m_world.GetMatchState().gameState.pace, this, SLOT(UpdatePoints()));
     }
 }
 
@@ -279,6 +277,12 @@ void MainWindow::OnActionStopGame()
     {
         m_dobConnection.DeleteRequest((*it).GetEntityId(), this);
     }
+}
+
+void MainWindow::UpdatePoints()
+{
+    m_tankInfoWidget[0]->SetPoints(m_world.GetPlayerOneTotalPoints());
+    m_tankInfoWidget[1]->SetPoints(m_world.GetPlayerTwoTotalPoints());
 }
 
 void MainWindow::OnActionRestartGame()
