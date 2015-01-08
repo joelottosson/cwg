@@ -5,7 +5,7 @@
 * Created by: Joel Ottosson / joot
 *
 ******************************************************************************/
-package cwg14;
+package cwg;
 
 
 class TankLogic {
@@ -35,27 +35,35 @@ class TankLogic {
 		//Remove it and write your own brilliant version!
 		//-------------------------------------------------------
 	    GameMap gm=new GameMap(tankId, gameState); //helper object
+	    Bfs bfs=new Bfs(gameState, gm.getOwnPosition());
 
 		Position currentPosition = gm.getOwnPosition(); //this is our current tank position
-
-		//Find an empty square we can move to, otherwize move downwards
-		consoden.tankgame.Direction moveDirection = consoden.tankgame.Direction.NEUTRAL;
+		Position enemyPosition = gm.getEnemyPosition(); //this is the enemy tank position
 		
-		if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.LEFT)) &&
-			!gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.LEFT))) {
-			moveDirection=consoden.tankgame.Direction.LEFT;
+		consoden.tankgame.Direction moveDirection = consoden.tankgame.Direction.NEUTRAL;
+
+		if (bfs.canReachSquare(enemyPosition)) { //if we can reach the enemy, get him
+			System.out.println("canReach");
+			moveDirection=bfs.backtrackFromSquare(enemyPosition);
 		}
-		else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.RIGHT)) &&
-				 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.RIGHT))) {
-			moveDirection=consoden.tankgame.Direction.RIGHT;
-		}
-		else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.UP)) &&
-				 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.UP))) {
-			moveDirection=consoden.tankgame.Direction.UP;
-		}
-		else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.DOWN)) &&
-				 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.DOWN))) {
-			moveDirection=consoden.tankgame.Direction.DOWN;
+		else { //find any empty square
+			System.out.println("cannot Reach");
+			if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.LEFT)) &&
+				!gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.LEFT))) {
+				moveDirection=consoden.tankgame.Direction.LEFT;
+			}
+			else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.RIGHT)) &&
+					 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.RIGHT))) {
+				moveDirection=consoden.tankgame.Direction.RIGHT;
+			}
+			else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.UP)) &&
+					 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.UP))) {
+				moveDirection=consoden.tankgame.Direction.UP;
+			}
+			else if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.DOWN)) &&
+					 !gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.DOWN))) {
+				moveDirection=consoden.tankgame.Direction.DOWN;
+			}
 		}
 
 		//Advanced tower aim stategy

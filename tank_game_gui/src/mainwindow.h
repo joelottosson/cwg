@@ -87,9 +87,14 @@ private:
     QEvent::Type m_dispatchEvent;
     DobConnector m_conThread;
     QTimer m_updateTimer;
+    QLabel* m_gameNumber;
+    QLabel* m_gameTime;
 
     void SendNewGameRequest();
     void MatchFinished();
+
+    void UpdateStatusGameNumber();
+    void UpdateStatusGameTime();
 
 private slots:
     void OnUpdateWorld();

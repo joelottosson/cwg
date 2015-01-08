@@ -40,35 +40,32 @@ namespace tank_player_cs
 			//Remove it and write your own brilliant version!
 			//-------------------------------------------------------
 			GameMap gm = new GameMap (tankId, gameState); //helpler object
-
-			Position currentPosition = gm.OwnPosition; //this is our current tank position
-
-			//Find an empty sqaure we can move to, if no emtpy square can be found we just dont move at all
+			Bfs bfs=new Bfs(gameState, gm.OwnPosition); //breadth first search
 			Consoden.TankGame.Direction.Enumeration moveDirection = Consoden.TankGame.Direction.Enumeration.Neutral;
-			if (!gm.IsWall(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Left)) &&
-			    !gm.IsMine(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Left)))
-			{
-				moveDirection=Consoden.TankGame.Direction.Enumeration.Left;
-			}
-			else if (!gm.IsWall(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Right)) &&
-			         !gm.IsMine(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Right)))
-			{
-				moveDirection=Consoden.TankGame.Direction.Enumeration.Right;
-			}
-			else if (!gm.IsWall(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Up)) &&
-			         !gm.IsMine(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Up)))
-			{
-				moveDirection=Consoden.TankGame.Direction.Enumeration.Up;
-			}
-			else if (!gm.IsWall(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Down)) &&
-			         !gm.IsMine(gm.Move(currentPosition, Consoden.TankGame.Direction.Enumeration.Down)))
-			{
-				moveDirection=Consoden.TankGame.Direction.Enumeration.Down;
+
+
+			if (bfs.CanReachSquare (gm.EnemyPosition)) { //if we can reach the enemy, get him
+				moveDirection = bfs.BacktrackFromSquare (gm.EnemyPosition);
+			} 
+			else { //find any empty square
+				if (!gm.IsWall (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Left)) &&
+					!gm.IsMine (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Left))) {
+					moveDirection = Consoden.TankGame.Direction.Enumeration.Left;
+				} else if (!gm.IsWall (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Right)) &&
+					!gm.IsMine (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Right))) {
+					moveDirection = Consoden.TankGame.Direction.Enumeration.Right;
+				} else if (!gm.IsWall (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Up)) &&
+					!gm.IsMine (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Up))) {
+					moveDirection = Consoden.TankGame.Direction.Enumeration.Up;
+				} else if (!gm.IsWall (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Down)) &&
+					!gm.IsMine (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Down))) {
+					moveDirection = Consoden.TankGame.Direction.Enumeration.Down;
+				}
 			}
 
 			//Advanced tower aim stategy
 			Consoden.TankGame.Direction.Enumeration towerDirection = 
-				(Consoden.TankGame.Direction.Enumeration)((1 + currentPosition.X + currentPosition.Y) % 4);
+				(Consoden.TankGame.Direction.Enumeration)((1 + gm.OwnPosition.X + gm.OwnPosition.Y) % 4);
 
 			//Of course we always want to fire
 			bool fire = true;

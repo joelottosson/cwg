@@ -59,7 +59,7 @@ void MatchStateMachine::OnNewGameState(const cwg::GameStatePtr gameState)
         m_player1PointsAccumulated+=m_currentGameState->PlayerOnePoints();
         m_player2PointsAccumulated+=m_currentGameState->PlayerTwoPoints();
     }
-     m_running=true;
+    m_running=true;
     m_currentGameStateHasFinished=false;
     OnUpdatedGameState(gameState);
 }
@@ -140,7 +140,6 @@ void MatchStateMachine::StartNextGame()
     auto gameIndex=static_cast<size_t>(m_state->CurrentGameNumber().GetVal())%m_games.size();    
     auto gameState=m_games[gameIndex];
     m_state->CurrentGameNumber()++;
-    m_currentGameState.reset();
     m_onUpdateMatchState();
     m_onStartNewGame(gameState);
 }

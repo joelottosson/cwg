@@ -129,6 +129,7 @@ struct GameState
     qint64 gameId{0};
     QPoint size{10, 10};
     int pace{1000}; //milliseconds per square
+    int elapsedTime{0};
     PointVec walls{};
     PointVec mines{};
     PointVec coins{};

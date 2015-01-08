@@ -9,18 +9,6 @@ using System;
 
 namespace tank_player_cs
 {
-	struct Position
-	{
-		public int X;
-		public int Y;
-
-		Position(int x, int y)
-		{
-			X = x;
-			Y = y;
-		}
-	}
-
 	class GameMap
 	{
 		private int tankId;
@@ -50,10 +38,7 @@ namespace tank_player_cs
 		//Own tank position
 		public Position OwnPosition {
 			get {
-				Position p;
-				p.X = gameState.Tanks [tankId].Obj.PosX.Val;
-				p.Y = gameState.Tanks [tankId].Obj.PosY.Val;
-				return p;
+				return new Position (gameState.Tanks [tankId].Obj.PosX.Val, gameState.Tanks [tankId].Obj.PosY.Val);
 			}
 		}
 
@@ -61,39 +46,32 @@ namespace tank_player_cs
 		public Position EnemyPosition {
 			get {
 				int i = (tankId + 1) % 2;
-				Position p;
-				p.X = gameState.Tanks [i].Obj.PosX.Val;
-				p.Y = gameState.Tanks [i].Obj.PosY.Val;
-				return p;
+				return new Position (gameState.Tanks [i].Obj.PosX.Val, gameState.Tanks [i].Obj.PosY.Val);
 			}
 		}
 
 		//Check if square is a wall.
 		public bool IsWall (Position p)
 		{
-			int i = ToIndex (p);
-			return gameState.Board.Val [i] == Convert.ToByte ('x');
+			return RawVal (p.X, p.Y) == 'x';
 		}
 
 		//Check if there is a mine in this square.
 		public bool IsMine (Position p)
 		{
-			int i = ToIndex (p);
-			return gameState.Board.Val [i] == Convert.ToByte ('o');
+			return RawVal (p.X, p.Y) == 'o';
 		}
 
 		//Check if there is a coin in this square.
 		public bool IsCoin (Position p)
 		{
-			int i = ToIndex (p);
-			return gameState.Board.Val [i] == Convert.ToByte ('$');
+			return RawVal (p.X, p.Y) == '$';
 		}
 
                 //Check if there is poison gas in this square.
 		public bool IsPoisonGas (Position p)
 		{
-			int i = ToIndex (p);
-			return gameState.Board.Val [i] == Convert.ToByte ('p');
+			return RawVal (p.X, p.Y) == 'p';
 		}
 
 		//Is there a missile in this square
@@ -117,25 +95,13 @@ namespace tank_player_cs
 		{
 			switch (d) {
 			case Consoden.TankGame.Direction.Enumeration.Left:
-				{
-				p.X = (p.X - 1 + SizeX) % SizeX;
-				return p;
-				}
+				return new Position ((p.X - 1 + SizeX) % SizeX, p.Y);
 			case Consoden.TankGame.Direction.Enumeration.Right:
-				{
-				p.X = (p.X + 1) % SizeX;
-				return p;
-				}
+				return new Position ((p.X + 1) % SizeX, p.Y);
 			case Consoden.TankGame.Direction.Enumeration.Up:
-				{
-				p.Y = (p.Y - 1 + SizeY) % SizeY;
-				return p;
-				}
+				return new Position (p.X, (p.Y - 1 + SizeY) % SizeY);
 			case Consoden.TankGame.Direction.Enumeration.Down:
-				{
-				p.Y = (p.Y + 1) % SizeY;
-				return p;
-				}
+				return new Position (p.X, (p.Y + 1) % SizeY);
 			default:
 				return p;
 			}
@@ -147,7 +113,7 @@ namespace tank_player_cs
 			TimeSpan elapsedToday = DateTime.Now - startOfDay;
 			return gameState.NextMove.Val - (int)elapsedToday.TotalMilliseconds;
 		}
-
+	
 		//Print game map
 		public void PrintMap ()
 		{
@@ -178,12 +144,9 @@ namespace tank_player_cs
 
 				Consoden.TankGame.Missile missile = gameState.Missiles [i].Obj;
 
-				Position head;
-				head.X = missile.HeadPosX.Val;
-				head.Y = missile.HeadPosY.Val;
-				Position tail;
-				tail.X = missile.TailPosX.Val;
-				tail.Y = missile.TailPosY.Val;
+				Position head = new Position (missile.HeadPosX.Val, missile.HeadPosY.Val);
+				Position tail = new Position (missile.TailPosX.Val, missile.TailPosY.Val);
+
 		        Consoden.TankGame.Direction.Enumeration direction = missile.Direction.Val;
 
 		        Console.WriteLine ("Missile position - head {0},{1}", head.X, head.Y);
@@ -218,10 +181,10 @@ namespace tank_player_cs
 			return x + y * SizeX;
 		}
 
-		private int ToIndex(Position p)
+		private char RawVal(int x, int y)
 		{
-			return ToIndex(p.X, p.Y);
+			int i = ToIndex (x, y);
+			return Convert.ToChar (gameState.Board.Val [i]);
 		}
-
 	}
 }

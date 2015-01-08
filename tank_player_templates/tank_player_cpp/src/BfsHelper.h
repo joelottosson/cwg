@@ -71,7 +71,7 @@ private:
     std::pair<int, int> MoveDown(const std::pair<int, int>& pos) const;
 
     void GenerateShortestPaths(std::pair<int, int> start_pos);
-    void EvaluateShortestPathsHelper(std::pair<int, int> current_pos, std::pair<int, int> next_pos, Consoden::TankGame::Direction::Enumeration direction, int steps);
+    void EvaluateShortestPathsHelper(std::pair<int, int> current_pos, std::pair<int, int> next_pos, int steps);
     void EvaluateShortestPaths(std::pair<int, int> pos, int steps);
 
 

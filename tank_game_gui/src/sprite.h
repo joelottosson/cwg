@@ -63,6 +63,7 @@ public:
     const QPointF& Position() const {return m_pos;}
     const QRectF& Fragment() const {return m_spriteData->fragments[m_currentFragment];}
     const qreal Rotation() const {return m_rotation;}
+    const int Repetitions() const {return m_repetitions;}
     bool Started() const {return QDateTime::currentMSecsSinceEpoch()>=m_startTime;}
     bool Finished() const
     {

@@ -5,10 +5,9 @@
 * Created by: Joel Ottosson / joot
 *
 ******************************************************************************/
-package cwg14;
+package cwg;
 
 import java.util.Calendar;
-import java.util.Date;
 
 class GameMap {
 
@@ -184,22 +183,10 @@ class GameMap {
 	}
 
 	private int toIndex(int x, int y) {
-		return x+y*getSizeY();
+		return x+y*getSizeX();
 	}
 	
 	private int toIndex(final Position pos) {
 		return pos.x+pos.y*getSizeX();
-	}
-}
-
-class Position {
-	public int x, y;
-	public Position(int x, int y) {
-		this.x=x;
-		this.y=y;
-	}
-	
-	public String toString() {
-		return String.format("{%d, %d}", x, y);
 	}
 }

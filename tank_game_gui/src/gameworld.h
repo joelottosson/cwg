@@ -54,13 +54,12 @@ public:
     const Joystick* GetJoystickTwo() const;
     const Tank* GetTankOne() const;
     const Tank* GetTankTwo() const;
-    const int GetTotalNumberOfGames() const {return m_matchState.totalNumberOfGames;}
-    const int GetCurrentGameNumber() const {return m_matchState.currentGameNumber;}
     const int GetPlayerOneTotalPoints() const {return m_matchState.playerOnePoints;}
     const int GetPlayerTwoTotalPoints() const {return m_matchState.playerTwoPoints;}
 
     const MatchState& GetMatchState() const {return m_matchState;}
     const GameState& GetGameState() const {return m_matchState.gameState;}
+
     const std::vector<Sprite>& Sprites() const {return m_sprites;}
 
     void SetTextBig(const QStringList& lines);

@@ -38,7 +38,7 @@ void BfsHelper::GenerateShortestPaths(std::pair<int, int> start_pos)
     EvaluateShortestPaths(start_pos, 1);
 }
 
-void BfsHelper::EvaluateShortestPathsHelper(std::pair<int, int> current_pos, std::pair<int, int> next_pos, Consoden::TankGame::Direction::Enumeration direction, int steps) 
+void BfsHelper::EvaluateShortestPathsHelper(std::pair<int, int> current_pos, std::pair<int, int> next_pos, int steps)
 {
     if (IsEmpty(next_pos)) 
     {
@@ -51,10 +51,10 @@ void BfsHelper::EvaluateShortestPathsHelper(std::pair<int, int> current_pos, std
 
 void BfsHelper::EvaluateShortestPaths(std::pair<int, int> pos, int steps)
 {
-    EvaluateShortestPathsHelper(pos, MoveLeft(pos), Consoden::TankGame::Direction::Left, steps);
-    EvaluateShortestPathsHelper(pos, MoveRight(pos), Consoden::TankGame::Direction::Right, steps);
-    EvaluateShortestPathsHelper(pos, MoveUp(pos), Consoden::TankGame::Direction::Up, steps);
-    EvaluateShortestPathsHelper(pos, MoveDown(pos), Consoden::TankGame::Direction::Down, steps);
+    EvaluateShortestPathsHelper(pos, MoveLeft(pos), steps);
+    EvaluateShortestPathsHelper(pos, MoveRight(pos), steps);
+    EvaluateShortestPathsHelper(pos, MoveUp(pos), steps);
+    EvaluateShortestPathsHelper(pos, MoveDown(pos), steps);
 }
 
 std::pair<int, int> BfsHelper::BacktrackFromSquare(std::pair<int, int> target_pos)
