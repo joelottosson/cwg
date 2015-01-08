@@ -258,6 +258,7 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 {
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
+    m_matchState.gameState.elapsedTime=static_cast<int>(game->ElapsedTime().GetVal());
 
     m_matchState.gameState.mines.clear();
 

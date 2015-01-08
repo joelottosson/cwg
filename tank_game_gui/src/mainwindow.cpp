@@ -35,6 +35,16 @@ MainWindow::MainWindow(int updateFrequency, QWidget *parent)
     QObject::connect(&m_conThread, SIGNAL(ConnectedToDob()), this, SLOT(OnConnected()));
     m_conThread.start();
 
+    m_gameNumber=new QLabel("Game: 0/0");
+    m_gameNumber->setFont( QFont( "sans", 12, QFont::Bold, false) );
+    m_gameNumber->setStyleSheet("QLabel { background-color : white; color : blue; }");
+    statusBar()->addPermanentWidget(m_gameNumber);
+
+    m_gameTime=new QLabel("Time: 0");
+    m_gameTime->setFont( QFont( "sans", 12, QFont::Bold, false) );
+    m_gameTime->setStyleSheet("QLabel { background-color : white; color : blue; }");
+    statusBar()->addPermanentWidget(m_gameTime);
+
     m_tankInfoWidget[0]=new TankInfoWidget(0);
     m_tankInfoWidget[1]=new TankInfoWidget(1);
     m_tankGameWidget=new TankGameWidget(m_world);
@@ -138,6 +148,8 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
         m_tankGameWidget->Reset();
         m_updateTimer.start(m_updateInterval);
 
+        UpdateStatusGameNumber();
+        UpdateStatusGameTime();
         return;
     }
 
@@ -156,6 +168,8 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     if (game && entityProxy.GetInstanceId().GetRawValue()==m_world.GameId())
     {
         m_world.Update(game);
+        UpdateStatusGameTime();
+        return;
     }
 
     Consoden::TankGame::JoystickConstPtr joystick=boost::dynamic_pointer_cast<Consoden::TankGame::Joystick>(entityProxy.GetEntity());
@@ -173,6 +187,7 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
         //updated match
         m_world.Update(match);
         QTimer::singleShot(m_world.GetMatchState().gameState.pace, this, SLOT(UpdatePoints()));
+        return;
     }
 }
 
@@ -291,3 +306,14 @@ void MainWindow::OnActionRestartGame()
     m_dobConnection.UpdateRequest(dummyPtr, Safir::Dob::Typesystem::InstanceId(m_world.MatchId()), this);
 }
 
+void MainWindow::UpdateStatusGameNumber()
+{
+    std::ostringstream os;
+    os<<"Game "<<m_world.GetMatchState().currentGameNumber<<"/"<<m_world.GetMatchState().totalNumberOfGames;
+    m_gameNumber->setText(os.str().c_str());
+}
+
+void MainWindow::UpdateStatusGameTime()
+{
+    m_gameTime->setText( QString("Time ")+QString::number(m_world.GetGameState().elapsedTime));
+}

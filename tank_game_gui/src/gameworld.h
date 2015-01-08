@@ -54,8 +54,6 @@ public:
     const Joystick* GetJoystickTwo() const;
     const Tank* GetTankOne() const;
     const Tank* GetTankTwo() const;
-    const int GetTotalNumberOfGames() const {return m_matchState.totalNumberOfGames;}
-    const int GetCurrentGameNumber() const {return m_matchState.currentGameNumber;}
     const int GetPlayerOneTotalPoints() const {return m_matchState.playerOnePoints;}
     const int GetPlayerTwoTotalPoints() const {return m_matchState.playerTwoPoints;}
 
