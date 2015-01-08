@@ -452,7 +452,7 @@ namespace TankEngine
                         tank_ptr->HitPoisonGas() = false;
                         tank2_ptr->InFlames() = true;
                         tank2_ptr->HitTank() = true;
-                        tank2_ptr->MoveDirection() = tank2_ptr->MoveDirection();
+                        tank2_ptr->MoveDirection() = joystick2_ptr->MoveDirection();
                         tank2_ptr->Fire() = false;
                         tank2_ptr->TookCoin() = false;
                         tank2_ptr->HitPoisonGas() = false;
