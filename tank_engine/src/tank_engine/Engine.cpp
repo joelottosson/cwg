@@ -63,6 +63,10 @@ namespace TankEngine
         mCounter = 0;
         mMaxGameTime = maxGameTime;
 
+        // Cleanup old games
+        mTimer.cancel();
+        m_JoystickWaitIds.clear();
+
         // Build wait list for tank_ids
         const Consoden::TankGame::GameStatePtr game_ptr =
             boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
