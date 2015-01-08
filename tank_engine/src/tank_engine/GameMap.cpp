@@ -315,6 +315,16 @@ namespace TankEngine
 
     void GameMap::Print()
     {
+        std::cout << "state in counter " << m_Game_ptr->Counter() << std::endl;
+        std::cout << "tank 0: (" << m_Game_ptr->Tanks()[0]->PosX() << "," << m_Game_ptr->Tanks()[0]->PosY() << ")" << std::endl;
+        std::cout << "tank 1: (" << m_Game_ptr->Tanks()[1]->PosX() << "," << m_Game_ptr->Tanks()[1]->PosY() << ")" << std::endl;
+        if (!m_Game_ptr->Missiles()[0].IsNull()) {
+            std::cout << "missile 0: (" << m_Game_ptr->Missiles()[0]->HeadPosX() << "," << m_Game_ptr->Missiles()[0]->HeadPosY() << ")-(" << m_Game_ptr->Missiles()[0]->TailPosX() << "," << m_Game_ptr->Missiles()[0]->TailPosY() << ")" << std::endl;
+        }
+        if (!m_Game_ptr->Missiles()[1].IsNull()) {
+            std::cout << "missile 1: (" << m_Game_ptr->Missiles()[1]->HeadPosX() << "," << m_Game_ptr->Missiles()[1]->HeadPosY() << ")-(" << m_Game_ptr->Missiles()[1]->TailPosX() << "," << m_Game_ptr->Missiles()[1]->TailPosY() << ")" << std::endl;            
+        }
+
         for (int y = 0; y < y_size; y++) {
             for (int x = 0; x < x_size; x++) {
                 //int index = (y * x_size) + x;
@@ -322,6 +332,7 @@ namespace TankEngine
             }
             std::cout << std::endl;
         }        
+        std::cout << std::endl;
     }
 
     //-----------------------------------------------------------------------------
