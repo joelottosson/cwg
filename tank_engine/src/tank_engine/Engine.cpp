@@ -63,6 +63,10 @@ namespace TankEngine
         mCounter = 0;
         mMaxGameTime = maxGameTime;
 
+        // Cleanup old games
+        mTimer.cancel();
+        m_JoystickWaitIds.clear();
+
         // Build wait list for tank_ids
         const Consoden::TankGame::GameStatePtr game_ptr =
             boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
@@ -448,7 +452,7 @@ namespace TankEngine
                         tank_ptr->HitPoisonGas() = false;
                         tank2_ptr->InFlames() = true;
                         tank2_ptr->HitTank() = true;
-                        tank2_ptr->MoveDirection() = tank2_ptr->MoveDirection();
+                        tank2_ptr->MoveDirection() = joystick2_ptr->MoveDirection();
                         tank2_ptr->Fire() = false;
                         tank2_ptr->TookCoin() = false;
                         tank2_ptr->HitPoisonGas() = false;
