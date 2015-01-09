@@ -8,7 +8,7 @@ find_package(Java REQUIRED)
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 INCLUDE(JavaMacros)
 
-file(GLOB_RECURSE sources cwg14/*.java)
+file(GLOB_RECURSE sources cwg/*.java)
 
 SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/dose_java.jar ${SAFIR_RUNTIME}/bin/logging_java.jar)
 
