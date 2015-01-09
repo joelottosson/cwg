@@ -59,9 +59,6 @@ private:
     {
         m_joystick(moveDirection, towerDirection, fire, dropMine);
     }
-
-    Consoden::TankGame::Direction::Enumeration m_move { Consoden::TankGame::Direction::Left };
-    bool m_dropMine{false};
 };
 
 #endif
