@@ -42,12 +42,10 @@ class TankLogic {
 		
 		consoden.tankgame.Direction moveDirection = consoden.tankgame.Direction.NEUTRAL;
 
-		if (bfs.canReachSquare(enemyPosition)) { //if we can reach the enemy, get him
-			System.out.println("canReach");
+		if (bfs.canReachSquare(enemyPosition)) { //if we can reach the enemy, get him			
 			moveDirection=bfs.backtrackFromSquare(enemyPosition);
 		}
-		else { //find any empty square
-			System.out.println("cannot Reach");
+		else { //find any empty square			
 			if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.LEFT)) &&
 				!gm.isMine(gm.move(currentPosition, consoden.tankgame.Direction.LEFT))) {
 				moveDirection=consoden.tankgame.Direction.LEFT;
@@ -75,7 +73,7 @@ class TankLogic {
 		
 		//Sometimes we also drop a mine
 	    boolean dropMine=((gameState.elapsedTime().getVal().intValue()) % 3)==0;
-
+	    
 		//Move our joystick.
 		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine);
 	}
