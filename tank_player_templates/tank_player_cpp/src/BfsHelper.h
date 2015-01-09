@@ -14,13 +14,27 @@
 #include <Consoden/TankGame/GameState.h>
 
 /**
- * Helper class for the Strategy. Parses game board and calculates the shortest paths to each square.
+  *Implementation of a breadth first algorithm.
+ * Helper class that parses game board and calculates the shortest paths to each square.
  */
 class BfsHelper
 {
 public:
 
+    /**
+     * Create a bfs graph based on startPos.
+     */
     BfsHelper(const Consoden::TankGame::GameStatePtr& gamePtr, std::pair<int, int> start_pos);
+
+    /**
+     * Is it possible to reach the square pos?
+     */
+    bool CanReachSquare(std::pair<int, int> pos);
+
+    /**
+     * How many steps are required to reach square pos?
+     */
+    int StepsToSquare(std::pair<int, int> pos);
 
     /**
      * Calculates the next step towards the target along the shortest path. 
@@ -32,17 +46,7 @@ public:
      * Calculates the direction of movement from start_pos to target_pos.
      * start_pos and target_pos must be adjacent squares.
      */
-    Consoden::TankGame::Direction::Enumeration FindDirection(std::pair<int, int> start_pos, std::pair<int, int> target_pos); 
-
-    /**
-     * Is it possible to reach the square pos?
-     */
-    bool CanReachSquare(std::pair<int, int> pos);
-
-    /**
-     * How many steps are required to reach square pos?
-     */
-    int StepsToSquare(std::pair<int, int> pos);
+    Consoden::TankGame::Direction::Enumeration FindDirection(std::pair<int, int> start_pos, std::pair<int, int> target_pos);
 
     /**
      * For debugging assistance, prints out the parsed map

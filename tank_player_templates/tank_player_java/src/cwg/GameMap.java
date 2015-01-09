@@ -9,9 +9,9 @@ package cwg;
 
 import java.util.Calendar;
 
+//Contains helper methods for reading a GameState and moving around in the game.
 class GameMap {
-
-	private long startTime;
+	
 	private int tankId;
 	private consoden.tankgame.GameState gameState;
 	private Calendar startOfDay;
@@ -21,9 +21,8 @@ class GameMap {
 	private byte coin=(byte)'$';
 	private byte poison=(byte)'p';
 	
-	
-	public GameMap(int tankId, consoden.tankgame.GameState gameState) {
-		this.startTime=System.nanoTime();
+	//Constructor, creates a new GameMap from a GameState.
+	public GameMap(int tankId, consoden.tankgame.GameState gameState) {		
 		this.tankId=tankId;
 		this.gameState=gameState;
 		
@@ -35,23 +34,23 @@ class GameMap {
 		startOfDay.set(year, month, date);
 	}
 	
-	//X size of game field
+	//X size of game field.
 	public int getSizeX() {
 		return gameState.width().getVal();
 	}
 	
-	//Y size of game field
+	//Y size of game field.
 	public int getSizeY() {
 		return gameState.height().getVal();
 	}
 	
-	//Own tank position
+	//Own tank position.
 	public Position getOwnPosition() {
 		return new Position(gameState.tanks().get(tankId).getObj().posX().getVal(),
 				gameState.tanks().get(tankId).getObj().posY().getVal());
 	}
 
-	//Enemy tank position
+	//Enemy tank position.
 	public Position getEnemyPosition() {
 		int id=(tankId+1)%2;
 		return new Position(gameState.tanks().get(id).getObj().posX().getVal(),
@@ -112,11 +111,7 @@ class GameMap {
 		return new Position(p.x, p.y);
 	}
 	
-	//Milliseconds elapsed since creation of this instance
-	public long getElapsedTime() {
-		return (System.nanoTime()-startTime)/1000000;
-	}
-	
+	//Milliseconds left until the joystick will be readout next time.
 	public long timeToNextMove() {
 		long time=Calendar.getInstance().getTimeInMillis()-startOfDay.getTimeInMillis();
 		return gameState.nextMove().getVal().longValue()-time;
