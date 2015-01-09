@@ -103,14 +103,6 @@ namespace tank_player_cs
 						joystick.Counter.Val = joystickCounter++;
 						connection.SetAll (joystick, myJoystickId, myHandlerId);
 						logic = new TankLogic (myTankId, UpdateJoystick);
-						try
-						{
-						    logic.MakeMove (gameState);
-					    }
-					    catch
-					    {
-					        Console.WriteLine("Caught unhandled exception in TankLogic!");
-					    }
 						break;
 					}
 				}

@@ -43,7 +43,6 @@ namespace tank_player_cs
 			Bfs bfs=new Bfs(gameState, gm.OwnPosition); //breadth first search
 			Consoden.TankGame.Direction.Enumeration moveDirection = Consoden.TankGame.Direction.Enumeration.Neutral;
 
-
 			if (bfs.CanReachSquare (gm.EnemyPosition)) { //if we can reach the enemy, get him
 				moveDirection = bfs.BacktrackFromSquare (gm.EnemyPosition);
 			} 

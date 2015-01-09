@@ -103,14 +103,6 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
     					joystick.counter().setVal(joystickCounter++);
     					dobConnection.setAll(joystick, myJoystickId, myHandlerId);
     					logic=new TankLogic(myTankId, this);
-    					
-    					try {
-    					    logic.makeMove(gameState);
-					    } 
-					    catch (java.lang.Exception e) {
-    					    System.out.println("Caught unhandled exception in TankLogic!");
-					    }
-
     					break;
     				}
     			}

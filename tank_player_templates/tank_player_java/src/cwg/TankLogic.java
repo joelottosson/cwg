@@ -35,8 +35,8 @@ class TankLogic {
 		//Remove it and write your own brilliant version!
 		//-------------------------------------------------------
 	    GameMap gm=new GameMap(tankId, gameState); //helper object
-	    Bfs bfs=new Bfs(gameState, gm.getOwnPosition());
-
+	    Bfs bfs=new Bfs(gameState, gm.getOwnPosition());	    
+	    
 		Position currentPosition = gm.getOwnPosition(); //this is our current tank position
 		Position enemyPosition = gm.getEnemyPosition(); //this is the enemy tank position
 		
