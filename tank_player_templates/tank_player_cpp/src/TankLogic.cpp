@@ -23,35 +23,16 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     auto currentPosition=gm.OwnPosition();
     auto enemyPosition=gm.EnemyPosition();
     BfsHelper bfs(gameState, currentPosition);
-    Consoden::TankGame::Direction::Enumeration moveDirection;
+    Consoden::TankGame::Direction::Enumeration moveDirection=m_move;
 
-    if (bfs.CanReachSquare(enemyPosition)) {
-        // It is possible to move all the way to the enemy, do it
-        moveDirection=bfs.FindDirection(currentPosition, bfs.BacktrackFromSquare(enemyPosition));
+    bool dropMine=m_dropMine;
+    m_dropMine=false;
+    if (m_move==Consoden::TankGame::Direction::Left)
+    {
+        m_move=Consoden::TankGame::Direction::Down;
+        if (m_ownTankId==1)
+            m_dropMine=true;
 
-    } else {
-        //Find an empty sqaure we can move to, otherwise move downwards
-        moveDirection=Consoden::TankGame::Direction::Neutral;
-        if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Left)) &&
-            !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Left)))
-        {
-            moveDirection=Consoden::TankGame::Direction::Left;
-        }
-        else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Right)) &&
-                 !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Right)))
-        {
-            moveDirection=Consoden::TankGame::Direction::Right;
-        }
-        else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Up)) &&
-                 !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Up)))
-        {
-            moveDirection=Consoden::TankGame::Direction::Up;
-        }
-        else if (!gm.IsWall(gm.Move(currentPosition, Consoden::TankGame::Direction::Down)) &&
-                 !gm.IsMine(gm.Move(currentPosition, Consoden::TankGame::Direction::Down)))
-        {
-            moveDirection=Consoden::TankGame::Direction::Down;
-        }
     }
 
     //Advanced tower aim stategy
@@ -60,8 +41,7 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     //Of course we always want to fire
     bool fire=true;
 
-    //Sometimes we also drop a mine
-    bool dropMine=(static_cast<int>(gameState->ElapsedTime().GetVal()) % 3)==0;
+
 
     //Move our joystick.
     SetJoystick(moveDirection, towerDirection, fire, dropMine);
