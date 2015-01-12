@@ -214,23 +214,6 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
                 m_matchState.gameState.coins.clear();
                 m_matchState.gameState.coins.insert(m_matchState.gameState.coins.begin(), boardParser.Coins().begin(), boardParser.Coins().end());
 
-                //WHY DOES THIS NOT WORK??
-//                //remove
-//                std::remove_if(m_sprites.begin(),
-//                               m_sprites.end(),
-//                               [&](const Sprite& sprite)
-//                {
-//                    if (sprite.Data()==&m_coin) //we only compare to coins sprites
-//                    {
-//                        auto it=std::find_if(m_matchState.gameState.coins.begin(),
-//                                     m_matchState.gameState.coins.end(),
-//                                     [&](const QPointF& p){return sprite.Position()==p;});
-
-//                        return it==m_matchState.gameState.coins.end();
-//                    }
-//                   return false;
-//                });
-
                 for (auto spriteIt=m_sprites.begin(); spriteIt!=m_sprites.end();)
                 {
                     bool remove=true;
