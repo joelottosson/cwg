@@ -214,21 +214,30 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
                 m_matchState.gameState.coins.clear();
                 m_matchState.gameState.coins.insert(m_matchState.gameState.coins.begin(), boardParser.Coins().begin(), boardParser.Coins().end());
 
-                //remove
-                std::remove_if(m_sprites.begin(),
-                               m_sprites.end(),
-                               [&](const Sprite& sprite)
+                for (auto spriteIt=m_sprites.begin(); spriteIt!=m_sprites.end();)
                 {
-                    if (sprite.Data()==&m_coin) //we only compare to coins sprites
+                    bool remove=true;
+                    if (spriteIt->Data()==&m_coin)
                     {
-                        auto it=std::find_if(m_matchState.gameState.coins.begin(),
-                                     m_matchState.gameState.coins.end(),
-                                     [&](const QPointF& p){return sprite.Position()==p;});
-
-                        return it==m_matchState.gameState.coins.end();
+                        for (auto& coin : m_matchState.gameState.coins)
+                        {
+                            if (coin==spriteIt->Position())
+                            {
+                                remove=false;
+                                break;
+                            }
+                        }
                     }
-                   return false;
-                });
+
+                    if (remove)
+                    {
+                        spriteIt=m_sprites.erase(spriteIt);
+                    }
+                    else
+                    {
+                        ++spriteIt;
+                    }
+                }
 
                 //play sound
                 m_tookCoinMediaPlayer.stop();

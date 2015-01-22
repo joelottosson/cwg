@@ -9,12 +9,14 @@ using System;
 
 namespace tank_player_cs
 {
+	//Contains helper methods for reading a GameState and moving around in the game.
 	class GameMap
 	{
 		private int tankId;
 		private Consoden.TankGame.GameState gameState;
 		private DateTime startOfDay = new DateTime (DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
 
+		//Constructor, creates a new GameMap from a GameState.
 		public GameMap (int tankId, Consoden.TankGame.GameState gameState)
 		{
 			this.tankId=tankId;
@@ -107,7 +109,7 @@ namespace tank_player_cs
 			}
 		}
 
-		//Time left until the joystick will be readout next time.
+		//Milliseconds left until the joystick will be readout next time.
 		public int TimeToNextMove()
 		{
 			TimeSpan elapsedToday = DateTime.Now - startOfDay;

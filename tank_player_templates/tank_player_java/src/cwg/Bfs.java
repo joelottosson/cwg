@@ -145,16 +145,11 @@ class Bfs {
 		boolean isEmpty= next==empty || next==coin || next==poison;
 		if (isEmpty) 
 		{
-			if (steps < gamePaths[nextPos.x][nextPos.y]) {
-				System.out.println(nextPos.toString()+" evaluated step: "+steps);
+			if (steps < gamePaths[nextPos.x][nextPos.y]) {				
 				gamePaths[nextPos.x][nextPos.y] = steps;
 				evaluateShortestPaths(nextPos, steps+1);                
 			}
-		}
-		else
-		{
-			System.out.println(nextPos.toString()+" not empty: "+(char)next);
-		}
+		}		
 	}
 
 	private void evaluateShortestPaths(Position pos, int steps) {

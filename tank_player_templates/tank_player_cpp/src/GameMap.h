@@ -22,6 +22,9 @@ class GameMap
 {
 public:
 
+    /**
+     * Constructor, creates a new GameMap from a GameState.
+     */
     GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr);
 
     /**
@@ -31,12 +34,12 @@ public:
     int SizeY() const {return m_sizeY;}
 
     /**
-     * Location of the players tank
+     * Location of the players tank.
      */
     std::pair<int, int> OwnPosition() const {return m_ownPos;}
 
     /**
-     * Location of the enemys tank
+     * Location of the enemys tank.
      */
     std::pair<int, int> EnemyPosition() const {return m_enemyPos;}
 

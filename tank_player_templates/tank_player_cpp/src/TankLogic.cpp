@@ -28,7 +28,6 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     if (bfs.CanReachSquare(enemyPosition)) {
         // It is possible to move all the way to the enemy, do it
         moveDirection=bfs.FindDirection(currentPosition, bfs.BacktrackFromSquare(enemyPosition));
-        std::cout << "Move to enemy, distance " << bfs.StepsToSquare(enemyPosition) << std::endl;
 
     } else {
         //Find an empty sqaure we can move to, otherwise move downwards
