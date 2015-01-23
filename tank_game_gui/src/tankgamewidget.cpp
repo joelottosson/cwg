@@ -173,6 +173,16 @@ void TankGameWidget::PaintMines(QPainter& painter)
     }
 }
 
+int TankGameWidget::CalculateWrappingCoordinate(int val, int maxVal, int boardSize)
+{
+    if (val<0)
+        return val+boardSize;
+    else if (val>maxVal)
+        return val-boardSize;
+    else
+        return val;
+}
+
 void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painter)
 {
     if (tank.explosion==Destroyed)
@@ -206,8 +216,11 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 
         if (tank.isWrapping)
         {
-            const int wrapX=(x+m_const.boardPixelSizeInt.x())%m_const.boardPixelSizeInt.x();
-            const int wrapY=(y+m_const.boardPixelSizeInt.y())%m_const.boardPixelSizeInt.y();
+            const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-tankImage.width(), m_const.boardPixelSizeInt.x());
+            const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-tankImage.height(), m_const.boardPixelSizeInt.y());
+
+            //const int wrapX=(x+m_const.boardPixelSizeInt.x())%m_const.boardPixelSizeInt.x();
+            //const int wrapY=(y+m_const.boardPixelSizeInt.y())%m_const.boardPixelSizeInt.y();
             painter.save();
             painter.translate(wrapX+tankImage.width()/2, wrapY+tankImage.height()/2);
             painter.rotate(DirectionToAngle(tank.moveDirection));
@@ -232,8 +245,11 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 
         if (tank.isWrapping)
         {
-            const int wrapX=(x+m_const.boardPixelSizeInt.x())%m_const.boardPixelSizeInt.x();
-            const int wrapY=(y+m_const.boardPixelSizeInt.y())%m_const.boardPixelSizeInt.y();
+            const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-m_tankTower.width(), m_const.boardPixelSizeInt.x());
+            const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-m_tankTower.height(), m_const.boardPixelSizeInt.y());
+
+            //const int wrapX=(x+m_const.boardPixelSizeInt.x())%m_const.boardPixelSizeInt.x();
+            //const int wrapY=(y+m_const.boardPixelSizeInt.y())%m_const.boardPixelSizeInt.y();
             painter.save();
             painter.translate(wrapX+m_tankTower.width()/2, wrapY+m_tankTower.height()/2);
             painter.rotate(tank.paintTowerAngle);

@@ -54,6 +54,8 @@ private:
         return QPointF(p.x()*m_const.squarePixelSize+xOffset, p.y()*m_const.squarePixelSize+yOffset);
     }
 
+    int CalculateWrappingCoordinate(int val, int maxVal, int boardSize);
+
     void PaintGrid(QPainter& painter);
     void PaintWalls(QPainter& painter);
     void PaintPoison(QPainter& painter);
