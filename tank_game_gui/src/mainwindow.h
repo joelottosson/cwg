@@ -63,7 +63,7 @@ class MainWindow : public QMainWindow,
     Q_OBJECT
     
 public:
-    explicit MainWindow(int updateFrequency, QWidget *parent = 0);
+    explicit MainWindow(int updateFrequency, bool soundEnalbed, QWidget *parent = 0);
     ~MainWindow();
 
     virtual bool eventFilter(QObject* o, QEvent* e);

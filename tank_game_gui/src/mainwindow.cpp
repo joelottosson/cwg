@@ -12,12 +12,12 @@
 #include "ui_mainwindow.h"
 #include "boardparser.h"
 
-MainWindow::MainWindow(int updateFrequency, QWidget *parent)
+MainWindow::MainWindow(int updateFrequency, bool soundEnalbed, QWidget *parent)
     :QMainWindow(parent)
     ,ui(new Ui::MainWindow)
     ,m_updateInterval(1000/updateFrequency) //hz
     ,m_tankGameWidget(NULL)
-    ,m_world(m_updateInterval)
+    ,m_world(m_updateInterval, soundEnalbed)
     ,m_dispatchEvent(static_cast<QEvent::Type>(QEvent::User+666))
     ,m_conThread(&m_dobConnection, this, this, 0)
     ,m_updateTimer(this)

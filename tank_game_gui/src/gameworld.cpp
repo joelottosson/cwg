@@ -27,10 +27,11 @@ namespace
     }
 }
 
-GameWorld::GameWorld(int updateInterval)
+GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     :m_matchState()
     ,m_players()
     ,m_animationUpdateInterval(updateInterval)
+    ,m_soundEnabled(soundEnabled)
     ,m_moveSpeed(0)
     ,m_towerSpeed(0)
     ,m_lastAnimationUpdate(0)
@@ -44,7 +45,10 @@ GameWorld::GameWorld(int updateInterval)
     ,m_tookCoinMediaPlayer()
     ,m_wilhelmScreamMediaPlayer()
 {
-    InitMediaPlayers();
+    if (m_soundEnabled)
+    {
+        InitMediaPlayers();
+    }
 
     //load sprite images
     m_explosion.image=QPixmap(":/images/explosion_sheet.png");
@@ -240,8 +244,11 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
                 }
 
                 //play sound
-                m_tookCoinMediaPlayer.stop();
-                m_tookCoinMediaPlayer.play();
+                if (m_soundEnabled)
+                {
+                    m_tookCoinMediaPlayer.stop();
+                    m_tookCoinMediaPlayer.play();
+                }
             }));
         }
     }
@@ -258,8 +265,11 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
             m_matchState.gameState.poison.clear();
             m_matchState.gameState.poison.insert(m_matchState.gameState.poison.begin(), boardParser.Poison().begin(), boardParser.Poison().end());
             //play sound
-            m_wilhelmScreamMediaPlayer.stop();
-            m_wilhelmScreamMediaPlayer.play();
+            if (m_soundEnabled)
+            {
+                m_wilhelmScreamMediaPlayer.stop();
+                m_wilhelmScreamMediaPlayer.play();
+            }
         }));
     }
 }
@@ -590,25 +600,28 @@ void GameWorld::Update()
                 tank.explosion=Destroyed;
             }));
 
-            auto tankPlayerId=tank.playerId;
-            m_eventQueue.insert(WorldEvents::value_type(now+timeToNextUpdate, [=]
+            if (m_soundEnabled)
             {
-                auto p1=GetPlayerOne();
-                if (!p1)
+                auto tankPlayerId=tank.playerId;
+                m_eventQueue.insert(WorldEvents::value_type(now+timeToNextUpdate, [=]
                 {
-                    return;
-                }
-                else if (p1->id==tankPlayerId)
-                {
-                    m_explosionMediaPlayer1.stop();
-                    m_explosionMediaPlayer1.play();
-                }
-                else
-                {
-                    m_explosionMediaPlayer2.stop();
-                    m_explosionMediaPlayer2.play();
-                }
-            }));
+                    auto p1=GetPlayerOne();
+                    if (!p1)
+                    {
+                        return;
+                    }
+                    else if (p1->id==tankPlayerId)
+                    {
+                        m_explosionMediaPlayer1.stop();
+                        m_explosionMediaPlayer1.play();
+                    }
+                    else
+                    {
+                        m_explosionMediaPlayer2.stop();
+                        m_explosionMediaPlayer2.play();
+                    }
+                }));
+            }
         }
     }
 
@@ -646,25 +659,28 @@ void GameWorld::Update()
             m_sprites.push_back(Sprite(m_tankFire, firePos, animationMoveSpeed, DirectionToAngle(missile.moveDirection), nextUpdate, 1));
             missile.paintFire=false;
 
-            qint64 missilePlayerId=m_matchState.gameState.tanks[missile.tankId].playerId;
-            m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [=]
+            if (m_soundEnabled)
             {
-                auto p1=GetPlayerOne();
-                if (!p1)
+                qint64 missilePlayerId=m_matchState.gameState.tanks[missile.tankId].playerId;
+                m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [=]
                 {
-                    return;
-                }
-                else if (p1->id==missilePlayerId)
-                {
-                    m_fireMediaPlayer1.stop();
-                    m_fireMediaPlayer1.play();
-                }
-                else
-                {
-                    m_fireMediaPlayer2.stop();
-                    m_fireMediaPlayer2.play();
-                }
-            }));
+                    auto p1=GetPlayerOne();
+                    if (!p1)
+                    {
+                        return;
+                    }
+                    else if (p1->id==missilePlayerId)
+                    {
+                        m_fireMediaPlayer1.stop();
+                        m_fireMediaPlayer1.play();
+                    }
+                    else
+                    {
+                        m_fireMediaPlayer2.stop();
+                        m_fireMediaPlayer2.play();
+                    }
+                }));
+            }
         }
 
         if (missile.explosion==SetInFlames)
@@ -674,25 +690,28 @@ void GameWorld::Update()
             m_sprites.push_back(Sprite(m_explosion, missile.position, nextUpdate, 1));
             missile.explosion=Burning;
 
-            qint64 missilePlayerId=m_matchState.gameState.tanks[missile.tankId].playerId;
-            m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [=]
+            if (m_soundEnabled)
             {
-                auto p1=GetPlayerOne();
-                if (!p1)
+                qint64 missilePlayerId=m_matchState.gameState.tanks[missile.tankId].playerId;
+                m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [=]
                 {
-                    return;
-                }
-                else if (p1->id==missilePlayerId)
-                {
-                    m_explosionMediaPlayer1.stop();
-                    m_explosionMediaPlayer1.play();
-                }
-                else
-                {
-                    m_explosionMediaPlayer2.stop();
-                    m_explosionMediaPlayer2.play();
-                }
-            }));
+                    auto p1=GetPlayerOne();
+                    if (!p1)
+                    {
+                        return;
+                    }
+                    else if (p1->id==missilePlayerId)
+                    {
+                        m_explosionMediaPlayer1.stop();
+                        m_explosionMediaPlayer1.play();
+                    }
+                    else
+                    {
+                        m_explosionMediaPlayer2.stop();
+                        m_explosionMediaPlayer2.play();
+                    }
+                }));
+            }
         }
     }
 

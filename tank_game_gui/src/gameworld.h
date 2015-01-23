@@ -26,7 +26,7 @@
 class GameWorld
 {
 public:
-    GameWorld(int updateInterval);
+    GameWorld(int updateInterval, bool soundEnabled);
 
     void Clear();
     void ClearGameState();
@@ -69,6 +69,7 @@ private:
     MatchState m_matchState;
     PlayerMap m_players;
     const int m_animationUpdateInterval;
+    const bool m_soundEnabled;
     qreal m_moveSpeed; //game speed, 1 square per second
     qreal m_towerSpeed;
     qint64 m_lastAnimationUpdate;
