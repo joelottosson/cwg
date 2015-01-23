@@ -78,6 +78,7 @@ struct Tank
     QPointF paintPosition;
     qreal paintTankAngle;
     qreal paintTowerAngle;
+    bool isWrapping;
 
     Tank(QPointF pos, Direction direction)
         :playerId(0)
@@ -90,6 +91,7 @@ struct Tank
         ,paintPosition(pos)
         ,paintTankAngle(DirectionToAngle(direction))
         ,paintTowerAngle(DirectionToAngle(direction))
+        ,isWrapping(false)
     {
     }
 };

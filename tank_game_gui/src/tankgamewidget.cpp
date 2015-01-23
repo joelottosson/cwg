@@ -33,7 +33,7 @@ void TankGameWidget::Reset()
     UpdatePaintConstants();
 
     m_backgroundPainter.reset();
-    m_backgroundPixmap.reset(new QPixmap(m_const.boardPixelSize.x()+2, m_const.boardPixelSize.y()+2));
+    m_backgroundPixmap.reset(new QPixmap(m_const.boardPixelSizeFloat.x()+2, m_const.boardPixelSizeFloat.y()+2));
     m_backgroundPixmap->fill(Qt::transparent);
     m_backgroundPainter.reset(new QPainter(m_backgroundPixmap.get()));
     m_backgroundPainter->setRenderHint(QPainter::Antialiasing);
@@ -43,20 +43,22 @@ void TankGameWidget::Reset()
 
 void TankGameWidget::UpdatePaintConstants()
 {
-    m_const.boardPixelSize.setX(m_const.squarePixelSize*m_world.GetGameState().size.x());
-    m_const.boardPixelSize.setY(m_const.squarePixelSize*m_world.GetGameState().size.y());
-    if (m_const.boardPixelSize.y()<height())
+    m_const.boardPixelSizeFloat.setX(m_const.squarePixelSize*m_world.GetGameState().size.x());
+    m_const.boardPixelSizeFloat.setY(m_const.squarePixelSize*m_world.GetGameState().size.y());
+    m_const.boardPixelSizeInt.setX(static_cast<int>(m_const.boardPixelSizeFloat.x()));
+    m_const.boardPixelSizeInt.setY(static_cast<int>(m_const.boardPixelSizeFloat.y()));
+    if (m_const.boardPixelSizeFloat.y()<height())
     {
         m_scale=1.0;
     }
     else
     {
         //perform auto scale
-        m_scale=(height()-10.0)/m_const.boardPixelSize.y();
+        m_scale=(height()-10.0)/m_const.boardPixelSizeFloat.y();
     }
 
-    m_const.upperLeft.setX(width()/2-(m_const.boardPixelSize.x()*m_scale)/2);
-    m_const.upperLeft.setY(height()/2-(m_const.boardPixelSize.y()*m_scale)/2);
+    m_const.upperLeft.setX(width()/2-(m_const.boardPixelSizeFloat.x()*m_scale)/2);
+    m_const.upperLeft.setY(height()/2-(m_const.boardPixelSizeFloat.y()*m_scale)/2);
 }
 
 void TankGameWidget::paintEvent(QPaintEvent*)
@@ -133,12 +135,12 @@ void TankGameWidget::PaintGrid(QPainter &painter)
     //horizontal
     for (int i=0; i<=m_world.GetGameState().size.y(); ++i)
     {
-        painter.drawLine(0, i*m_const.squarePixelSize, m_const.boardPixelSize.x(), i*m_const.squarePixelSize);
+        painter.drawLine(0, i*m_const.squarePixelSize, m_const.boardPixelSizeFloat.x(), i*m_const.squarePixelSize);
     }
     //vertical
     for (int i=0; i<=m_world.GetGameState().size.x(); ++i)
     {
-        painter.drawLine(i*m_const.squarePixelSize, 0, i*m_const.squarePixelSize, m_const.boardPixelSize.y());
+        painter.drawLine(i*m_const.squarePixelSize, 0, i*m_const.squarePixelSize, m_const.boardPixelSizeFloat.y());
     }
 }
 
@@ -199,8 +201,20 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
         painter.translate(x+tankImage.width()/2, y+tankImage.height()/2);
         painter.rotate(DirectionToAngle(tank.moveDirection));
         painter.translate(tankImage.width()/-2, tankImage.height()/-2);
-        painter.drawPixmap(0, 0, tankImage);
+        painter.drawPixmap(0, 0, tankImage);        
         painter.restore();
+
+        if (tank.isWrapping)
+        {
+            const int wrapX=(x+m_const.boardPixelSizeInt.x())%m_const.boardPixelSizeInt.x();
+            const int wrapY=(y+m_const.boardPixelSizeInt.y())%m_const.boardPixelSizeInt.y();
+            painter.save();
+            painter.translate(wrapX+tankImage.width()/2, wrapY+tankImage.height()/2);
+            painter.rotate(DirectionToAngle(tank.moveDirection));
+            painter.translate(tankImage.width()/-2, tankImage.height()/-2);
+            painter.drawPixmap(0, 0, tankImage);
+            painter.restore();
+        }
     }
 
     //tank tower
@@ -215,6 +229,18 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
         painter.translate(m_tankTower.width()/-2, tankImage.height()/-2);
         painter.drawPixmap(0, 0, m_tankTower);
         painter.restore();
+
+        if (tank.isWrapping)
+        {
+            const int wrapX=(x+m_const.boardPixelSizeInt.x())%m_const.boardPixelSizeInt.x();
+            const int wrapY=(y+m_const.boardPixelSizeInt.y())%m_const.boardPixelSizeInt.y();
+            painter.save();
+            painter.translate(wrapX+m_tankTower.width()/2, wrapY+m_tankTower.height()/2);
+            painter.rotate(tank.paintTowerAngle);
+            painter.translate(m_tankTower.width()/-2, tankImage.height()/-2);
+            painter.drawPixmap(0, 0, m_tankTower);
+            painter.restore();
+        }
     }
 }
 
@@ -270,7 +296,7 @@ void TankGameWidget::PaintText(const ScreenText& txt, QPainter& painter)
         int yPos=txt.Position().y();
         if (xPos<0) xPos=0;
         if (yPos<0) yPos=0;
-        QRect rect(xPos, yPos, m_const.boardPixelSize.x(), txt.FontSize());
+        QRect rect(xPos, yPos, m_const.boardPixelSizeFloat.x(), txt.FontSize());
         for (const QString& s : txt.Text())
         {
             painter.drawText(rect, Qt::AlignCenter, s);

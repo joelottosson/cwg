@@ -15,6 +15,12 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 {
     //TODO: implement your own tank logic and call SetJoystick
 
+    if (m_ownTankId==0)
+        SetJoystick(Consoden::TankGame::Direction::Up, Consoden::TankGame::Direction::Up, false, false);
+    else
+        SetJoystick(Consoden::TankGame::Direction::Down, Consoden::TankGame::Direction::Down, false, false);
+    return;
+
     //-------------------------------------------------------
     //Example of a stupid tank logic:
     //Remove it and write your own brilliant version!

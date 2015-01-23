@@ -42,7 +42,8 @@ private:
     struct PaintConstants
     {
         static const int squarePixelSize = 72;
-        QPointF boardPixelSize;
+        QPoint boardPixelSizeInt;
+        QPointF boardPixelSizeFloat;
         QPointF upperLeft;
     };
     PaintConstants m_const;

@@ -97,6 +97,9 @@ private:
     inline void UpdateCoins(const Board& board);
     inline void UpdatePoison(const Board& board);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
+    inline void UpdateTank(const Consoden::TankGame::TankPtr& tank);
+
+    inline void UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal);
 
     template <class T>
     inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item)
@@ -118,40 +121,40 @@ private:
             {
                 qreal prev=item.paintPosition.x();
                 item.paintPosition.setX(prev-movement);
-                if (item.paintPosition.x()<item.position.x())
-                {
-                    item.paintPosition=item.position;
-                }
+//                if (item.paintPosition.x()<item.position.x())
+//                {
+//                    item.paintPosition=item.position;
+//                }
             }
                 break;
             case RightHeading:
             {
                 qreal prev=item.paintPosition.x();
                 item.paintPosition.setX(prev+movement);
-                if (item.paintPosition.x()>item.position.x())
-                {
-                    item.paintPosition=item.position;
-                }
+//                if (item.paintPosition.x()>item.position.x())
+//                {
+//                    item.paintPosition=item.position;
+//                }
             }
                 break;
             case UpHeading:
             {
                 qreal prev=item.paintPosition.y();
                 item.paintPosition.setY(prev-movement);
-                if (item.paintPosition.y()<item.position.y())
-                {
-                    item.paintPosition=item.position;
-                }
+//                if (item.paintPosition.y()<item.position.y())
+//                {
+//                    item.paintPosition=item.position;
+//                }
             }
                 break;
             case DownHeading:
             {
                 qreal prev=item.paintPosition.y();
                 item.paintPosition.setY(prev+movement);
-                if (item.paintPosition.y()>item.position.y())
-                {
-                    item.paintPosition=item.position;
-                }
+//                if (item.paintPosition.y()>item.position.y())
+//                {
+//                    item.paintPosition=item.position;
+//                }
             }
                 break;
             case None:
