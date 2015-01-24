@@ -16,8 +16,7 @@ namespace tank_player_cs
 	//This class implements the tank logic.
 	class TankLogic
 	{
-		//TODO: Change to your team name
-		public const string PlayerName = "tank_consoden";
+		public const string PlayerName = "tank_player_csharp"; //TODO: Change to your team name
 
 		private int tankId;
 		private SetJoystick setJoystick;
