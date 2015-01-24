@@ -17,7 +17,7 @@ namespace tank_player_cs
 	class TankLogic
 	{
 		//TODO: Change to your team name
-		public const string PlayerName = "tank_player_csharp";
+		public const string PlayerName = "tank_consoden";
 
 		private int tankId;
 		private SetJoystick setJoystick;

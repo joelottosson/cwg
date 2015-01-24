@@ -28,21 +28,21 @@ namespace tank_player_cs
 		private int myTankId=-1;
 		private int joystickCounter=0;
 
-		public Player ()
+		public Player (string playerName)
 		{
 			//This players unique identifiers
-			myHandlerId = new HandlerId (TankLogic.PlayerName + "Handler");
-			myPlayerId = new InstanceId (TankLogic.PlayerName + "Instance");
+            myHandlerId = new HandlerId (playerName + "Handler");
+            myPlayerId = new InstanceId (playerName + "Instance");
 
 			// Open DOB connection. Register player and joystick, subscribe for gameStates
-			connection.Open (TankLogic.PlayerName, "", 0, this, this);
+            connection.Open (playerName, "", 0, this, this);
 			connection.RegisterEntityHandler (Consoden.TankGame.Player.ClassTypeId, myHandlerId, Safir.Dob.InstanceIdPolicy.Enumeration.HandlerDecidesInstanceId, this);
 			connection.RegisterEntityHandler (Consoden.TankGame.Joystick.ClassTypeId, myHandlerId, Safir.Dob.InstanceIdPolicy.Enumeration.HandlerDecidesInstanceId, this);
 			connection.SubscribeEntity (Consoden.TankGame.GameState.ClassTypeId, this);
 	        
 			//Create our player entity
 			Consoden.TankGame.Player player = new Consoden.TankGame.Player ();
-			player.Name.Val = TankLogic.PlayerName;	        
+            player.Name.Val = playerName;	        
 			connection.SetAll (player, myPlayerId, myHandlerId);
 
 			//Run the game player
@@ -173,7 +173,11 @@ namespace tank_player_cs
 
 		public static void Main (string[] args)
 		{
-			new Player();
+            string playerName = TankLogic.PlayerName;
+            if (args.Length > 0) {
+                playerName = args [0];
+            }
+            new Player(playerName);
 		}
 	}
 }

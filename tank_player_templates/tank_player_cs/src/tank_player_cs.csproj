@@ -8,7 +8,7 @@
     <ProjectGuid>{072AA65F-871E-4A3F-A4FC-225CB91FA09F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>tank_player_cs</RootNamespace>
-    <AssemblyName>tank_player_cs</AssemblyName>
+    <AssemblyName>tank_player_joel</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>

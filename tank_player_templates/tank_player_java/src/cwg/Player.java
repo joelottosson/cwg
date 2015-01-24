@@ -29,21 +29,21 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
     private TankLogic logic = null;
     private int joystickCounter = 0;
         
-    public Player() {
+    public Player(String playerName) {
     	//set up our unique id's
-        myHandlerId=new HandlerId(TankLogic.PLAYER_NAME+"Handler");
-        myPlayerId= new InstanceId(TankLogic.PLAYER_NAME+"Instance");
+        myHandlerId=new HandlerId(playerName+"Handler");
+        myPlayerId= new InstanceId(playerName+"Instance");
         
         //open DOB connection. Register player and joystick. Subscribe for gameStates.
         dobConnection = new com.saabgroup.safir.dob.Connection();
-        dobConnection.open(TankLogic.PLAYER_NAME, "", 0, this, this);
+        dobConnection.open(playerName, "", 0, this, this);
         dobConnection.registerEntityHandler(consoden.tankgame.Player.ClassTypeId, myHandlerId, com.saabgroup.safir.dob.InstanceIdPolicy.HANDLER_DECIDES_INSTANCE_ID, this);
         dobConnection.registerEntityHandler(consoden.tankgame.Joystick.ClassTypeId, myHandlerId, com.saabgroup.safir.dob.InstanceIdPolicy.HANDLER_DECIDES_INSTANCE_ID, this);
         dobConnection.subscribeEntity(consoden.tankgame.GameState.ClassTypeId, this);
         
         //create our player entity
         consoden.tankgame.Player player=new consoden.tankgame.Player();
-        player.name().setVal(TankLogic.PLAYER_NAME);
+        player.name().setVal(playerName);
         dobConnection.setAll(player, myPlayerId, myHandlerId);
 
         //run the game player
@@ -203,6 +203,11 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
 	}
 	
 	public static void main(String[] args) {
-        new Player();
+		String playerName=TankLogic.PLAYER_NAME;
+		if (args.length>0) {
+			playerName=args[0];
+		}
+		
+        new Player(playerName);
     }
 }
