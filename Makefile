@@ -20,8 +20,10 @@ backend: engine gui server
 
 #How do i stop !?
 start_backend: .FORCE
-	xterm -e sh init.sh &
-
+	$(TERM) -e sh init.sh &
+	
+start_complete: .FORCE
+	$(TERM) -e sh init-players.sh &
 
 	
 
