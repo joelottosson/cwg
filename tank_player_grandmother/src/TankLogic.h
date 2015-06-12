@@ -8,9 +8,14 @@
 #ifndef __TANK_LOGIC_H__
 #define __TANK_LOGIC_H__
 
+
 #include <boost/function.hpp>
 #include <Consoden/TankGame/GameState.h>
+#include <memory>
 #include "GameMap.h"
+
+#define TG Consoden::TankGame
+#define Dir Consoden::TankGame::Direction
 
 typedef boost::function<void(Consoden::TankGame::Direction::Enumeration,
                              Consoden::TankGame::Direction::Enumeration,
@@ -24,7 +29,7 @@ public:
      * Team or player name
      */
     static const std::wstring PlayerName;
-    GameMap gm;
+    boost::shared_ptr<GameMap> m_gm;
 
     /**
      * TankLogic A new instance is created every time a new game is started.
@@ -63,6 +68,16 @@ private:
     }
 
     Consoden::TankGame::Direction::Enumeration isInSight();
+
+    TG::Direction::Enumeration pickDirection(TG::Direction::Enumeration preffered_direction, TG::Direction::Enumeration ignore_direction,
+    		bool conservative, bool priorize_coin);
+
+    TG::Direction::Enumeration escape();
+    std::pair<int,int> posFromOffs(int x,int y,std::pair<int,int> pos);
+
+    bool aligned(TG::Direction::Enumeration a,TG::Direction::Enumeration b);
+
+    char* direction2String(Dir::Enumeration);
 
 };
 

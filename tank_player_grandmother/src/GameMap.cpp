@@ -66,6 +66,7 @@ bool GameMap::IsCoin(const std::pair<int, int>& pos) const
 bool GameMap::IsPoisonGas(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='p';
+	//return true;
 }
 
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const

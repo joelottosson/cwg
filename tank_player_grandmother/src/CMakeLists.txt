@@ -6,7 +6,7 @@ project(${proj_name} CXX)
 include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 if (NOT MSVC)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -std=c++0x")
 endif()
 
 file(GLOB headers *.h)
