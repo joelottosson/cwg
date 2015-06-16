@@ -166,6 +166,9 @@ void MatchStateMachine::CreateBoards()
     }
 }
 
+/*
+ * In itializes all the objects from the board :D
+ */
 Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::string &boardFile, bool reversedPlayers) const
 {
     std::vector<char> board;
@@ -209,6 +212,9 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank1->TookCoin()=false;
     tank1->HitPoisonGas()=false;
 
+
+
+
     cwg::TankPtr tank2=cwg::Tank::Create();
     tank2->TankId()=1;
     tank2->PlayerId()=game->PlayerTwoId();
@@ -246,6 +252,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
 
     game->Tanks()[0].SetPtr(tank1);
     game->Tanks()[1].SetPtr(tank2);
+
+
 
     return game;
 }

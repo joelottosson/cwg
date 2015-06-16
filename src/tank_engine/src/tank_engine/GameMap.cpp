@@ -65,6 +65,12 @@ namespace TankEngine
     {
         m_Game[pos_x][pos_y] = '.';
     }
+
+    //TODO:Crap added by me
+    void GameMap::DudeSquare(int pos_x, int pos_y)
+       {
+           m_Game[pos_x][pos_y] = 'd';
+       }
  
     bool GameMap::IsTankHit(int pos_x, int pos_y)
     {

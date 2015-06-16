@@ -22,6 +22,7 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     ,m_missile(":/images/missile.png")
     ,m_tankWreck(":/images/panzerIV_wreck.png")
     ,m_mine(":/images/mine.png")
+	,m_dudes(":/images/tux-anim.png")
     ,m_poison(":/images/poison.png")
 {
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
@@ -74,6 +75,8 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
     PaintPoison(painter);
 
+    //PaintDudes(painter);
+
     //Paint tanks
     int blueTank=true;
     for (auto& tank : m_world.GetGameState().tanks)
@@ -87,6 +90,12 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     {
         PaintSprite(s, painter);
     }
+
+    for (auto& s : m_world.DudeSprites())
+        {
+            PaintSprite(s, painter);
+        }
+
 
     //Paint missiles
     for (auto& vt : m_world.GetGameState().missiles)
@@ -163,6 +172,16 @@ void TankGameWidget::PaintPoison(QPainter& painter)
     {
         painter.drawPixmap(ToScreen(pos, 0, 0), m_poison);
     }
+}
+
+//TODO: Stuff added by me
+void TankGameWidget::PaintDudes(QPainter& painter)
+{
+/*    for (const auto& pos : m_world.GetGameState().dudes)
+    {
+    	//std::wcout << "I really should be printing stuff right now..." << std::endl;
+        painter.drawPixmap(ToScreen(pos, 0, 0), m_dudes);
+    }*/
 }
 
 void TankGameWidget::PaintMines(QPainter& painter)

@@ -36,6 +36,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_towerSpeed(0)
     ,m_lastAnimationUpdate(0)
     ,m_sprites()
+	,m_sprites_dude()
     ,m_explosion()
     ,m_tankFire()
     ,m_fireMediaPlayer1()
@@ -45,6 +46,9 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_tookCoinMediaPlayer()
     ,m_wilhelmScreamMediaPlayer()
 {
+	//TODO: This is horrible. Fix at some point
+	m_first = true;
+
     if (m_soundEnabled)
     {
         InitMediaPlayers();
@@ -71,6 +75,15 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     {
         m_coin.fragments.push_back(QRectF(i*72, 0, 72, 72));
     }
+
+    //TODO: reconisder this!
+    m_dude.image=QPixmap(":/images/tux-anim.png");
+	m_dude.lifeTime=500;
+	for (int i=0; i<3; ++i)
+	{
+		m_dude.fragments.push_back(QRectF(i*72, 0, 72, 72));
+	}
+
 }
 
 void GameWorld::Clear()
@@ -78,6 +91,7 @@ void GameWorld::Clear()
     m_matchState=MatchState();
     m_matchState.finished=true;
     m_sprites.clear();
+    m_sprites_dude.clear();
     m_screenText.clear();
 }
 
@@ -86,6 +100,7 @@ void GameWorld::ClearGameState()
     m_matchState.gameState=GameState();
     m_matchState.gameState.finished=true;
     m_sprites.clear();
+    m_sprites_dude.clear();
     m_screenText.clear();
 }
 
@@ -97,6 +112,7 @@ void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t 
     m_matchState.players[1]=match->PlayerTwoId().GetVal().GetRawValue();
     m_matchState.totalNumberOfGames=match->TotalNumberOfGames();
     m_sprites.clear();
+    m_sprites_dude.clear();
     m_screenText.clear();
     Update(match);
 
@@ -114,6 +130,7 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_matchState.gameState.gameId=id;
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
     m_sprites.clear();
+    m_sprites_dude.clear();
     m_screenText.clear();
 
     if (!game->GamePace().IsNull())
@@ -126,6 +143,10 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_matchState.gameState.size.setY(boardParser.GetYSize());
     m_matchState.gameState.walls.insert(m_matchState.gameState.walls.begin(), boardParser.Walls().begin(), boardParser.Walls().end());
     m_matchState.gameState.poison.insert(m_matchState.gameState.poison.begin(), boardParser.Poison().begin(), boardParser.Poison().end());
+
+    //TODO: Crap added by me
+    //m_matchState.gameState.dudes.insert(m_matchState.gameState.dudes.begin(), boardParser.Dudes().begin(), boardParser.Dudes().end());
+
 
     for (int i=0; i<game->TanksArraySize(); ++i)
     {
@@ -207,6 +228,7 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
             for (auto pos : m_matchState.gameState.coins)
             {
                 m_sprites.push_back(Sprite(m_coin, pos, QDateTime::currentMSecsSinceEpoch(), 0));
+            	m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
             }
         }
         else
@@ -273,6 +295,50 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
         }));
     }
 }
+
+//TODO: Crap added by meeeeeeee
+void  GameWorld::UpdateDudes(const Board& boardParser)
+{
+    //if (boardParser.Dudes().size()!=m_matchState.gameState.dudes.size()) //only updates when coins change?
+    //{
+        if (m_matchState.gameState.dudes.empty())
+        {
+            //first time after start, immediately place coins on board
+        	std::wcout << "Dude is in its empty so lets create a dude" << std::endl;
+        	std::vector<QPointF> positions;
+
+        	positions.insert(positions.begin() ,boardParser.Dudes().begin(), boardParser.Dudes().end());
+        	QPointF pos = positions.front();
+        	Dude dude;
+        	dude.moveDirection = Direction::RightHeading;
+        	dude.dying = false;
+        	dude.paintPosition = pos.QPointF();
+        	dude.position = pos.QPointF();
+
+        	m_matchState.gameState.dudes.insert(m_matchState.gameState.dudes.begin(), dude);
+
+
+            //m_matchState.gameState.dudes.
+            for (auto& dude : m_matchState.gameState.dudes)
+            {
+                //m_sprites.push_back(Sprite(m_dude, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
+
+            	dude.visible = true;
+                m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
+            }
+        }else{
+        	std::wcout << "time to make another dude of doom :D" << std::endl;
+        	std::wcout << "There are " << m_matchState.gameState.dudes.size() << " Lights!" << std::endl;
+            for (auto& dude : m_matchState.gameState.dudes)
+            {
+                //m_sprites.push_back(Sprite(m_dude, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
+            	std::wcout << "Dude is at: " << dude.position.x() <<","<< dude.position.y() <<
+            			" and its paint position is : "<< dude.paintPosition.x() <<","<< dude.paintPosition.y()<< std::endl;
+                m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
+            }
+        }
+}
+
 
 void GameWorld::UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal)
 {
@@ -415,6 +481,15 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
     }
 }
 
+
+/*s
+ *
+ * This function appears to do a lot of various updating
+ *
+ * In seems to do some of the graphical updating, though mostly for the objects using spites
+ *
+ * And some hit detection for some things
+ */
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 {
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
@@ -422,10 +497,21 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     m_matchState.gameState.mines.clear();
 
+
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
     UpdateCoins(boardParser);
+
+    //TODO: crap added by me
+    //Disable to enable animations
+    UpdateDudes(boardParser);
+
+    /*
+     * Well... lets try to get this dude on the road.
+     */
+
+
 
     //if hit poison gas square, play a terrible sound
     if (game->Tanks()[0].GetPtr()->HitPoisonGas().GetVal() || game->Tanks()[1].GetPtr()->HitPoisonGas().GetVal())
@@ -456,6 +542,9 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         }
     }
 
+
+
+    //creates and updates missiles
     for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
     {
         if (game->Missiles()[i].IsNull())
@@ -497,6 +586,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         }
     }
 
+    //Updates the tanks
     for (int i=0; i<game->TanksArraySize(); ++i)
     {
         if (!game->Tanks()[i].IsNull())
@@ -536,7 +626,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             {
 
             }
-
+            //TODO: Ask about no break!!
         default:
         {
             m_matchState.gameState.winnerPlayerId=0;
@@ -569,6 +659,9 @@ void GameWorld::Update(const Consoden::TankGame::JoystickConstPtr &joystick)
     js.towerDirection=ToDirection(joystick->TowerDirection());
 }
 
+/*
+ * Another update function which updates even more wierd stuff.
+ */
 void GameWorld::Update()
 {
     m_moveSpeed=1.0/static_cast<double>(m_matchState.gameState.pace); //square per millisec
@@ -583,6 +676,8 @@ void GameWorld::Update()
 
     HandleEventQueue(now);
 
+
+    //updates each tank.
     for (Tank& tank : m_matchState.gameState.tanks)
     {
         UpdatePosition(timeToNextUpdate, movement, tank);
@@ -625,6 +720,9 @@ void GameWorld::Update()
         }
     }
 
+    /**
+     * Appears to update the missiles
+     */
     for (auto& vt : m_matchState.gameState.missiles)
     {
         Missile& missile=vt.second;
@@ -683,6 +781,8 @@ void GameWorld::Update()
             }
         }
 
+
+
         if (missile.explosion==SetInFlames)
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
@@ -713,6 +813,22 @@ void GameWorld::Update()
                 }));
             }
         }
+    }
+
+
+    //TODO: UGLY HACK :D
+
+/*
+    *
+    *
+	* Lets try to update the little dude
+*/
+    for (auto& dude : m_matchState.gameState.dudes){
+
+    	dude.position.setX(dude.position.x()+movement),
+    	UpdatePosition(timeToNextUpdate, 1*movement, dude);
+//    	game->
+
     }
 
     for (auto it=m_sprites.begin(); it!=m_sprites.end();)
@@ -753,6 +869,7 @@ bool GameWorld::MatchFinished() const
             bool spriteFinished=sprite.Repetitions()==0 || sprite.Finished();
             if (!spriteFinished)
             {
+            	std::wcout << "We removed some sprajtz" << std::endl;
                 return false; //there are still sprites that will not run forever that has not finished
             }
         }

@@ -61,6 +61,7 @@ public:
     const GameState& GetGameState() const {return m_matchState.gameState;}
 
     const std::vector<Sprite>& Sprites() const {return m_sprites;}
+    const std::vector<Sprite>& DudeSprites() const {return m_sprites_dude;}
 
     void SetTextBig(const QStringList& lines);
     const std::vector<ScreenText>& ScreenTexts() const {return m_screenText;}
@@ -74,10 +75,15 @@ private:
     qreal m_towerSpeed;
     qint64 m_lastAnimationUpdate;
     std::vector<Sprite> m_sprites;
+    std::vector<Sprite> m_sprites_dude;
     SpriteData m_explosion;
     SpriteData m_tankFire;
     SpriteData m_coin;
+    SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
+
+    //TODO: This is horrible. There must be a better way.
+    bool m_first;
 
     typedef std::multimap<qint64, boost::function<void()> > WorldEvents;
     WorldEvents m_eventQueue;
@@ -99,6 +105,9 @@ private:
     inline void UpdatePoison(const Board& board);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
     inline void UpdateTank(const Consoden::TankGame::TankPtr& tank);
+
+    inline void UpdateDudes(const Board& board);
+
 
     inline void UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal);
 

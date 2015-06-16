@@ -103,7 +103,7 @@ bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std
         for (size_t i=0; i<line.size(); ++i)
         {
             char c=line[i];
-            if (c=='.' || c=='o' || c=='$' || c=='p' || c=='x')
+            if (c=='.' || c=='o' || c=='$' || c=='p' || c=='x'|| c== 'd')
             {
                 continue;
             }

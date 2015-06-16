@@ -123,6 +123,21 @@ struct Player
 };
 typedef std::map<qint64 /*playerId*/, Player> PlayerMap;
 
+//************
+// Dude
+//************
+struct Dude
+{
+
+    QPointF position; //position of the dude
+    Direction moveDirection;
+    bool visible;
+    bool dying;
+    QPointF paintPosition;
+};
+typedef std::vector<Dude> DudeMap;
+
+
 //************************************
 // GameState
 //************************************
@@ -136,6 +151,7 @@ struct GameState
     PointVec mines{};
     PointVec coins{};
     PointVec poison{};
+    DudeMap dudes{};
     MissileMap missiles{};
     TankVec tanks{};
     JoystickMap joystics{};

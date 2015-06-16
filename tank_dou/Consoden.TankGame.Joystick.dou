@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Consoden.TankGame.Joystick</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+        <member>
+            <name>GameId</name>
+            <type>InstanceId</type>
+        </member>
+        <member>
+            <name>PlayerId</name>
+            <type>InstanceId</type>
+        </member>
+        <member>
+            <name>TankId</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>MoveDirection</name>
+            <type>Consoden.TankGame.Direction</type>
+        </member>
+        <member>
+            <name>TowerDirection</name>
+            <type>Consoden.TankGame.Direction</type>
+        </member>
+        <member>
+            <name>Fire</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <name>MineDrop</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <name>Counter</name>
+            <type>Int32</type>
+        </member>
+    </members>
+</class>
+
