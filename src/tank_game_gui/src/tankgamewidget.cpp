@@ -22,7 +22,8 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     ,m_missile(":/images/missile.png")
     ,m_tankWreck(":/images/panzerIV_wreck.png")
     ,m_mine(":/images/mine.png")
-	,m_dudes(":/images/tux-anim.png")
+	,m_dudes(":/images/tiny-tux.png")
+	,m_dead_dude(":/images/dead-tux.png")
     ,m_poison(":/images/poison.png")
 {
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
@@ -75,7 +76,11 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
     PaintPoison(painter);
 
-    //PaintDudes(painter);
+    if(m_world.GetGameState().dudes.size() == 0 ){
+    	std::wcout << "AINT GOT NO DUDES!" << std::endl;
+    }else{
+    	PaintDudes(m_world.GetGameState().dudes.front(), painter);
+    }
 
     //Paint tanks
     int blueTank=true;
@@ -90,12 +95,6 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     {
         PaintSprite(s, painter);
     }
-
-    for (auto& s : m_world.DudeSprites())
-        {
-            PaintSprite(s, painter);
-        }
-
 
     //Paint missiles
     for (auto& vt : m_world.GetGameState().missiles)
@@ -175,13 +174,26 @@ void TankGameWidget::PaintPoison(QPainter& painter)
 }
 
 //TODO: Stuff added by me
-void TankGameWidget::PaintDudes(QPainter& painter)
+void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 {
-/*    for (const auto& pos : m_world.GetGameState().dudes)
-    {
-    	//std::wcout << "I really should be printing stuff right now..." << std::endl;
-        painter.drawPixmap(ToScreen(pos, 0, 0), m_dudes);
-    }*/
+	if(!dude.dying){
+		const int xoffset=(m_const.squarePixelSize-m_dudes.width())/2;
+		const int yoffset=(m_const.squarePixelSize-m_dudes.height())/2;
+		const int x=xoffset+dude.paintPosition.x()*m_const.squarePixelSize;
+		const int y=yoffset+dude.paintPosition.y()*m_const.squarePixelSize;
+		painter.save();
+		painter.translate(x+m_dudes.width()/2, y+m_dudes.height()/2);
+		painter.translate(m_dudes.width()/-2, m_dudes.height()/-2);
+		painter.drawPixmap(0, 0, m_dudes);
+		painter.restore();
+	}else{
+		const int xoffset=(m_const.squarePixelSize-m_dudes.width())/2;
+		const int yoffset=(m_const.squarePixelSize-m_dudes.height())/2;
+		const int x=xoffset+dude.paintPosition.x()*m_const.squarePixelSize;
+		const int y=yoffset+dude.paintPosition.y()*m_const.squarePixelSize;
+		painter.drawPixmap(x,y,m_dead_dude);
+	}
+
 }
 
 void TankGameWidget::PaintMines(QPainter& painter)

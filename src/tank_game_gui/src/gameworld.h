@@ -105,6 +105,7 @@ private:
     inline void UpdatePoison(const Board& board);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
     inline void UpdateTank(const Consoden::TankGame::TankPtr& tank);
+    inline void UpdateDude(const Consoden::TankGame::DudePtr& dude);
 
     inline void UpdateDudes(const Board& board);
 

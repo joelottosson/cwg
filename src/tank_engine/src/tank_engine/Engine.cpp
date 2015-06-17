@@ -27,6 +27,8 @@
 
 #include "GameMap.h"
 
+namespace SDob = Safir::Dob::Typesystem;
+namespace CWG= Consoden::TankGame;
 namespace TankEngine
 {
     Engine::Engine(boost::asio::io_service& io) :
@@ -380,6 +382,11 @@ namespace TankEngine
         m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
     }
 
+
+
+    /*
+     * I think this actually is the game "logic"
+     */
     void Engine::Evaluate()
     {
         Consoden::TankGame::GameStatePtr game_ptr =
@@ -389,6 +396,54 @@ namespace TankEngine
 
         gm.MoveMissiles();
         bool tank_tank_collission = false;
+
+
+        //TODO: lets try to move the dudeinator
+        CWG::DudePtr dude_ptr = game_ptr->TheDude().GetPtr();
+        if(!dude_ptr->Dying()){
+			int dude_new_x = dude_ptr->PosX();
+			int dude_new_y = dude_ptr->PosY();
+
+
+			switch (rand()%4) {
+				case 0:
+					dude_ptr->Direction() = CWG::Direction::Up;
+					dude_new_y--;
+					break;
+				case 1:
+					dude_ptr->Direction() = CWG::Direction::Down;
+					dude_new_y++;
+					break;
+				case 2:
+					dude_ptr->Direction() = CWG::Direction::Left;
+					dude_new_x--;
+					break;
+				case 3:
+					dude_ptr->Direction() = CWG::Direction::Right;
+					dude_new_x++;
+					break;
+				default:
+					break;
+			}
+
+			//Lets skip mines and wrapping for now.
+			if(		gm.WallSquare(dude_new_x, dude_new_y)
+					|| dude_new_x < 0
+					|| dude_new_x >= game_ptr->Width()
+					|| dude_new_y < 0
+					|| dude_new_y >= game_ptr->Height()
+				){
+
+				dude_ptr->Direction() = CWG::Direction::Neutral;
+
+			}else{
+				dude_ptr->PosX() = dude_new_x;
+				dude_ptr->PosY() = dude_new_y;
+			}
+        }else{
+        	std::wcout << "Dude is no longer with us" << std::endl;
+        }
+
 
         // Move all tanks according to rules and evaluate resutls
 
@@ -657,6 +712,14 @@ namespace TankEngine
             if (gm.MineSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal())) {
                 tank_ptr->InFlames() = true;
                 tank_ptr->HitMine() = true;
+            }
+
+            // Killed the dude :'(
+            if (gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) && !dude_ptr->Dying()) {
+            	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
+                dude_ptr->Dying().SetVal(true);
+                AddPoints(-5, tank_ptr->TankId(), game_ptr);
+
             }
 
             // Hit by missile?

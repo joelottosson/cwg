@@ -134,6 +134,15 @@ struct Dude
     bool visible;
     bool dying;
     QPointF paintPosition;
+
+    Dude(QPointF position, Direction direction):
+    	position(position),
+		moveDirection(direction),
+    	visible(true),
+		dying(false),
+    	paintPosition(position)
+    {}
+
 };
 typedef std::vector<Dude> DudeMap;
 

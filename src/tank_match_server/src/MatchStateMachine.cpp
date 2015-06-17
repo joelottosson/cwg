@@ -167,15 +167,15 @@ void MatchStateMachine::CreateBoards()
 }
 
 /*
- * In itializes all the objects from the board :D
+ * In itializes all the entities from the board :D
  */
 Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::string &boardFile, bool reversedPlayers) const
 {
     std::vector<char> board;
-    Point tankPos1, tankPos2;
+    Point tankPos1, tankPos2, dudePos;
     int width, height;
 
-    if (!BoardHandler::FromFile(boardFile, width, height, board, tankPos1, tankPos2))
+    if (!BoardHandler::FromFile(boardFile, width, height, board, tankPos1, tankPos2, dudePos))
     {
         std::wcout<<L"Failed to read file "<<boardFile.c_str()<<std::endl;
         throw std::logic_error("Board file error");
@@ -199,6 +199,13 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     game->Survivor()=cwg::Winner::Unknown;
     game->Winner()=cwg::Winner::Unknown;
 
+    //Create the one and only dude
+    cwg::DudePtr dude = cwg::Dude::Create();
+    dude->PosX() = dudePos.x;
+    dude->PosY() = dudePos.y;
+    dude->Dying() = false;
+    dude->Direction() = cwg::Direction::Right;
+
     //create tanks
     cwg::TankPtr tank1=cwg::Tank::Create();
     tank1->TankId()=0;
@@ -211,7 +218,6 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank1->HitTank()=false;
     tank1->TookCoin()=false;
     tank1->HitPoisonGas()=false;
-
 
 
 
@@ -252,6 +258,7 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
 
     game->Tanks()[0].SetPtr(tank1);
     game->Tanks()[1].SetPtr(tank2);
+    game->TheDude().SetPtr(dude);
 
 
 

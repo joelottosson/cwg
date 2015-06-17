@@ -70,14 +70,16 @@ void BoardHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*
     std::wcout<<L"MatchServer: Revoed registration of TankGame.Boards"<<std::endl;
 }
 
-bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std::vector<char> &board, Point &tank1, Point &tank2)
+bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std::vector<char> &board, Point &tank1, Point &tank2, Point &dude)
 {
     xSize=0;
     ySize=0;
     board.clear();
-    tank1=Point();
-    tank2=Point();
+    tank1 = Point();
+    tank2 = Point();
+    dude = Point();
     int numberOfTanks=0;
+    bool hasDude = false;
 
     std::ifstream is;
     is.open(file.c_str());
@@ -103,7 +105,7 @@ bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std
         for (size_t i=0; i<line.size(); ++i)
         {
             char c=line[i];
-            if (c=='.' || c=='o' || c=='$' || c=='p' || c=='x'|| c== 'd')
+            if (c=='.' || c=='o' || c=='$' || c=='p' || c=='x')
             {
                 continue;
             }
@@ -114,10 +116,14 @@ bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std
                 tankRef.y=ySize;
                 line[i]='.'; //remove tank
                 ++numberOfTanks;
+            }else if(c=='d' && !hasDude){
+            	hasDude = true;
+            	dude.x = i;
+            	dude.y = ySize;
             }
             else
             {
-                std::wcout<<L"Invalid character: "<<c<<L", numTanks: "<<numberOfTanks<<std::endl;
+                std::wcout<<L"Invalid character: "<<c<<L", numTanks: "<<numberOfTanks<< " has dude ? " << hasDude << std::endl;
                 return false;
             }
         }
@@ -184,6 +190,14 @@ std::string BoardHandler::GenerateRandomFile()
         }
     }
 
+    while(true){
+    	int dude_start = rand()%size;
+    	if(board[dude_start] != 't'){
+    		board[dude_start] = 'd';
+    		break;
+    	}
+    }
+
     size_t index=0;
     for (int y=0; y<ySize; ++y)
     {
@@ -206,7 +220,8 @@ bool BoardHandler::ValidFile(const std::string &file) const
     std::vector<char> board;
     Point tank1;
     Point tank2;
-    return FromFile(file, x, y, board, tank1, tank2);
+    Point dude;
+    return FromFile(file, x, y, board, tank1, tank2, dude);
 }
 
 void BoardHandler::Refresh()

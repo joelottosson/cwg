@@ -7,6 +7,7 @@
 *******************************************************************************/
 #include "gameworld.h"
 
+namespace CWG = Consoden::TankGame;
 namespace
 {
     Direction ToDirection(const Safir::Dob::Typesystem::ContainerProxy<Consoden::TankGame::Direction::EnumerationContainer>& ec)
@@ -79,7 +80,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     //TODO: reconisder this!
     m_dude.image=QPixmap(":/images/tux-anim.png");
 	m_dude.lifeTime=500;
-	for (int i=0; i<3; ++i)
+	for (int i=0; i<4; ++i)
 	{
 		m_dude.fragments.push_back(QRectF(i*72, 0, 72, 72));
 	}
@@ -165,6 +166,10 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
             m_matchState.gameState.tanks.push_back(t);
         }
     }
+
+    CWG::DudePtr dude =  game->TheDude().GetPtr();
+    Dude d(QPointF(dude->PosX().GetVal(), dude->PosY().GetVal()), ToDirection(dude->Direction()));
+    m_matchState.gameState.dudes.push_back(d);
 
     if (game->Counter().GetVal()<=1)
     {
@@ -296,48 +301,24 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
     }
 }
 
+//void  GameWorld::UpdateDudes(const Board& boardParser){}
+
 //TODO: Crap added by meeeeeeee
 void  GameWorld::UpdateDudes(const Board& boardParser)
 {
-    //if (boardParser.Dudes().size()!=m_matchState.gameState.dudes.size()) //only updates when coins change?
-    //{
-        if (m_matchState.gameState.dudes.empty())
-        {
-            //first time after start, immediately place coins on board
-        	std::wcout << "Dude is in its empty so lets create a dude" << std::endl;
-        	std::vector<QPointF> positions;
 
-        	positions.insert(positions.begin() ,boardParser.Dudes().begin(), boardParser.Dudes().end());
-        	QPointF pos = positions.front();
-        	Dude dude;
-        	dude.moveDirection = Direction::RightHeading;
-        	dude.dying = false;
-        	dude.paintPosition = pos.QPointF();
-        	dude.position = pos.QPointF();
-
-        	m_matchState.gameState.dudes.insert(m_matchState.gameState.dudes.begin(), dude);
-
-
-            //m_matchState.gameState.dudes.
-            for (auto& dude : m_matchState.gameState.dudes)
-            {
-                //m_sprites.push_back(Sprite(m_dude, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
-
-            	dude.visible = true;
-                m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
-            }
-        }else{
-        	std::wcout << "time to make another dude of doom :D" << std::endl;
-        	std::wcout << "There are " << m_matchState.gameState.dudes.size() << " Lights!" << std::endl;
+        	//std::wcout << "There are " << m_matchState.gameState.dudes.size() << " Lights!" << std::endl;
             for (auto& dude : m_matchState.gameState.dudes)
             {
                 //m_sprites.push_back(Sprite(m_dude, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
             	std::wcout << "Dude is at: " << dude.position.x() <<","<< dude.position.y() <<
             			" and its paint position is : "<< dude.paintPosition.x() <<","<< dude.paintPosition.y()<< std::endl;
-                m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
+                //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
+            	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QPointF(1.0, 0), 5.0, QDateTime::currentMSecsSinceEpoch(), 0));
             }
-        }
+
 }
+
 
 
 void GameWorld::UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal)
@@ -373,6 +354,13 @@ void GameWorld::UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank
     }
 
     lastVal.isWrapping=false;
+}
+
+void GameWorld::UpdateDude(const Consoden::TankGame::DudePtr& dude){
+	Dude& d = m_matchState.gameState.dudes.front();
+	d.moveDirection = ToDirection(dude->Direction());
+
+
 }
 
 void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
@@ -482,16 +470,17 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
 }
 
 
-/*s
+/*
+ * Method updating all of the entities.
  *
- * This function appears to do a lot of various updating
+ * Gets called when the game state is updated (every second by default)
  *
- * In seems to do some of the graphical updating, though mostly for the objects using spites
- *
- * And some hit detection for some things
  */
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 {
+	std::wcout << "Called Update (GmeState)" << std::endl;
+
+
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
     m_matchState.gameState.elapsedTime=static_cast<int>(game->ElapsedTime().GetVal());
 
@@ -503,13 +492,26 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     UpdateCoins(boardParser);
 
+
     //TODO: crap added by me
-    //Disable to enable animations
-    UpdateDudes(boardParser);
+	UpdateDudes(boardParser);
+
 
     /*
      * Well... lets try to get this dude on the road.
      */
+    if(game->TheDude().IsNull()){
+    	std::wcout << "DUDE IS NULL" << std::endl;
+    }else{
+    	auto& dude_game = game->TheDude().GetPtr();
+    	auto& dude = m_matchState.gameState.dudes.front();
+    	dude.position.setX(dude_game->PosX());
+    	dude.position.setY(dude_game->PosY());
+    	dude.moveDirection = ToDirection(dude_game->Direction());
+    	dude.dying = dude_game->Dying();
+    }
+
+
 
 
 
@@ -661,6 +663,11 @@ void GameWorld::Update(const Consoden::TankGame::JoystickConstPtr &joystick)
 
 /*
  * Another update function which updates even more wierd stuff.
+ *
+ * Sorta looks like it only updates graphics but I don't know :/
+ *
+ * Apears to get called everytime the frame refreshes.
+ *
  */
 void GameWorld::Update()
 {
@@ -817,16 +824,41 @@ void GameWorld::Update()
 
 
     //TODO: UGLY HACK :D
-
-/*
-    *
-    *
-	* Lets try to update the little dude
-*/
+    //update of our dude
     for (auto& dude : m_matchState.gameState.dudes){
+    	//std::wcout << "LOOOK_WE_ARE_DOING_THINGS  " << std::endl;
+    	//dude.position.setX(dude.position.x()+movement),
+		//dude.position.setX(dude.position.x()+movement),
+    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
 
-    	dude.position.setX(dude.position.x()+movement),
-    	UpdatePosition(timeToNextUpdate, 1*movement, dude);
+
+
+        QPointF animationMoveSpeed(0,0);
+        switch(dude.moveDirection)
+        {
+        case LeftHeading:
+            animationMoveSpeed.setX(-1*m_moveSpeed);
+            //firePos.setX(firePos.x()+1);
+            break;
+        case RightHeading:
+            animationMoveSpeed.setX(m_moveSpeed);
+            //firePos.setX(firePos.x()-1);
+            break;
+        case UpHeading:
+            animationMoveSpeed.setY(-1*m_moveSpeed);
+            //firePos.setY(firePos.y()+1);
+            break;
+        case DownHeading:
+            animationMoveSpeed.setY(m_moveSpeed);
+            //firePos.setY(firePos.y()-1);
+            break;
+        case None:
+            break;
+        }
+    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, animationMoveSpeed, 0, now, 0));
+        UpdatePosition(timeToNextUpdate, 1*movement, dude);
+
+
 //    	game->
 
     }

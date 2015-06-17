@@ -35,6 +35,7 @@ private:
     QPixmap m_tankWreck;
     QPixmap m_mine;
     QPixmap m_dudes;
+    QPixmap m_dead_dude;
     QPixmap m_poison;
 
 
@@ -61,7 +62,7 @@ private:
     void PaintGrid(QPainter& painter);
     void PaintWalls(QPainter& painter);
     void PaintPoison(QPainter& painter);
-    void PaintDudes(QPainter& painter);
+    void PaintDudes(const Dude& dude, QPainter& painter);
     void PaintMines(QPainter& painter);
     void PaintTank(const Tank& tank, bool blue, QPainter& painter);
     void PaintMissile(const Missile& missile, QPainter& painter);

@@ -67,9 +67,9 @@ namespace TankEngine
     }
 
     //TODO:Crap added by me
-    void GameMap::DudeSquare(int pos_x, int pos_y)
+    bool GameMap::DudeSquare(int pos_x, int pos_y)
        {
-           m_Game[pos_x][pos_y] = 'd';
+           return pos_x == m_Game_ptr->TheDude().GetPtr()->PosX() && pos_y == m_Game_ptr->TheDude().GetPtr()->PosY();
        }
  
     bool GameMap::IsTankHit(int pos_x, int pos_y)
