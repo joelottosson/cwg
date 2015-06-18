@@ -475,6 +475,8 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
  *
  * Gets called when the game state is updated (every second by default)
  *
+ * Unfortunatley it might appear as if this function needs to match the behaviour of the function in Engine.cpp....whose name i have forgotten
+ *
  */
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 {
@@ -618,7 +620,9 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         {
             m_matchState.gameState.winnerPlayerId=game->PlayerTwoId().GetVal().GetRawValue();
         }
-            break;if (m_matchState.currentGameNumber==1 && m_matchState.finished)
+            break;
+            //TODO: Is this code dead !?
+            if (m_matchState.currentGameNumber==1 && m_matchState.finished)
             {
                 QStringList sl;
                 sl.append("Start new match");
@@ -628,7 +632,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             {
 
             }
-            //TODO: Ask about no break!!
+
         default:
         {
             m_matchState.gameState.winnerPlayerId=0;
@@ -687,7 +691,34 @@ void GameWorld::Update()
     //updates each tank.
     for (Tank& tank : m_matchState.gameState.tanks)
     {
-        UpdatePosition(timeToNextUpdate, movement, tank);
+    	//if(tank.explosion == SetInFlames){
+
+			if(tank.deathCause == tank.Death::HitWall){
+/*				switch (tank.moveDirection) {
+					case CWG::Direction::Up :
+						 y_compensate = -.5;
+						break;
+					case CWG::Direction::Down:
+						//tank.paintPosition.setY((double)(tank.paintPosition.y() - 0.5));
+						y_compensate = .5;
+						break;
+					case CWG::Direction::Left :
+						//tank.paintPosition.setX((double)(tank.paintPosition.x() + 0.5));
+						x_compensate = -.5;
+						break;
+					case CWG::Direction::Right:
+						//tank.paintPosition.setX((double)(tank.paintPosition.x() - 0.5));
+						x_compensate = .5;
+						break;
+					default:
+						break;
+				}*/
+				UpdatePosition(timeToNextUpdate, movement*0.5, tank);
+			}else{
+				UpdatePosition(timeToNextUpdate, movement, tank);
+			}
+
+
         UpdateTowerAngle(timeToNextUpdate, angle, tank);
         if (tank.explosion==SetInFlames)
         {
@@ -901,7 +932,7 @@ bool GameWorld::MatchFinished() const
             bool spriteFinished=sprite.Repetitions()==0 || sprite.Finished();
             if (!spriteFinished)
             {
-            	std::wcout << "We removed some sprajtz" << std::endl;
+            	// std::wcout << "We removed some sprajtz" << std::endl;
                 return false; //there are still sprites that will not run forever that has not finished
             }
         }

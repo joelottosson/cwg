@@ -10,6 +10,10 @@
 #include <qstyleoption.h>
 #include "tankgamewidget.h"
 
+namespace SDob = Safir::Dob::Typesystem;
+namespace CWG= Consoden::TankGame;
+
+
 TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     :QWidget(parent)
     ,m_world(world)
@@ -216,12 +220,14 @@ int TankGameWidget::CalculateWrappingCoordinate(int val, int maxVal, int boardSi
 
 void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painter)
 {
+
     if (tank.explosion==Destroyed)
     {
+
         const int xoffset=(m_const.squarePixelSize-m_tankWreck.width())/2;
         const int yoffset=(m_const.squarePixelSize-m_tankWreck.height())/2;
-        const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
-        const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
+        const int x=xoffset+(tank.paintPosition.x())*m_const.squarePixelSize;
+        const int y=yoffset+(tank.paintPosition.y())*m_const.squarePixelSize;
         painter.save();
         painter.translate(x+m_tankWreck.width()/2, y+m_tankWreck.height()/2);
         painter.rotate(DirectionToAngle(tank.moveDirection));

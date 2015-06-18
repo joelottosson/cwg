@@ -27,8 +27,7 @@
 
 #include "GameMap.h"
 
-namespace SDob = Safir::Dob::Typesystem;
-namespace CWG= Consoden::TankGame;
+
 namespace TankEngine
 {
     Engine::Engine(boost::asio::io_service& io) :
@@ -714,6 +713,8 @@ namespace TankEngine
                 tank_ptr->HitMine() = true;
             }
 
+            //TODO: dude detection
+
             // Killed the dude :'(
             if (gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) && !dude_ptr->Dying()) {
             	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
@@ -892,5 +893,14 @@ namespace TankEngine
             game_ptr->Winner().SetVal(Consoden::TankGame::Winner::Draw);
             std::cout << "The game is a draw." << std::endl;
         }
+    }
+
+    std::pair<int,int> Engine::WrappedPosition(std::pair<int,int> pos, CWG::Direction dir){
+
+    }
+
+    bool Engine::CollisionPredicter(CWG::Direction own_direction, std::pair<int,int> own_pos, CWG::Direction other_direction, std::pair<int,int> others_pos){
+
+    	return true;
     }
  };

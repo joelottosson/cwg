@@ -16,6 +16,9 @@
 #include "JoystickEntityHandler.h"
 #include "JoystickEngineIF.h"
 
+namespace SDob = Safir::Dob::Typesystem;
+namespace CWG= Consoden::TankGame;
+
 namespace TankEngine
 {
     class Engine :
@@ -60,6 +63,7 @@ namespace TankEngine
         void UpdateState();
         void Evaluate();
         void ScheduleMissileCleanup();
+        bool CollisionPredicter(CWG::Direction own_direction, std::pair<int,int> own_pos, CWG::Direction other_direction, std::pair<int,int> others_pos);
 
         std::string FindPlayerName(Safir::Dob::Typesystem::InstanceId playerId);
 
@@ -68,6 +72,7 @@ namespace TankEngine
         Consoden::TankGame::Winner::Enumeration TankIdToWinner(int tank_id) { if (tank_id == mPlayerOneTankId) { return Consoden::TankGame::Winner::PlayerOne; } else { return Consoden::TankGame::Winner::PlayerTwo; } }
         int  OpponentTankId(int tank_id) { if (tank_id == mPlayerOneTankId) { return mPlayerTwoTankId; } else { return mPlayerOneTankId; } }
 
+        std::pair<int,int> WrappedPosition(std::pair<int,int> pos, CWG::Direction dir);
 
         bool mGamePrepare;
         bool mGameRunning;
