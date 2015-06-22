@@ -203,9 +203,11 @@ void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
                                                                      dude.walking_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
-        painter.drawPixmapFragments(&pf, 1, dude.walking_sprite.image);
 
         dude.updateFramecounter(dude.walking_sprite);
+        painter.drawPixmapFragments(&pf, 1, dude.walking_sprite.image);
+
+
 		painter.restore();
 
 	}else{
@@ -214,9 +216,11 @@ void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
                                                                      dude.dead_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
-        painter.drawPixmapFragments(&pf, 1, dude.dead_sprite.image);
 
         dude.updateFramecounter(dude.dead_sprite);
+        painter.drawPixmapFragments(&pf, 1, dude.dead_sprite.image);
+
+
 		painter.restore();
 	}
 
