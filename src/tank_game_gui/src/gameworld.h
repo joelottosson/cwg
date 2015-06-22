@@ -96,6 +96,7 @@ private:
     QMediaPlayer m_explosionMediaPlayer2;
     QMediaPlayer m_tookCoinMediaPlayer;
     QMediaPlayer m_wilhelmScreamMediaPlayer;
+    QMediaPlayer m_dude_dies_MediaPlayer;
 
     void SetTextSmall(const QStringList& lines);
     void SetTextPlayer(int playerNumber, const QStringList& lines);

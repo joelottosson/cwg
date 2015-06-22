@@ -508,6 +508,11 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     	dude.position.setX(dude_game->PosX());
     	dude.position.setY(dude_game->PosY());
     	dude.moveDirection = ToDirection(dude_game->Direction());
+    	if(!dude.dying && dude_game->Dying().GetVal()){
+    		m_dude_dies_MediaPlayer.play();
+    	}else{
+    		m_dude_dies_MediaPlayer.stop();
+    	}
     	dude.dying = dude_game->Dying();
     }
 
@@ -972,6 +977,7 @@ void GameWorld::InitMediaPlayers()
     QString bigBombPath=QDir::cleanPath(path+QDir::separator()+"big_bomb.mp3");
     QString tookCoin=QDir::cleanPath(path+QDir::separator()+"coin.mp3");
     QString wilhelmScream=QDir::cleanPath(path+QDir::separator()+"wilhelm_scream.mp3");
+    QString death_of_dude=QDir::cleanPath(path+QDir::separator()+"dude-dies.mp3");
 
     m_fireMediaPlayer1.setMedia(QUrl::fromLocalFile(firePath));
     m_explosionMediaPlayer1.setMedia(QUrl::fromLocalFile(explostionPath));
@@ -979,6 +985,7 @@ void GameWorld::InitMediaPlayers()
     m_explosionMediaPlayer2.setMedia(QUrl::fromLocalFile(bigBombPath));
     m_tookCoinMediaPlayer.setMedia(QUrl::fromLocalFile(tookCoin));
     m_wilhelmScreamMediaPlayer.setMedia(QUrl::fromLocalFile(wilhelmScream));
+    m_dude_dies_MediaPlayer.setMedia(QUrl::fromLocalFile(death_of_dude));
 }
 
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)
