@@ -11,6 +11,8 @@
 #include <QWidget>
 #include "gameworld.h"
 #include "tankinfowidget.h"
+#include "sprite.h"
+
 
 class TankGameWidget : public QWidget
 {
@@ -37,6 +39,7 @@ private:
     QPixmap m_dudes;
     QPixmap m_dead_dude;
     QPixmap m_poison;
+    SpriteData m_dude_anim;
 
 
     boost::shared_ptr<QPixmap> m_backgroundPixmap;

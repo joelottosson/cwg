@@ -80,7 +80,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     //TODO: reconisder this!
     m_dude.image=QPixmap(":/images/tux-anim.png");
 	m_dude.lifeTime=500;
-	for (int i=0; i<4; ++i)
+	for (int i=0; i < 3; ++i)
 	{
 		m_dude.fragments.push_back(QRectF(i*72, 0, 72, 72));
 	}
@@ -306,16 +306,16 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
 //TODO: Crap added by meeeeeeee
 void  GameWorld::UpdateDudes(const Board& boardParser)
 {
-
+	return;
         	//std::wcout << "There are " << m_matchState.gameState.dudes.size() << " Lights!" << std::endl;
-            for (auto& dude : m_matchState.gameState.dudes)
-            {
+//            for (auto& dude : m_matchState.gameState.dudes)
+//            {
                 //m_sprites.push_back(Sprite(m_dude, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
-            	std::wcout << "Dude is at: " << dude.position.x() <<","<< dude.position.y() <<
-            			" and its paint position is : "<< dude.paintPosition.x() <<","<< dude.paintPosition.y()<< std::endl;
+            	//std::wcout << "Dude is at: " << dude.position.x() <<","<< dude.position.y() <<
+            	//		" and its paint position is : "<< dude.paintPosition.x() <<","<< dude.paintPosition.y()<< std::endl;
                 //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
             	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QPointF(1.0, 0), 5.0, QDateTime::currentMSecsSinceEpoch(), 0));
-            }
+//            }
 
 }
 
@@ -480,8 +480,6 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
  */
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 {
-	std::wcout << "Called Update (GmeState)" << std::endl;
-
 
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
     m_matchState.gameState.elapsedTime=static_cast<int>(game->ElapsedTime().GetVal());
@@ -622,7 +620,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         }
             break;
             //TODO: Is this code dead !?
-            if (m_matchState.currentGameNumber==1 && m_matchState.finished)
+            /*if (m_matchState.currentGameNumber==1 && m_matchState.finished)
             {
                 QStringList sl;
                 sl.append("Start new match");
@@ -631,7 +629,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             else if (m_matchState.finished)
             {
 
-            }
+            }*/
 
         default:
         {
@@ -666,11 +664,8 @@ void GameWorld::Update(const Consoden::TankGame::JoystickConstPtr &joystick)
 }
 
 /*
- * Another update function which updates even more wierd stuff.
  *
- * Sorta looks like it only updates graphics but I don't know :/
- *
- * Apears to get called everytime the frame refreshes.
+ * Does the graphical update part. Gets called every time the screen refreshes.
  *
  */
 void GameWorld::Update()
@@ -694,25 +689,7 @@ void GameWorld::Update()
     	//if(tank.explosion == SetInFlames){
 
 			if(tank.deathCause == tank.Death::HitWall){
-/*				switch (tank.moveDirection) {
-					case CWG::Direction::Up :
-						 y_compensate = -.5;
-						break;
-					case CWG::Direction::Down:
-						//tank.paintPosition.setY((double)(tank.paintPosition.y() - 0.5));
-						y_compensate = .5;
-						break;
-					case CWG::Direction::Left :
-						//tank.paintPosition.setX((double)(tank.paintPosition.x() + 0.5));
-						x_compensate = -.5;
-						break;
-					case CWG::Direction::Right:
-						//tank.paintPosition.setX((double)(tank.paintPosition.x() - 0.5));
-						x_compensate = .5;
-						break;
-					default:
-						break;
-				}*/
+
 				UpdatePosition(timeToNextUpdate, movement*0.5, tank);
 			}else{
 				UpdatePosition(timeToNextUpdate, movement, tank);
@@ -854,7 +831,7 @@ void GameWorld::Update()
     }
 
 
-    //TODO: UGLY HACK :D
+    //TODO:
     //update of our dude
     for (auto& dude : m_matchState.gameState.dudes){
     	//std::wcout << "LOOOK_WE_ARE_DOING_THINGS  " << std::endl;
@@ -869,24 +846,21 @@ void GameWorld::Update()
         {
         case LeftHeading:
             animationMoveSpeed.setX(-1*m_moveSpeed);
-            //firePos.setX(firePos.x()+1);
             break;
         case RightHeading:
             animationMoveSpeed.setX(m_moveSpeed);
-            //firePos.setX(firePos.x()-1);
             break;
         case UpHeading:
             animationMoveSpeed.setY(-1*m_moveSpeed);
-            //firePos.setY(firePos.y()+1);
             break;
         case DownHeading:
             animationMoveSpeed.setY(m_moveSpeed);
-            //firePos.setY(firePos.y()-1);
             break;
         case None:
             break;
         }
-    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, animationMoveSpeed, 0, now, 0));
+    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, animationMoveSpeed, 0, now, 1));
+        //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, now, 0,true));
         UpdatePosition(timeToNextUpdate, 1*movement, dude);
 
 
@@ -902,7 +876,9 @@ void GameWorld::Update()
         }
         else
         {
+
             it->Update();
+
             ++it;
         }
     }

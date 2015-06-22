@@ -8,6 +8,7 @@
 #include <boost/make_shared.hpp>
 #include <QtGui>
 #include <qstyleoption.h>
+#include "sprite.h"
 #include "tankgamewidget.h"
 
 namespace SDob = Safir::Dob::Typesystem;
@@ -30,8 +31,13 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
 	,m_dead_dude(":/images/dead-tux.png")
     ,m_poison(":/images/poison.png")
 {
+
+
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     Reset();
+
+
+
 }
 
 void TankGameWidget::Reset()
@@ -97,7 +103,9 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     //Paint sprites
     for (auto& s : m_world.Sprites())
     {
+
         PaintSprite(s, painter);
+        //s.killToggle();
     }
 
     //Paint missiles
@@ -178,24 +186,38 @@ void TankGameWidget::PaintPoison(QPainter& painter)
 }
 
 //TODO: Stuff added by me
+/*
+ * Draws and moves the dude.
+ *
+ * does the drawing without doing any animation or funny stuff :/
+ *
+ * gets called at every screen refresh
+ *
+ */
 void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 {
+
 	if(!dude.dying){
-		const int xoffset=(m_const.squarePixelSize-m_dudes.width())/2;
-		const int yoffset=(m_const.squarePixelSize-m_dudes.height())/2;
-		const int x=xoffset+dude.paintPosition.x()*m_const.squarePixelSize;
-		const int y=yoffset+dude.paintPosition.y()*m_const.squarePixelSize;
+
 		painter.save();
-		painter.translate(x+m_dudes.width()/2, y+m_dudes.height()/2);
-		painter.translate(m_dudes.width()/-2, m_dudes.height()/-2);
-		painter.drawPixmap(0, 0, m_dudes);
+
+        QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
+                                                                     dude.walking_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
+        painter.drawPixmapFragments(&pf, 1, dude.walking_sprite.image);
+
+        dude.updateFramecounter(dude.walking_sprite);
 		painter.restore();
+
 	}else{
-		const int xoffset=(m_const.squarePixelSize-m_dudes.width())/2;
-		const int yoffset=(m_const.squarePixelSize-m_dudes.height())/2;
-		const int x=xoffset+dude.paintPosition.x()*m_const.squarePixelSize;
-		const int y=yoffset+dude.paintPosition.y()*m_const.squarePixelSize;
-		painter.drawPixmap(x,y,m_dead_dude);
+
+		painter.save();
+
+        QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
+                                                                     dude.dead_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
+        painter.drawPixmapFragments(&pf, 1, dude.dead_sprite.image);
+
+        dude.updateFramecounter(dude.dead_sprite);
+		painter.restore();
 	}
 
 }
