@@ -403,31 +403,31 @@ namespace TankEngine
 			int dude_new_x ;
 			int dude_new_y ;
 
-			CWG::Direction random_list[] = directionPermuter();
+			int* random_list = directionPermuter();
 			for(int i = 0; i < 4; i++){
 				dude_new_x = dude_ptr->PosX();
 				dude_new_y = dude_ptr->PosY();
 				switch (random_list[i]) {
-					case CWG::Direction::Up:
+					case 1:
 						dude_ptr->Direction() = CWG::Direction::Up;
 						dude_new_y--;
 						break;
-					case CWG::Direction::Down:
+					case 2:
 						dude_ptr->Direction() = CWG::Direction::Down;
 						dude_new_y++;
 						break;
-					case CWG::Direction::Left:
+					case 3:
 						dude_ptr->Direction() = CWG::Direction::Left;
 						dude_new_x--;
 						break;
-					case CWG::Direction::Right:
+					case 4:
 						dude_ptr->Direction() = CWG::Direction::Right;
 						dude_new_x++;
 						break;
-					case CWG::Direction::Neutral:
+					case 5:
 						dude_ptr->Direction() = CWG::Direction::Neutral;
 						if(i != 4){
-							std::wcout << "Neutral was not the alst direction :(" << std::endl;
+							std::wcout << "Neutral was not the last direction :(" << std::endl;
 						}
 						//dude_new_x++;
 						break;
@@ -448,6 +448,7 @@ namespace TankEngine
 				}else{
 					dude_ptr->PosX() = dude_new_x;
 					dude_ptr->PosY() = dude_new_y;
+					delete random_list;
 					break;
 				}
 			}
@@ -917,13 +918,17 @@ namespace TankEngine
     }
 
 
-    CWG::Direction * Engine::directionPermuter(){
+    int* Engine::directionPermuter(){
 
-    	CWG::Direction permutation[5] = {CWG::Direction::Up,CWG::Direction::Down,CWG::Direction::Left,CWG::Direction::Right,CWG::Direction::Neutral};
+    	int* permutation = new int[5];
+    	for(int i = 0; i < 4; i++){
+    		permutation[i] = i+1;
+    	}
+    	permutation[4] = 0;
 		unsigned i;
 		for (i = 0; i < 3; i++) {
-			unsigned j = (rand() % 3) + i;
-			unsigned swap = permutation[i];
+			int j = (rand() % 3) + i;
+			int swap = permutation[i];
 			permutation[i] = permutation[j];
 			permutation[j] = swap;
 		}

@@ -70,9 +70,12 @@ namespace TankEngine
          * Creates a random list of the directions.(Each direction occurs only once).
          * the neutral direction is always last.
          *
-         * returns: A array of length 5 containing the directions in a random order. The neutral direction  is always the last element
+         * returns: A array of length 5 containing integers corresponding to directions in a random order.
+         * The neutral direction(0 in this case)  is always the last element
+         *
+         * note: Caller must free returned array
          */
-        CWG::Direction* directionPermuter();
+        int* directionPermuter();
 
 
         std::string FindPlayerName(Safir::Dob::Typesystem::InstanceId playerId);
