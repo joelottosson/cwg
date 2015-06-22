@@ -400,44 +400,56 @@ namespace TankEngine
         //TODO: lets try to move the dudeinator
         CWG::DudePtr dude_ptr = game_ptr->TheDude().GetPtr();
         if(!dude_ptr->Dying()){
-			int dude_new_x = dude_ptr->PosX();
-			int dude_new_y = dude_ptr->PosY();
+			int dude_new_x ;
+			int dude_new_y ;
+
+			CWG::Direction random_list[] = directionPermuter();
+			for(int i = 0; i < 4; i++){
+				dude_new_x = dude_ptr->PosX();
+				dude_new_y = dude_ptr->PosY();
+				switch (random_list[i]) {
+					case CWG::Direction::Up:
+						dude_ptr->Direction() = CWG::Direction::Up;
+						dude_new_y--;
+						break;
+					case CWG::Direction::Down:
+						dude_ptr->Direction() = CWG::Direction::Down;
+						dude_new_y++;
+						break;
+					case CWG::Direction::Left:
+						dude_ptr->Direction() = CWG::Direction::Left;
+						dude_new_x--;
+						break;
+					case CWG::Direction::Right:
+						dude_ptr->Direction() = CWG::Direction::Right;
+						dude_new_x++;
+						break;
+					case CWG::Direction::Neutral:
+						dude_ptr->Direction() = CWG::Direction::Neutral;
+						if(i != 4){
+							std::wcout << "Neutral was not the alst direction :(" << std::endl;
+						}
+						//dude_new_x++;
+						break;
+					default:
+						break;
+				}
+
+				//Lets skip mines and wrapping for now.
+				if(		gm.WallSquare(dude_new_x, dude_new_y)
+						|| dude_new_x < 0
+						|| dude_new_x >= game_ptr->Width()
+						|| dude_new_y < 0
+						|| dude_new_y >= game_ptr->Height()
+					){
 
 
-			switch (rand()%4) {
-				case 0:
-					dude_ptr->Direction() = CWG::Direction::Up;
-					dude_new_y--;
-					break;
-				case 1:
-					dude_ptr->Direction() = CWG::Direction::Down;
-					dude_new_y++;
-					break;
-				case 2:
-					dude_ptr->Direction() = CWG::Direction::Left;
-					dude_new_x--;
-					break;
-				case 3:
-					dude_ptr->Direction() = CWG::Direction::Right;
-					dude_new_x++;
-					break;
-				default:
-					break;
-			}
 
-			//Lets skip mines and wrapping for now.
-			if(		gm.WallSquare(dude_new_x, dude_new_y)
-					|| dude_new_x < 0
-					|| dude_new_x >= game_ptr->Width()
-					|| dude_new_y < 0
-					|| dude_new_y >= game_ptr->Height()
-				){
-
-				dude_ptr->Direction() = CWG::Direction::Neutral;
-
-			}else{
-				dude_ptr->PosX() = dude_new_x;
-				dude_ptr->PosY() = dude_new_y;
+				}else{
+					dude_ptr->PosX() = dude_new_x;
+					dude_ptr->PosY() = dude_new_y;
+					break;
+				}
 			}
         }else{
         	std::wcout << "Dude is no longer with us" << std::endl;
@@ -903,4 +915,20 @@ namespace TankEngine
 
     	return true;
     }
+
+
+    CWG::Direction * Engine::directionPermuter(){
+
+    	CWG::Direction permutation[5] = {CWG::Direction::Up,CWG::Direction::Down,CWG::Direction::Left,CWG::Direction::Right,CWG::Direction::Neutral};
+		unsigned i;
+		for (i = 0; i < 3; i++) {
+			unsigned j = (rand() % 3) + i;
+			unsigned swap = permutation[i];
+			permutation[i] = permutation[j];
+			permutation[j] = swap;
+		}
+
+		return permutation;
+    }
+
  };
