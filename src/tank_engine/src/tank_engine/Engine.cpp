@@ -459,6 +459,8 @@ namespace TankEngine
 
         // Move all tanks according to rules and evaluate resutls
 
+
+
         // Check for frontal collission
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
              (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
@@ -466,6 +468,15 @@ namespace TankEngine
 
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
+
+            //We might need to have this before any movement for the detector to work
+            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || CollisionPredicter(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
+            	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
+                dude_ptr->Dying().SetVal(true);
+                AddPoints(-5, tank_ptr->TankId(), game_ptr);
+
+            }
+
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
@@ -727,14 +738,13 @@ namespace TankEngine
             }
 
             //TODO: dude detection
-
             // Killed the dude :'(
-            if (gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) && !dude_ptr->Dying()) {
+/*            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || CollisionPredicter(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
             	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
                 dude_ptr->Dying().SetVal(true);
                 AddPoints(-5, tank_ptr->TankId(), game_ptr);
 
-            }
+            }*/
 
             // Hit by missile?
             if (gm.IsTankHit(tank_ptr->PosX(), tank_ptr->PosY())) {
@@ -912,9 +922,38 @@ namespace TankEngine
 
     }
 
-    bool Engine::CollisionPredicter(CWG::Direction own_direction, std::pair<int,int> own_pos, CWG::Direction other_direction, std::pair<int,int> others_pos){
+    bool Engine::CollisionPredicter(CWG::DudePtr& dude,CWG::TankPtr& tank){
+    	std::pair<int,int> own_pos(dude->PosX(),dude->PosY());
+    	std::pair<int,int> others_pos(tank->PosX(),tank->PosY());
+    	CWG::Direction::Enumeration own_direction = dude->Direction();
+    	CWG::Direction::Enumeration other_direction = tank->MoveDirection();
 
-    	return true;
+    	if(own_pos.first == (others_pos.first - 1) && own_pos.second == others_pos.second
+    			&& own_direction == CWG::Direction::Right && other_direction == CWG::Direction::Left){
+    		//dude is to the left of the tank
+    		std::wcout << "dude got hit by tank coming from the right" << std::endl;
+    		return true;
+
+    	}else if(own_pos.first == (others_pos.first + 1) && own_pos.second == others_pos.second
+    				&& own_direction == CWG::Direction::Left && other_direction == CWG::Direction::Right){
+    		//dude is to the right of the tank
+    		std::wcout << "dude got hit by tank coming from the left" << std::endl;
+    		return true;
+
+    	}else if(own_pos.second == (others_pos.second + 1) && own_pos.first == others_pos.first
+				&& own_direction == CWG::Direction::Up && other_direction == CWG::Direction::Down){
+		//dude is below the tank
+    		std::wcout << "dude got hit by tank coming from above" << std::endl;
+    		return true;
+
+    	}else if(own_pos.second == (others_pos.second - 1) && own_pos.first== others_pos.first
+				&& own_direction == CWG::Direction::Down && other_direction == CWG::Direction::Up){
+    		std::wcout << "dude got hit by tank coming from be low" << std::endl;
+		//dude is above the tank
+    		return true;
+	}
+
+    	return false;
     }
 
 

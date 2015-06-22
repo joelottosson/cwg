@@ -63,7 +63,7 @@ namespace TankEngine
         void UpdateState();
         void Evaluate();
         void ScheduleMissileCleanup();
-        bool CollisionPredicter(CWG::Direction own_direction, std::pair<int,int> own_pos, CWG::Direction other_direction, std::pair<int,int> others_pos);
+        bool CollisionPredicter(CWG::DudePtr& dude, CWG::TankPtr& tank);
 
 
         /*
