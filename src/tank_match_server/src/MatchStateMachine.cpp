@@ -203,6 +203,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     cwg::DudePtr dude = cwg::Dude::Create();
     dude->PosX() = dudePos.x;
     dude->PosY() = dudePos.y;
+    dude->OldX() = dudePos.x;
+    dude->OldY() = dudePos.y;
     dude->Dying() = false;
     dude->Direction() = cwg::Direction::Right;
 

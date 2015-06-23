@@ -399,6 +399,11 @@ namespace TankEngine
 
         //TODO: lets try to move the dudeinator
         CWG::DudePtr dude_ptr = game_ptr->TheDude().GetPtr();
+        int lame_x = -1;
+        int lame_y= -1;
+        CWG::Direction::Enumeration candidate_direction = CWG::Direction::Neutral;
+        CWG::Direction::Enumeration lame_direction = CWG::Direction::Neutral;
+        bool found_new_way = false;
         if(!dude_ptr->Dying()){
 			int dude_new_x ;
 			int dude_new_y ;
@@ -409,23 +414,23 @@ namespace TankEngine
 				dude_new_y = dude_ptr->PosY();
 				switch (random_list[i]) {
 					case 1:
-						dude_ptr->Direction() = CWG::Direction::Up;
+						candidate_direction = CWG::Direction::Up;
 						dude_new_y--;
 						break;
 					case 2:
-						dude_ptr->Direction() = CWG::Direction::Down;
+						candidate_direction = CWG::Direction::Down;
 						dude_new_y++;
 						break;
 					case 3:
-						dude_ptr->Direction() = CWG::Direction::Left;
+						candidate_direction = CWG::Direction::Left;
 						dude_new_x--;
 						break;
 					case 4:
-						dude_ptr->Direction() = CWG::Direction::Right;
+						candidate_direction = CWG::Direction::Right;
 						dude_new_x++;
 						break;
 					case 5:
-						dude_ptr->Direction() = CWG::Direction::Neutral;
+						candidate_direction = CWG::Direction::Neutral;
 						if(i != 4){
 							std::wcout << "Neutral was not the last direction :(" << std::endl;
 						}
@@ -443,21 +448,40 @@ namespace TankEngine
 						|| dude_new_y >= game_ptr->Height()
 					){
 
-
+					//Direction leads to silly possition, do nothing.
 
 				}else{
-					dude_ptr->PosX() = dude_new_x;
-					dude_ptr->PosY() = dude_new_y;
-					delete random_list;
-					break;
+					if((dude_new_x == dude_ptr->OldX() && dude_new_y == dude_ptr->OldY()) || candidate_direction == CWG::Direction::Neutral){
+						lame_x = dude_new_x;
+						lame_y = dude_new_y;
+						lame_direction = candidate_direction;
+
+
+					}else{
+						dude_ptr->OldX() = dude_ptr->PosX();
+						dude_ptr->OldY() = dude_ptr->PosY();
+						dude_ptr->PosX() = dude_new_x;
+						dude_ptr->PosY() = dude_new_y;
+						dude_ptr->Direction() = candidate_direction;
+						found_new_way = true;
+						delete random_list;
+						break;
+
+					}
 				}
 			}
-        }else{
-        	std::wcout << "Dude is no longer with us" << std::endl;
+
+			if(!found_new_way){
+				dude_ptr->OldX() = dude_ptr->PosX();
+				dude_ptr->OldY() = dude_ptr->PosY();
+				dude_ptr->PosX() = lame_x;
+				dude_ptr->PosY() = lame_y;
+				dude_ptr->Direction() = lame_direction;
+				delete random_list;
+
+			}
         }
 
-
-        // Move all tanks according to rules and evaluate resutls
 
 
 
@@ -966,7 +990,7 @@ namespace TankEngine
     	permutation[4] = 0;
 		unsigned i;
 		for (i = 0; i < 3; i++) {
-			int j = (rand() % 3) + i;
+			int j = (rand() % 3-i) + i;
 			int swap = permutation[i];
 			permutation[i] = permutation[j];
 			permutation[j] = swap;
