@@ -482,9 +482,6 @@ namespace TankEngine
 			}
         }
 
-
-
-
         // Check for frontal collission
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
              (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
