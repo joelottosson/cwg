@@ -903,12 +903,18 @@ namespace TankEngine
     	}
     	permutation[4] = 0;
 		unsigned i;
-		for (i = 0; i < 3; i++) {
-			int j = (rand() % 3-i) + i;
+		for (i = 0; i < 4; i++) {
+			int j = (rand() % 4-i) + i;
 			int swap = permutation[i];
 			permutation[i] = permutation[j];
 			permutation[j] = swap;
 		}
+
+/*		std::wcout << "the rendom list is ";
+		for(int i = 0; i < 5; i++){
+			std::wcout << permutation[i] << " ";
+		}
+		std::wcout << std::endl;*/
 
 		return permutation;
     }
@@ -926,6 +932,7 @@ namespace TankEngine
 			int dude_new_y ;
 
 			std::srand(dude_ptr->Seed());
+
 			int* random_list = directionPermuter();
 			for(int i = 0; i < 4; i++){
 				dude_new_x = dude_ptr->PosX();
