@@ -200,27 +200,20 @@ void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 	if(!dude.dying){
 
 		painter.save();
-
+        dude.updateFramecounter(dude.walking_sprite);
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
                                                                      dude.walking_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
-
-        dude.updateFramecounter(dude.walking_sprite);
         painter.drawPixmapFragments(&pf, 1, dude.walking_sprite.image);
-
-
 		painter.restore();
 
 	}else{
 
 		painter.save();
-
+		dude.updateFramecounter(dude.dead_sprite);
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
                                                                      dude.dead_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
-
-        dude.updateFramecounter(dude.dead_sprite);
+        std::wcout << "The dude frame counter for dead dude is " << dude.current_frame << " and the size of the thing is "<< dude.dead_sprite.fragments.size()  << std::endl;
         painter.drawPixmapFragments(&pf, 1, dude.dead_sprite.image);
-
-
 		painter.restore();
 	}
 

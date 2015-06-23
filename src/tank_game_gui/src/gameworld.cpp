@@ -508,7 +508,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     	dude.position.setX(dude_game->PosX());
     	dude.position.setY(dude_game->PosY());
     	dude.moveDirection = ToDirection(dude_game->Direction());
-    	if(!dude.dying && dude_game->Dying().GetVal()){
+    	if(!dude.dying && dude_game->Dying().GetVal() && m_soundEnabled){
     		m_dude_dies_MediaPlayer.play();
     	}else{
     		m_dude_dies_MediaPlayer.stop();

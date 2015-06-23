@@ -41,9 +41,8 @@ void Dude::updateFramecounter(SpriteData sprite ) const {
 	qint64 elapsed_time = QDateTime::currentMSecsSinceEpoch() - last_update;
 	if(current_frame >= (qint64)(sprite.fragments.size())){
 		current_frame = 0;
-		return;
-	}
-	if(elapsed_time >= (qint64)(sprite.lifeTime/sprite.fragments.size())){
+
+	}else if(elapsed_time >= (qint64)(sprite.lifeTime/sprite.fragments.size())){
 		current_frame = (current_frame + 1) % sprite.fragments.size();
 		last_update = QDateTime::currentMSecsSinceEpoch();
 	}
