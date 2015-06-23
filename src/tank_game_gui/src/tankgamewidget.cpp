@@ -86,9 +86,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
     PaintPoison(painter);
 
-    if(m_world.GetGameState().dudes.size() == 0 ){
-    	std::wcout << "AINT GOT NO DUDES!" << std::endl;
-    }else{
+    if(m_world.GetGameState().dudes.size() != 0 ){
     	PaintDudes(m_world.GetGameState().dudes.front(), painter);
     }
 
@@ -212,7 +210,6 @@ void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 		dude.updateFramecounter(dude.dead_sprite);
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
                                                                      dude.dead_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
-        std::wcout << "The dude frame counter for dead dude is " << dude.current_frame << " and the size of the thing is "<< dude.dead_sprite.fragments.size()  << std::endl;
         painter.drawPixmapFragments(&pf, 1, dude.dead_sprite.image);
 		painter.restore();
 	}
