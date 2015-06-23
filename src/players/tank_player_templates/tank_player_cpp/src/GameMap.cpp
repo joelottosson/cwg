@@ -6,13 +6,14 @@
 *
 *******************************************************************************/
 
+#include "GameMap.h"
+
 #include <iostream>
 #include <utility>
 #include <vector>
 #include <map>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "GameMap.h"
 
 GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr)
     :m_TankId(tankId)
@@ -65,6 +66,12 @@ bool GameMap::IsCoin(const std::pair<int, int>& pos) const
 bool GameMap::IsPoisonGas(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='p';
+	//return true;
+}
+
+bool GameMap::IsPenguin(const std::pair<int, int>& pos) const
+{
+   return pos.first == m_gamePtr->TheDude().GetPtr()->PosX() && pos.second == m_gamePtr->TheDude().GetPtr()->PosY();
 }
 
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const
@@ -121,7 +128,7 @@ std::pair<int, int> GameMap::Move(const std::pair<int, int>& pos,
 int GameMap::TimeToNextMove() const
 {
     // Get current time from the clock, using microseconds resolution
-    const boost::posix_time::ptime now = 
+    const boost::posix_time::ptime now =
         boost::posix_time::microsec_clock::local_time();
 
     // Get the time offset in current day
@@ -131,7 +138,7 @@ int GameMap::TimeToNextMove() const
 
     // We ignore midnight to keep it simple
     return m_gamePtr->NextMove().GetVal() - total_milliseconds;
-}    
+}
 
 void GameMap::PrintMap() const
 {

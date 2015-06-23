@@ -64,6 +64,12 @@ public:
     bool IsPoisonGas(const std::pair<int, int>& pos) const;
 
     /**
+	 * Check if there is a penguin.
+	 */
+	bool IsPenguin(const std::pair<int, int>& pos) const;
+
+
+    /**
      * Is there a missile in this position right now?
      */
     bool IsMissileInPosition(const std::pair<int, int>& pos) const;

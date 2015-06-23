@@ -76,6 +76,12 @@ class GameMap {
 	public boolean isPoisonGas(final Position pos) {
 		return gameState.board().getVal()[toIndex(pos)]==poison;
 	}
+	
+	//Returns the position of the penguin.
+	public boolean getPenguinPosition() {
+		return new Position(gameState.theDude().getObj().posX(),
+				gameState.theDude().getObj().posX());
+	}
 
 	//Is there a missile in this square
 	public boolean isMissileInPosition (Position p) {
