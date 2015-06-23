@@ -113,15 +113,41 @@ private:
 
     inline void UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal);
 
+    /**
+     * This function updates the paint position of the item according to its movement and speed.
+     * paint position will be set to the actual position of the item even
+     * if the movement is not finished.
+     *
+     * timeToNextUpdate: The time to the next game update update.
+     * movement: The distance (in board squares) that the item will move within this state update.
+     * item: The thing to be moved
+     *
+     *
+     */
     template <class T>
-    inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item)
+        inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item){
+    	UpdatePosition(timeToNextUpdate, movement, item,true);
+    }
+
+    /**
+     * This function updates the paint position of the item according to its movement and speed.
+     *
+     * timeToNextUpdate: The time to the next game update update (irrelevant if force_set is true)
+     * movement: The distance (in board squares) that the item will move within this state udpdate.
+     * item: The thing to be moved
+     * force_set: if true the paint position will be set to the actual position of the item even
+     * if the movement is not finished
+     *
+     */
+    template <class T>
+    inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item,bool force_set)
     {
         if (item.position==item.paintPosition)
         {
             return;
         }
 
-        if (timeToNextUpdate<=m_animationUpdateInterval)
+        if (timeToNextUpdate<=m_animationUpdateInterval && force_set)
         {
             item.paintPosition=item.position;
         }

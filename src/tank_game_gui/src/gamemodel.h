@@ -141,6 +141,7 @@ struct Dude
     int dead_frames;
     mutable int current_frame = 0;
     mutable qint64 last_update;
+    bool just_died = false;
 
     Dude(QPointF position, Direction direction);
 

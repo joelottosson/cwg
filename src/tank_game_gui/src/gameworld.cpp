@@ -493,27 +493,42 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     UpdateCoins(boardParser);
 
 
-    //TODO: crap added by me
-	UpdateDudes(boardParser);
+
+    //UpdateDudes(boardParser);
 
 
     /*
      * Well... lets try to get this dude on the road.
+     *
+     * todo:BOB
      */
-    if(game->TheDude().IsNull()){
-    	std::wcout << "DUDE IS NULL" << std::endl;
-    }else{
+    if(!game->TheDude().IsNull()){
     	auto& dude_game = game->TheDude().GetPtr();
     	auto& dude = m_matchState.gameState.dudes.front();
-    	dude.position.setX(dude_game->PosX());
-    	dude.position.setY(dude_game->PosY());
-    	dude.moveDirection = ToDirection(dude_game->Direction());
+
     	if(!dude.dying && dude_game->Dying().GetVal() && m_soundEnabled){
     		m_dude_dies_MediaPlayer.play();
     	}else{
     		m_dude_dies_MediaPlayer.stop();
     	}
-    	dude.dying = dude_game->Dying();
+
+    	if(dude.just_died && dude_game->Dying() && !dude.dying){
+    		dude.just_died = false;
+    		dude.dying = true;
+    	}
+
+    	if(!dude.dying && dude_game->Dying()){
+    		dude.just_died = true;
+
+    	}
+
+    	if(!dude.dying){
+    		dude.position.setX(dude_game->PosX());
+    		dude.position.setY(dude_game->PosY());
+    		dude.moveDirection = ToDirection(dude_game->Direction());
+    	}
+
+
     }
 
 
@@ -866,10 +881,12 @@ void GameWorld::Update()
         }
     	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, animationMoveSpeed, 0, now, 1));
         //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, now, 0,true));
-        UpdatePosition(timeToNextUpdate, 1*movement, dude);
+        if(dude.just_died){
+        	UpdatePosition(timeToNextUpdate, .5*movement, dude,false);
 
-
-//    	game->
+        }else if(!dude.dying){
+        	UpdatePosition(timeToNextUpdate, 1*movement, dude);
+        }
 
     }
 
