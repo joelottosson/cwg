@@ -25,7 +25,6 @@
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "GameMap.h"
 
 
 namespace TankEngine
@@ -399,88 +398,7 @@ namespace TankEngine
 
         //TODO: lets try to move the dudeinator
         CWG::DudePtr dude_ptr = game_ptr->TheDude().GetPtr();
-        int lame_x = -1;
-        int lame_y= -1;
-        CWG::Direction::Enumeration candidate_direction = CWG::Direction::Neutral;
-        CWG::Direction::Enumeration lame_direction = CWG::Direction::Neutral;
-        bool found_new_way = false;
-        if(!dude_ptr->Dying()){
-			int dude_new_x ;
-			int dude_new_y ;
-
-			int* random_list = directionPermuter();
-			for(int i = 0; i < 4; i++){
-				dude_new_x = dude_ptr->PosX();
-				dude_new_y = dude_ptr->PosY();
-				switch (random_list[i]) {
-					case 1:
-						candidate_direction = CWG::Direction::Up;
-						dude_new_y--;
-						break;
-					case 2:
-						candidate_direction = CWG::Direction::Down;
-						dude_new_y++;
-						break;
-					case 3:
-						candidate_direction = CWG::Direction::Left;
-						dude_new_x--;
-						break;
-					case 4:
-						candidate_direction = CWG::Direction::Right;
-						dude_new_x++;
-						break;
-					case 5:
-						candidate_direction = CWG::Direction::Neutral;
-						if(i != 4){
-							std::wcout << "Neutral was not the last direction :(" << std::endl;
-						}
-						//dude_new_x++;
-						break;
-					default:
-						break;
-				}
-
-				//Lets skip mines and wrapping for now.
-				if(		gm.WallSquare(dude_new_x, dude_new_y)
-						|| dude_new_x < 0
-						|| dude_new_x >= game_ptr->Width()
-						|| dude_new_y < 0
-						|| dude_new_y >= game_ptr->Height()
-					){
-
-					//Direction leads to silly possition, do nothing.
-
-				}else{
-					if((dude_new_x == dude_ptr->OldX() && dude_new_y == dude_ptr->OldY()) || candidate_direction == CWG::Direction::Neutral){
-						lame_x = dude_new_x;
-						lame_y = dude_new_y;
-						lame_direction = candidate_direction;
-
-
-					}else{
-						dude_ptr->OldX() = dude_ptr->PosX();
-						dude_ptr->OldY() = dude_ptr->PosY();
-						dude_ptr->PosX() = dude_new_x;
-						dude_ptr->PosY() = dude_new_y;
-						dude_ptr->Direction() = candidate_direction;
-						found_new_way = true;
-						delete random_list;
-						break;
-
-					}
-				}
-			}
-
-			if(!found_new_way){
-				dude_ptr->OldX() = dude_ptr->PosX();
-				dude_ptr->OldY() = dude_ptr->PosY();
-				dude_ptr->PosX() = lame_x;
-				dude_ptr->PosY() = lame_y;
-				dude_ptr->Direction() = lame_direction;
-				delete random_list;
-
-			}
-        }
+        dudeUpdater(dude_ptr,gm,game_ptr);
 
         // Check for frontal collission
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
@@ -979,7 +897,6 @@ namespace TankEngine
 
 
     int* Engine::directionPermuter(){
-
     	int* permutation = new int[5];
     	for(int i = 0; i < 4; i++){
     		permutation[i] = i+1;
@@ -995,5 +912,96 @@ namespace TankEngine
 
 		return permutation;
     }
+
+    void Engine::dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr){
+
+        int lame_x = -1;
+        int lame_y = -1;
+        int old_seed = std::rand();
+        CWG::Direction::Enumeration candidate_direction = CWG::Direction::Neutral;
+        CWG::Direction::Enumeration lame_direction = CWG::Direction::Neutral;
+        bool found_new_way = false;
+        if(!dude_ptr->Dying()){
+			int dude_new_x ;
+			int dude_new_y ;
+
+			std::srand(dude_ptr->Seed());
+			int* random_list = directionPermuter();
+			for(int i = 0; i < 4; i++){
+				dude_new_x = dude_ptr->PosX();
+				dude_new_y = dude_ptr->PosY();
+				switch (random_list[i]) {
+					case 1:
+						candidate_direction = CWG::Direction::Up;
+						dude_new_y--;
+						break;
+					case 2:
+						candidate_direction = CWG::Direction::Down;
+						dude_new_y++;
+						break;
+					case 3:
+						candidate_direction = CWG::Direction::Left;
+						dude_new_x--;
+						break;
+					case 4:
+						candidate_direction = CWG::Direction::Right;
+						dude_new_x++;
+						break;
+					case 5:
+						candidate_direction = CWG::Direction::Neutral;
+						if(i != 4){
+							std::wcout << "Neutral was not the last direction :(" << std::endl;
+						}
+						//dude_new_x++;
+						break;
+					default:
+						break;
+				}
+
+				//Lets skip mines and wrapping for now.
+				if(		gm.WallSquare(dude_new_x, dude_new_y)
+						|| dude_new_x < 0
+						|| dude_new_x >= game_ptr->Width()
+						|| dude_new_y < 0
+						|| dude_new_y >= game_ptr->Height()
+					){
+
+					//Direction leads to silly possition, do nothing.
+
+				}else{
+					if((dude_new_x == dude_ptr->OldX() && dude_new_y == dude_ptr->OldY()) || candidate_direction == CWG::Direction::Neutral){
+						lame_x = dude_new_x;
+						lame_y = dude_new_y;
+						lame_direction = candidate_direction;
+
+
+					}else{
+						dude_ptr->OldX() = dude_ptr->PosX();
+						dude_ptr->OldY() = dude_ptr->PosY();
+						dude_ptr->PosX() = dude_new_x;
+						dude_ptr->PosY() = dude_new_y;
+						dude_ptr->Direction() = candidate_direction;
+						found_new_way = true;
+						delete random_list;
+						break;
+
+					}
+				}
+			}
+
+			if(!found_new_way){
+				dude_ptr->OldX() = dude_ptr->PosX();
+				dude_ptr->OldY() = dude_ptr->PosY();
+				dude_ptr->PosX() = lame_x;
+				dude_ptr->PosY() = lame_y;
+				dude_ptr->Direction() = lame_direction;
+				delete random_list;
+
+			}
+			dude_ptr->Seed() = std::rand();
+        }
+        std::srand(old_seed);
+    }
+
 
  };

@@ -16,6 +16,9 @@
 #include "JoystickEntityHandler.h"
 #include "JoystickEngineIF.h"
 
+
+#include "GameMap.h"
+
 namespace SDob = Safir::Dob::Typesystem;
 namespace CWG= Consoden::TankGame;
 
@@ -64,6 +67,8 @@ namespace TankEngine
         void Evaluate();
         void ScheduleMissileCleanup();
         bool CollisionPredicter(CWG::DudePtr& dude, CWG::TankPtr& tank);
+
+        void dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr);
 
 
         /*

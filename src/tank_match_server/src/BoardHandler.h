@@ -45,6 +45,8 @@ public:
 
     static std::string GenerateRandomFile();
 
+
+
 private:
     Safir::Dob::Connection& m_connection;
     Safir::Dob::Typesystem::HandlerId m_defaultHandler;

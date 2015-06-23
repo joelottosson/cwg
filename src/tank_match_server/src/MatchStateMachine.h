@@ -31,6 +31,7 @@ public:
 
     cwg::MatchPtr CurrentState() const {return m_state;}
     sdt::EntityId MatchEntityId() const {return m_matchEid;}
+    int hashBoard(std::vector<char> board) const;
 
 private:
     cwg::MatchPtr m_state;
