@@ -8,7 +8,12 @@
 #include <boost/make_shared.hpp>
 #include <QtGui>
 #include <qstyleoption.h>
+#include "sprite.h"
 #include "tankgamewidget.h"
+
+namespace SDob = Safir::Dob::Typesystem;
+namespace CWG= Consoden::TankGame;
+
 
 TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     :QWidget(parent)
@@ -22,10 +27,17 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     ,m_missile(":/images/missile.png")
     ,m_tankWreck(":/images/panzerIV_wreck.png")
     ,m_mine(":/images/mine.png")
+	,m_dudes(":/images/tiny-tux.png")
+	,m_dead_dude(":/images/dead-tux.png")
     ,m_poison(":/images/poison.png")
 {
+
+
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     Reset();
+
+
+
 }
 
 void TankGameWidget::Reset()
@@ -74,6 +86,8 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
     PaintPoison(painter);
 
+
+
     //Paint tanks
     int blueTank=true;
     for (auto& tank : m_world.GetGameState().tanks)
@@ -85,7 +99,13 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     //Paint sprites
     for (auto& s : m_world.Sprites())
     {
+
         PaintSprite(s, painter);
+        //s.killToggle();
+    }
+
+    if(m_world.GetGameState().dudes.size() != 0 ){
+    	PaintDudes(m_world.GetGameState().dudes.front(), painter);
     }
 
     //Paint missiles
@@ -165,6 +185,39 @@ void TankGameWidget::PaintPoison(QPainter& painter)
     }
 }
 
+//TODO: Stuff added by me
+/*
+ * Draws and moves the dude.
+ *
+ * does the drawing without doing any animation or funny stuff :/
+ *
+ * gets called at every screen refresh
+ *
+ */
+void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
+{
+
+	if(!dude.dying){
+
+		painter.save();
+        dude.updateFramecounter(dude.walking_sprite);
+        QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
+                                                                     dude.walking_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
+        painter.drawPixmapFragments(&pf, 1, dude.walking_sprite.image);
+		painter.restore();
+
+	}else{
+
+		painter.save();
+		dude.updateFramecounter(dude.dead_sprite);
+        QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
+                                                                     dude.dead_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
+        painter.drawPixmapFragments(&pf, 1, dude.dead_sprite.image);
+		painter.restore();
+	}
+
+}
+
 void TankGameWidget::PaintMines(QPainter& painter)
 {    
     for (const auto& mine : m_world.GetGameState().mines)
@@ -185,12 +238,14 @@ int TankGameWidget::CalculateWrappingCoordinate(int val, int maxVal, int boardSi
 
 void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painter)
 {
+
     if (tank.explosion==Destroyed)
     {
+
         const int xoffset=(m_const.squarePixelSize-m_tankWreck.width())/2;
         const int yoffset=(m_const.squarePixelSize-m_tankWreck.height())/2;
-        const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
-        const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
+        const int x=xoffset+(tank.paintPosition.x())*m_const.squarePixelSize;
+        const int y=yoffset+(tank.paintPosition.y())*m_const.squarePixelSize;
         painter.save();
         painter.translate(x+m_tankWreck.width()/2, y+m_tankWreck.height()/2);
         painter.rotate(DirectionToAngle(tank.moveDirection));

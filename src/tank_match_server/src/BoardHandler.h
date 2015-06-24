@@ -40,9 +40,12 @@ public:
                          int& ySize,
                          std::vector<char>& board,
                          Point& tank1,
-                         Point& tank2);
+                         Point& tank2,
+						 Point& dude);
 
     static std::string GenerateRandomFile();
+
+
 
 private:
     Safir::Dob::Connection& m_connection;

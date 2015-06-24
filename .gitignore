@@ -6,6 +6,12 @@
 *.dll
 *.mdb
 *.pdb
+src/tank_match_server/src/tank_match_server
+src/tank_game_gui/src/tank_game_gui
+src/tank_engine/src/tank_engine/tank_engine
+src/players/tank_random_player/src/tank_random_player/tank_random_player
+src/players/tank_player_templates/tank_player_cpp/src/tank_player_cpp
+src/players/tank_player_dumb/src/tank_player_dumb
 
 #CMake stuff
 *.cmake
@@ -102,3 +108,4 @@ build-*
 *.orig
 .cproject
 .project
+.settings/

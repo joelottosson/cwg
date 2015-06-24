@@ -35,6 +35,28 @@ public:
         ,m_timeSlice(spriteData.lifeTime/spriteData.fragments.size())
         ,m_lastUpdated(QDateTime::currentMSecsSinceEpoch())
         ,m_repetitions(repetitions)
+		,m_singleframe(false)
+		,m_kill_instantly(false)
+    {
+    	if(repetitions < 0){m_singleframe = true;}
+    }
+
+    Sprite(const SpriteData& spriteData,
+           const QPointF& position,
+           qint64 startTime,
+           int repetitions,//0 repetitions means forever
+		   bool single) // Wether or not the sprite will only live for one update.
+        :m_spriteData(&spriteData)
+        ,m_currentFragment(0)
+        ,m_pos(position)
+        ,m_speed(0, 0)
+        ,m_rotation(0)
+        ,m_startTime(startTime)
+        ,m_timeSlice(spriteData.lifeTime/spriteData.fragments.size())
+        ,m_lastUpdated(QDateTime::currentMSecsSinceEpoch())
+        ,m_repetitions(repetitions)
+		,m_singleframe(single)
+    	,m_kill_instantly(false)
     {
     }
 
@@ -54,6 +76,8 @@ public:
         ,m_timeSlice(spriteData.lifeTime/spriteData.fragments.size())
         ,m_lastUpdated(QDateTime::currentMSecsSinceEpoch())
         ,m_repetitions(repetitions)
+    	,m_singleframe(false)
+    	,m_kill_instantly(false)
     {
     }
 
@@ -67,11 +91,22 @@ public:
     bool Started() const {return QDateTime::currentMSecsSinceEpoch()>=m_startTime;}
     bool Finished() const
     {
-        if (m_repetitions==0)
+        if (m_repetitions==0){
             return false;
-        else
+        }else if(m_kill_instantly){
+        	return false;
+        }else{
             return QDateTime::currentMSecsSinceEpoch()>m_startTime+m_repetitions*m_spriteData->lifeTime;
+        }
     }
+
+    void killToggle(){
+    	if(m_singleframe){
+    		m_kill_instantly = true;
+    	}
+    }
+
+    bool killInstantly() {return m_kill_instantly;}
 
     void Update()
     {
@@ -109,6 +144,8 @@ private:
     qint64 m_timeSlice;
     qint64 m_lastUpdated;
     int m_repetitions;
+    bool m_singleframe;
+    bool m_kill_instantly;
 };
 
 #endif

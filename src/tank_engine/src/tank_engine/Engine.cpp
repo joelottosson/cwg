@@ -25,7 +25,7 @@
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "GameMap.h"
+
 
 namespace TankEngine
 {
@@ -380,6 +380,11 @@ namespace TankEngine
         m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
     }
 
+
+
+    /*
+     * I think this actually is the game "logic"
+     */
     void Engine::Evaluate()
     {
         Consoden::TankGame::GameStatePtr game_ptr =
@@ -390,7 +395,10 @@ namespace TankEngine
         gm.MoveMissiles();
         bool tank_tank_collission = false;
 
-        // Move all tanks according to rules and evaluate resutls
+
+        //TODO: lets try to move the dudeinator
+        CWG::DudePtr dude_ptr = game_ptr->TheDude().GetPtr();
+        dudeUpdater(dude_ptr,gm,game_ptr);
 
         // Check for frontal collission
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
@@ -399,6 +407,15 @@ namespace TankEngine
 
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
+
+            //We might need to have this before any movement for the detector to work
+            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || CollisionPredicter(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
+            	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
+                dude_ptr->Dying().SetVal(true);
+                AddPoints(-5, tank_ptr->TankId(), game_ptr);
+
+            }
+
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
@@ -659,6 +676,15 @@ namespace TankEngine
                 tank_ptr->HitMine() = true;
             }
 
+            //TODO: dude detection
+            // Killed the dude :'(
+/*            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || CollisionPredicter(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
+            	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
+                dude_ptr->Dying().SetVal(true);
+                AddPoints(-5, tank_ptr->TankId(), game_ptr);
+
+            }*/
+
             // Hit by missile?
             if (gm.IsTankHit(tank_ptr->PosX(), tank_ptr->PosY())) {
                 // BOOM!
@@ -830,4 +856,159 @@ namespace TankEngine
             std::cout << "The game is a draw." << std::endl;
         }
     }
+
+    std::pair<int,int> Engine::WrappedPosition(std::pair<int,int> pos, CWG::Direction dir){
+
+    }
+
+    bool Engine::CollisionPredicter(CWG::DudePtr& dude,CWG::TankPtr& tank){
+    	std::pair<int,int> own_pos(dude->PosX(),dude->PosY());
+    	std::pair<int,int> others_pos(tank->PosX(),tank->PosY());
+    	CWG::Direction::Enumeration own_direction = dude->Direction();
+    	CWG::Direction::Enumeration other_direction = tank->MoveDirection();
+
+    	if(own_pos.first == (others_pos.first - 1) && own_pos.second == others_pos.second
+    			&& own_direction == CWG::Direction::Right && other_direction == CWG::Direction::Left){
+    		//dude is to the left of the tank
+    		std::wcout << "dude got hit by tank coming from the right" << std::endl;
+    		return true;
+
+    	}else if(own_pos.first == (others_pos.first + 1) && own_pos.second == others_pos.second
+    				&& own_direction == CWG::Direction::Left && other_direction == CWG::Direction::Right){
+    		//dude is to the right of the tank
+    		std::wcout << "dude got hit by tank coming from the left" << std::endl;
+    		return true;
+
+    	}else if(own_pos.second == (others_pos.second + 1) && own_pos.first == others_pos.first
+				&& own_direction == CWG::Direction::Up && other_direction == CWG::Direction::Down){
+		//dude is below the tank
+    		std::wcout << "dude got hit by tank coming from above" << std::endl;
+    		return true;
+
+    	}else if(own_pos.second == (others_pos.second - 1) && own_pos.first== others_pos.first
+				&& own_direction == CWG::Direction::Down && other_direction == CWG::Direction::Up){
+    		std::wcout << "dude got hit by tank coming from be low" << std::endl;
+		//dude is above the tank
+    		return true;
+	}
+
+    	return false;
+    }
+
+
+    int* Engine::directionPermuter(){
+    	int* permutation = new int[5];
+    	for(int i = 0; i < 4; i++){
+    		permutation[i] = i+1;
+    	}
+    	permutation[4] = 0;
+		unsigned i;
+		for (i = 0; i < 4; i++) {
+			int j = (rand() % 4-i) + i;
+			int swap = permutation[i];
+			permutation[i] = permutation[j];
+			permutation[j] = swap;
+		}
+
+/*		std::wcout << "the rendom list is ";
+		for(int i = 0; i < 5; i++){
+			std::wcout << permutation[i] << " ";
+		}
+		std::wcout << std::endl;*/
+
+		return permutation;
+    }
+
+    void Engine::dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr){
+
+        int lame_x = -1;
+        int lame_y = -1;
+        int old_seed = std::rand();
+        CWG::Direction::Enumeration candidate_direction = CWG::Direction::Neutral;
+        CWG::Direction::Enumeration lame_direction = CWG::Direction::Neutral;
+        bool found_new_way = false;
+        if(!dude_ptr->Dying()){
+			int dude_new_x ;
+			int dude_new_y ;
+
+			std::srand(dude_ptr->Seed());
+
+			int* random_list = directionPermuter();
+			for(int i = 0; i < 4; i++){
+				dude_new_x = dude_ptr->PosX();
+				dude_new_y = dude_ptr->PosY();
+				switch (random_list[i]) {
+					case 1:
+						candidate_direction = CWG::Direction::Up;
+						dude_new_y--;
+						break;
+					case 2:
+						candidate_direction = CWG::Direction::Down;
+						dude_new_y++;
+						break;
+					case 3:
+						candidate_direction = CWG::Direction::Left;
+						dude_new_x--;
+						break;
+					case 4:
+						candidate_direction = CWG::Direction::Right;
+						dude_new_x++;
+						break;
+					case 5:
+						candidate_direction = CWG::Direction::Neutral;
+						if(i != 4){
+							std::wcout << "Neutral was not the last direction :(" << std::endl;
+						}
+						//dude_new_x++;
+						break;
+					default:
+						break;
+				}
+
+				//Lets skip mines and wrapping for now.
+				if(		gm.WallSquare(dude_new_x, dude_new_y)
+						|| dude_new_x < 0
+						|| dude_new_x >= game_ptr->Width()
+						|| dude_new_y < 0
+						|| dude_new_y >= game_ptr->Height()
+					){
+
+					//Direction leads to silly possition, do nothing.
+
+				}else{
+					if((dude_new_x == dude_ptr->OldX() && dude_new_y == dude_ptr->OldY()) || candidate_direction == CWG::Direction::Neutral){
+						lame_x = dude_new_x;
+						lame_y = dude_new_y;
+						lame_direction = candidate_direction;
+
+
+					}else{
+						dude_ptr->OldX() = dude_ptr->PosX();
+						dude_ptr->OldY() = dude_ptr->PosY();
+						dude_ptr->PosX() = dude_new_x;
+						dude_ptr->PosY() = dude_new_y;
+						dude_ptr->Direction() = candidate_direction;
+						found_new_way = true;
+						delete random_list;
+						break;
+
+					}
+				}
+			}
+
+			if(!found_new_way){
+				dude_ptr->OldX() = dude_ptr->PosX();
+				dude_ptr->OldY() = dude_ptr->PosY();
+				dude_ptr->PosX() = lame_x;
+				dude_ptr->PosY() = lame_y;
+				dude_ptr->Direction() = lame_direction;
+				delete random_list;
+
+			}
+			dude_ptr->Seed() = std::rand();
+        }
+        std::srand(old_seed);
+    }
+
+
  };

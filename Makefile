@@ -16,7 +16,11 @@ random_player: .FORCE
 	cd src/tank_random_player/src && cmake . && make install
 	@cd ../../..
 
-backend: engine gui server
+backend: remove_cache engine gui server
+	
+dob: .FORCE
+	dobmake.py --no-ada --no-java --no-dotnet --batch
+	
 
 #How do i stop !?
 start_backend: .FORCE
@@ -25,7 +29,13 @@ start_backend: .FORCE
 start_complete: .FORCE
 	$(TERM) -e sh init-players.sh &
 
-	
+remove_cache: .FORCE
+	-find . -name CMakeCache.txt | xargs rm	
+
+copy_and_rebuid_dob: .FORCE
+	 cp -uv tank_dou/*.dou $(SAFIR_SDK)/dots/dots_generated/tank/
+	 dobmake.py --no-java --no-ada --no-dotnet --batch
+	 
 
 #Fix this later
 .FORCE: 

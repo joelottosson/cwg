@@ -7,6 +7,7 @@
 *******************************************************************************/
 #include "gameworld.h"
 
+namespace CWG = Consoden::TankGame;
 namespace
 {
     Direction ToDirection(const Safir::Dob::Typesystem::ContainerProxy<Consoden::TankGame::Direction::EnumerationContainer>& ec)
@@ -36,6 +37,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_towerSpeed(0)
     ,m_lastAnimationUpdate(0)
     ,m_sprites()
+	,m_sprites_dude()
     ,m_explosion()
     ,m_tankFire()
     ,m_fireMediaPlayer1()
@@ -45,6 +47,9 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_tookCoinMediaPlayer()
     ,m_wilhelmScreamMediaPlayer()
 {
+	//TODO: This is horrible. Fix at some point
+	m_first = true;
+
     if (m_soundEnabled)
     {
         InitMediaPlayers();
@@ -71,6 +76,15 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     {
         m_coin.fragments.push_back(QRectF(i*72, 0, 72, 72));
     }
+
+    //TODO: reconisder this!
+    m_dude.image=QPixmap(":/images/tux-anim.png");
+	m_dude.lifeTime=500;
+	for (int i=0; i < 3; ++i)
+	{
+		m_dude.fragments.push_back(QRectF(i*72, 0, 72, 72));
+	}
+
 }
 
 void GameWorld::Clear()
@@ -78,6 +92,7 @@ void GameWorld::Clear()
     m_matchState=MatchState();
     m_matchState.finished=true;
     m_sprites.clear();
+    m_sprites_dude.clear();
     m_screenText.clear();
 }
 
@@ -86,6 +101,7 @@ void GameWorld::ClearGameState()
     m_matchState.gameState=GameState();
     m_matchState.gameState.finished=true;
     m_sprites.clear();
+    m_sprites_dude.clear();
     m_screenText.clear();
 }
 
@@ -97,6 +113,7 @@ void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t 
     m_matchState.players[1]=match->PlayerTwoId().GetVal().GetRawValue();
     m_matchState.totalNumberOfGames=match->TotalNumberOfGames();
     m_sprites.clear();
+    m_sprites_dude.clear();
     m_screenText.clear();
     Update(match);
 
@@ -114,6 +131,7 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_matchState.gameState.gameId=id;
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
     m_sprites.clear();
+    m_sprites_dude.clear();
     m_screenText.clear();
 
     if (!game->GamePace().IsNull())
@@ -126,6 +144,10 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_matchState.gameState.size.setY(boardParser.GetYSize());
     m_matchState.gameState.walls.insert(m_matchState.gameState.walls.begin(), boardParser.Walls().begin(), boardParser.Walls().end());
     m_matchState.gameState.poison.insert(m_matchState.gameState.poison.begin(), boardParser.Poison().begin(), boardParser.Poison().end());
+
+    //TODO: Crap added by me
+    //m_matchState.gameState.dudes.insert(m_matchState.gameState.dudes.begin(), boardParser.Dudes().begin(), boardParser.Dudes().end());
+
 
     for (int i=0; i<game->TanksArraySize(); ++i)
     {
@@ -144,6 +166,10 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
             m_matchState.gameState.tanks.push_back(t);
         }
     }
+
+    CWG::DudePtr dude =  game->TheDude().GetPtr();
+    Dude d(QPointF(dude->PosX().GetVal(), dude->PosY().GetVal()), ToDirection(dude->Direction()));
+    m_matchState.gameState.dudes.push_back(d);
 
     if (game->Counter().GetVal()<=1)
     {
@@ -207,6 +233,7 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
             for (auto pos : m_matchState.gameState.coins)
             {
                 m_sprites.push_back(Sprite(m_coin, pos, QDateTime::currentMSecsSinceEpoch(), 0));
+            	m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
             }
         }
         else
@@ -274,6 +301,26 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
     }
 }
 
+//void  GameWorld::UpdateDudes(const Board& boardParser){}
+
+//TODO: Crap added by meeeeeeee
+void  GameWorld::UpdateDudes(const Board& boardParser)
+{
+	return;
+        	//std::wcout << "There are " << m_matchState.gameState.dudes.size() << " Lights!" << std::endl;
+//            for (auto& dude : m_matchState.gameState.dudes)
+//            {
+                //m_sprites.push_back(Sprite(m_dude, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
+            	//std::wcout << "Dude is at: " << dude.position.x() <<","<< dude.position.y() <<
+            	//		" and its paint position is : "<< dude.paintPosition.x() <<","<< dude.paintPosition.y()<< std::endl;
+                //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
+            	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QPointF(1.0, 0), 5.0, QDateTime::currentMSecsSinceEpoch(), 0));
+//            }
+
+}
+
+
+
 void GameWorld::UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal)
 {
     //is wrapping in x-direction
@@ -307,6 +354,13 @@ void GameWorld::UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank
     }
 
     lastVal.isWrapping=false;
+}
+
+void GameWorld::UpdateDude(const Consoden::TankGame::DudePtr& dude){
+	Dude& d = m_matchState.gameState.dudes.front();
+	d.moveDirection = ToDirection(dude->Direction());
+
+
 }
 
 void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
@@ -415,17 +469,71 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
     }
 }
 
+
+/*
+ * Method updating all of the entities.
+ *
+ * Gets called when the game state is updated (every second by default)
+ *
+ * Unfortunatley it might appear as if this function needs to match the behaviour of the function in Engine.cpp....whose name i have forgotten
+ *
+ */
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 {
+
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
     m_matchState.gameState.elapsedTime=static_cast<int>(game->ElapsedTime().GetVal());
 
     m_matchState.gameState.mines.clear();
 
+
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
     UpdateCoins(boardParser);
+
+
+
+    //UpdateDudes(boardParser);
+
+
+    /*
+     * Well... lets try to get this dude on the road.
+     *
+     * todo:BOB
+     */
+    if(!game->TheDude().IsNull()){
+    	auto& dude_game = game->TheDude().GetPtr();
+    	auto& dude = m_matchState.gameState.dudes.front();
+
+    	if(!dude.dying && dude_game->Dying().GetVal() && m_soundEnabled){
+    		m_dude_dies_MediaPlayer.play();
+    	}else{
+    		m_dude_dies_MediaPlayer.stop();
+    	}
+
+    	if(dude.just_died && dude_game->Dying() && !dude.dying){
+    		dude.just_died = false;
+    		dude.dying = true;
+    	}
+
+    	if(!dude.dying && dude_game->Dying()){
+    		dude.just_died = true;
+
+    	}
+
+    	if(!dude.dying){
+    		dude.position.setX(dude_game->PosX());
+    		dude.position.setY(dude_game->PosY());
+    		dude.moveDirection = ToDirection(dude_game->Direction());
+    	}
+
+
+    }
+
+
+
+
 
     //if hit poison gas square, play a terrible sound
     if (game->Tanks()[0].GetPtr()->HitPoisonGas().GetVal() || game->Tanks()[1].GetPtr()->HitPoisonGas().GetVal())
@@ -456,6 +564,9 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         }
     }
 
+
+
+    //creates and updates missiles
     for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
     {
         if (game->Missiles()[i].IsNull())
@@ -497,6 +608,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         }
     }
 
+    //Updates the tanks
     for (int i=0; i<game->TanksArraySize(); ++i)
     {
         if (!game->Tanks()[i].IsNull())
@@ -526,7 +638,9 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         {
             m_matchState.gameState.winnerPlayerId=game->PlayerTwoId().GetVal().GetRawValue();
         }
-            break;if (m_matchState.currentGameNumber==1 && m_matchState.finished)
+            break;
+            //TODO: Is this code dead !?
+            /*if (m_matchState.currentGameNumber==1 && m_matchState.finished)
             {
                 QStringList sl;
                 sl.append("Start new match");
@@ -535,7 +649,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             else if (m_matchState.finished)
             {
 
-            }
+            }*/
 
         default:
         {
@@ -569,6 +683,11 @@ void GameWorld::Update(const Consoden::TankGame::JoystickConstPtr &joystick)
     js.towerDirection=ToDirection(joystick->TowerDirection());
 }
 
+/*
+ *
+ * Does the graphical update part. Gets called every time the screen refreshes.
+ *
+ */
 void GameWorld::Update()
 {
     m_moveSpeed=1.0/static_cast<double>(m_matchState.gameState.pace); //square per millisec
@@ -583,9 +702,20 @@ void GameWorld::Update()
 
     HandleEventQueue(now);
 
+
+    //updates each tank.
     for (Tank& tank : m_matchState.gameState.tanks)
     {
-        UpdatePosition(timeToNextUpdate, movement, tank);
+    	//if(tank.explosion == SetInFlames){
+
+			if(tank.deathCause == tank.Death::HitWall){
+
+				UpdatePosition(timeToNextUpdate, movement*0.5, tank);
+			}else{
+				UpdatePosition(timeToNextUpdate, movement, tank);
+			}
+
+
         UpdateTowerAngle(timeToNextUpdate, angle, tank);
         if (tank.explosion==SetInFlames)
         {
@@ -625,6 +755,9 @@ void GameWorld::Update()
         }
     }
 
+    /**
+     * Appears to update the missiles
+     */
     for (auto& vt : m_matchState.gameState.missiles)
     {
         Missile& missile=vt.second;
@@ -683,6 +816,8 @@ void GameWorld::Update()
             }
         }
 
+
+
         if (missile.explosion==SetInFlames)
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
@@ -715,6 +850,46 @@ void GameWorld::Update()
         }
     }
 
+
+    //TODO:
+    //update of our dude
+    for (auto& dude : m_matchState.gameState.dudes){
+    	//std::wcout << "LOOOK_WE_ARE_DOING_THINGS  " << std::endl;
+    	//dude.position.setX(dude.position.x()+movement),
+		//dude.position.setX(dude.position.x()+movement),
+    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
+
+
+
+        QPointF animationMoveSpeed(0,0);
+        switch(dude.moveDirection)
+        {
+        case LeftHeading:
+            animationMoveSpeed.setX(-1*m_moveSpeed);
+            break;
+        case RightHeading:
+            animationMoveSpeed.setX(m_moveSpeed);
+            break;
+        case UpHeading:
+            animationMoveSpeed.setY(-1*m_moveSpeed);
+            break;
+        case DownHeading:
+            animationMoveSpeed.setY(m_moveSpeed);
+            break;
+        case None:
+            break;
+        }
+    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, animationMoveSpeed, 0, now, 1));
+        //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, now, 0,true));
+        if(dude.just_died){
+        	UpdatePosition(timeToNextUpdate, .5*movement, dude,false);
+
+        }else if(!dude.dying){
+        	UpdatePosition(timeToNextUpdate, 1*movement, dude);
+        }
+
+    }
+
     for (auto it=m_sprites.begin(); it!=m_sprites.end();)
     {
         if (it->Finished())
@@ -723,7 +898,9 @@ void GameWorld::Update()
         }
         else
         {
+
             it->Update();
+
             ++it;
         }
     }
@@ -753,6 +930,7 @@ bool GameWorld::MatchFinished() const
             bool spriteFinished=sprite.Repetitions()==0 || sprite.Finished();
             if (!spriteFinished)
             {
+            	// std::wcout << "We removed some sprajtz" << std::endl;
                 return false; //there are still sprites that will not run forever that has not finished
             }
         }
@@ -816,6 +994,7 @@ void GameWorld::InitMediaPlayers()
     QString bigBombPath=QDir::cleanPath(path+QDir::separator()+"big_bomb.mp3");
     QString tookCoin=QDir::cleanPath(path+QDir::separator()+"coin.mp3");
     QString wilhelmScream=QDir::cleanPath(path+QDir::separator()+"wilhelm_scream.mp3");
+    QString death_of_dude=QDir::cleanPath(path+QDir::separator()+"dude-dies.mp3");
 
     m_fireMediaPlayer1.setMedia(QUrl::fromLocalFile(firePath));
     m_explosionMediaPlayer1.setMedia(QUrl::fromLocalFile(explostionPath));
@@ -823,6 +1002,7 @@ void GameWorld::InitMediaPlayers()
     m_explosionMediaPlayer2.setMedia(QUrl::fromLocalFile(bigBombPath));
     m_tookCoinMediaPlayer.setMedia(QUrl::fromLocalFile(tookCoin));
     m_wilhelmScreamMediaPlayer.setMedia(QUrl::fromLocalFile(wilhelmScream));
+    m_dude_dies_MediaPlayer.setMedia(QUrl::fromLocalFile(death_of_dude));
 }
 
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)

@@ -166,13 +166,16 @@ void MatchStateMachine::CreateBoards()
     }
 }
 
+/*
+ * In itializes all the entities from the board :D
+ */
 Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::string &boardFile, bool reversedPlayers) const
 {
     std::vector<char> board;
-    Point tankPos1, tankPos2;
+    Point tankPos1, tankPos2, dudePos;
     int width, height;
 
-    if (!BoardHandler::FromFile(boardFile, width, height, board, tankPos1, tankPos2))
+    if (!BoardHandler::FromFile(boardFile, width, height, board, tankPos1, tankPos2, dudePos))
     {
         std::wcout<<L"Failed to read file "<<boardFile.c_str()<<std::endl;
         throw std::logic_error("Board file error");
@@ -196,6 +199,18 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     game->Survivor()=cwg::Winner::Unknown;
     game->Winner()=cwg::Winner::Unknown;
 
+    //Create the one and only dude
+    cwg::DudePtr dude = cwg::Dude::Create();
+    dude->PosX() = dudePos.x;
+    dude->PosY() = dudePos.y;
+    dude->OldX() = dudePos.x;
+    dude->OldY() = dudePos.y;
+    dude->Dying() = false;
+    dude->Direction() = cwg::Direction::Right;
+    dude->Seed() = hashBoard(board);
+
+
+
     //create tanks
     cwg::TankPtr tank1=cwg::Tank::Create();
     tank1->TankId()=0;
@@ -208,6 +223,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank1->HitTank()=false;
     tank1->TookCoin()=false;
     tank1->HitPoisonGas()=false;
+
+
 
     cwg::TankPtr tank2=cwg::Tank::Create();
     tank2->TankId()=1;
@@ -246,6 +263,29 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
 
     game->Tanks()[0].SetPtr(tank1);
     game->Tanks()[1].SetPtr(tank2);
+    game->TheDude().SetPtr(dude);
+
+
 
     return game;
 }
+
+int MatchStateMachine::hashBoard(std::vector<char> board) const{
+
+	int h = 0;
+	for(char ki: board){
+		int highorder = h & 0xf8000000;    // extract high-order 5 bits from h
+									  	  // 0xf8000000 is the hexadecimal representation
+									  	  //   for the 32-bit number with the first five
+									  	  //   bits = 1 and the other bits = 0
+			h = h << 5;                    // shift h left by 5 bits
+			h = h ^ (highorder >> 27);     // move the highorder 5 bits to the low-order
+									  	  //   end and XOR into h
+			h = h ^ ki;                    // XOR h and ki
+									  	  //taken from http://www.cs.hmc.edu/~geoff/classes/hmc.cs070.200101/homework10/hashfuncs.html
+	}
+
+	return h;
+
+}
+

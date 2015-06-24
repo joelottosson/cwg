@@ -52,6 +52,14 @@ namespace tank_player_cs
 			}
 		}
 
+		//Penguin position
+		public Position PenguinPosition {
+			get {
+				
+				return new Position (gameState.TheDude.Obj.PosX.Val, gameState.TheDude.Obj.PosY.Val);
+			}
+		}
+
 		//Check if square is a wall.
 		public bool IsWall (Position p)
 		{

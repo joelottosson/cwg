@@ -16,6 +16,12 @@
 #include "JoystickEntityHandler.h"
 #include "JoystickEngineIF.h"
 
+
+#include "GameMap.h"
+
+namespace SDob = Safir::Dob::Typesystem;
+namespace CWG= Consoden::TankGame;
+
 namespace TankEngine
 {
     class Engine :
@@ -60,6 +66,22 @@ namespace TankEngine
         void UpdateState();
         void Evaluate();
         void ScheduleMissileCleanup();
+        bool CollisionPredicter(CWG::DudePtr& dude, CWG::TankPtr& tank);
+
+        void dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr);
+
+
+        /*
+         * Creates a random list of the directions.(Each direction occurs only once).
+         * the neutral direction is always last.
+         *
+         * returns: A array of length 5 containing integers corresponding to directions in a random order.
+         * The neutral direction(0 in this case)  is always the last element
+         *
+         * note: Caller must free returned array
+         */
+        int* directionPermuter();
+
 
         std::string FindPlayerName(Safir::Dob::Typesystem::InstanceId playerId);
 
@@ -68,6 +90,7 @@ namespace TankEngine
         Consoden::TankGame::Winner::Enumeration TankIdToWinner(int tank_id) { if (tank_id == mPlayerOneTankId) { return Consoden::TankGame::Winner::PlayerOne; } else { return Consoden::TankGame::Winner::PlayerTwo; } }
         int  OpponentTankId(int tank_id) { if (tank_id == mPlayerOneTankId) { return mPlayerTwoTankId; } else { return mPlayerOneTankId; } }
 
+        std::pair<int,int> WrappedPosition(std::pair<int,int> pos, CWG::Direction dir);
 
         bool mGamePrepare;
         bool mGameRunning;

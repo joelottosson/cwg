@@ -11,6 +11,8 @@
 #include <QWidget>
 #include "gameworld.h"
 #include "tankinfowidget.h"
+#include "sprite.h"
+
 
 class TankGameWidget : public QWidget
 {
@@ -34,7 +36,11 @@ private:
     QPixmap m_missile;
     QPixmap m_tankWreck;
     QPixmap m_mine;
+    QPixmap m_dudes;
+    QPixmap m_dead_dude;
     QPixmap m_poison;
+    SpriteData m_dude_anim;
+
 
     boost::shared_ptr<QPixmap> m_backgroundPixmap;
     boost::shared_ptr<QPainter> m_backgroundPainter;
@@ -59,10 +65,12 @@ private:
     void PaintGrid(QPainter& painter);
     void PaintWalls(QPainter& painter);
     void PaintPoison(QPainter& painter);
+    void PaintDudes(const Dude& dude, QPainter& painter);
     void PaintMines(QPainter& painter);
     void PaintTank(const Tank& tank, bool blue, QPainter& painter);
     void PaintMissile(const Missile& missile, QPainter& painter);
     void PaintSprite(const Sprite& sprite, QPainter& painter);
+    //void PaintSpriteDude(const Sprite& sprite, QPainter& painter);
     void PaintText(const ScreenText& txt, QPainter& painter);
     void PaintWinner(QPainter& painter);
 };

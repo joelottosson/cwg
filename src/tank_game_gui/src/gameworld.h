@@ -61,6 +61,7 @@ public:
     const GameState& GetGameState() const {return m_matchState.gameState;}
 
     const std::vector<Sprite>& Sprites() const {return m_sprites;}
+    const std::vector<Sprite>& DudeSprites() const {return m_sprites_dude;}
 
     void SetTextBig(const QStringList& lines);
     const std::vector<ScreenText>& ScreenTexts() const {return m_screenText;}
@@ -74,10 +75,15 @@ private:
     qreal m_towerSpeed;
     qint64 m_lastAnimationUpdate;
     std::vector<Sprite> m_sprites;
+    std::vector<Sprite> m_sprites_dude;
     SpriteData m_explosion;
     SpriteData m_tankFire;
     SpriteData m_coin;
+    SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
+
+    //TODO: This is horrible. There must be a better way.
+    bool m_first;
 
     typedef std::multimap<qint64, boost::function<void()> > WorldEvents;
     WorldEvents m_eventQueue;
@@ -90,6 +96,7 @@ private:
     QMediaPlayer m_explosionMediaPlayer2;
     QMediaPlayer m_tookCoinMediaPlayer;
     QMediaPlayer m_wilhelmScreamMediaPlayer;
+    QMediaPlayer m_dude_dies_MediaPlayer;
 
     void SetTextSmall(const QStringList& lines);
     void SetTextPlayer(int playerNumber, const QStringList& lines);
@@ -99,18 +106,48 @@ private:
     inline void UpdatePoison(const Board& board);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
     inline void UpdateTank(const Consoden::TankGame::TankPtr& tank);
+    inline void UpdateDude(const Consoden::TankGame::DudePtr& dude);
+
+    inline void UpdateDudes(const Board& board);
+
 
     inline void UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal);
 
+    /**
+     * This function updates the paint position of the item according to its movement and speed.
+     * paint position will be set to the actual position of the item even
+     * if the movement is not finished.
+     *
+     * timeToNextUpdate: The time to the next game update update.
+     * movement: The distance (in board squares) that the item will move within this state update.
+     * item: The thing to be moved
+     *
+     *
+     */
     template <class T>
-    inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item)
+        inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item){
+    	UpdatePosition(timeToNextUpdate, movement, item,true);
+    }
+
+    /**
+     * This function updates the paint position of the item according to its movement and speed.
+     *
+     * timeToNextUpdate: The time to the next game update update (irrelevant if force_set is true)
+     * movement: The distance (in board squares) that the item will move within this state udpdate.
+     * item: The thing to be moved
+     * force_set: if true the paint position will be set to the actual position of the item even
+     * if the movement is not finished
+     *
+     */
+    template <class T>
+    inline void UpdatePosition(qint64 timeToNextUpdate, qreal movement, T& item,bool force_set)
     {
         if (item.position==item.paintPosition)
         {
             return;
         }
 
-        if (timeToNextUpdate<=m_animationUpdateInterval)
+        if (timeToNextUpdate<=m_animationUpdateInterval && force_set)
         {
             item.paintPosition=item.position;
         }

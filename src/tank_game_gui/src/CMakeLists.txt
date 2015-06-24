@@ -28,7 +28,7 @@ endif()
 
 if (Qt5Widgets_FOUND)
   message("-- Building tank_game with Qt5")
-  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_AUTOMOC OFF)   
   QT5_WRAP_UI(ui_headers ${ui})
   QT5_ADD_RESOURCES(qrc_src ${qrc})
 else() 

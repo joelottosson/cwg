@@ -16,6 +16,7 @@ Board::Board(const std::string& filepath)
     ,m_mines()
     ,m_coins()
     ,m_poison()
+	,m_dudes()
 {
     std::ifstream is;
     is.open(filepath.c_str());
@@ -55,6 +56,7 @@ Board::Board(const char* binary, int xSize, int ySize)
     ,m_mines()
     ,m_coins()
     ,m_poison()
+	,m_dudes()
 {
     Parse(binary);
 }
@@ -92,6 +94,11 @@ void Board::ToBinary(std::vector<char>& bin) const
     {
         size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
         bin[index]='p';
+    }
+    for (const auto& pos : m_dudes)
+    {
+        size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
+        bin[index]='d';
     }
 }
 
@@ -131,6 +138,12 @@ void Board::Parse(const char* data)
             case 'o': //mine
             {
                 m_mines.push_back(QPointF(x, y));
+            }
+                break;
+
+            case 'd': //mine
+            {
+                m_dudes.push_back(QPointF(x, y));
             }
                 break;
 

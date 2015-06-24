@@ -15,6 +15,7 @@
 #include <string>
 #include <sstream>
 #include <boost/cstdint.hpp>
+#include "sprite.h"
 
 typedef std::vector<QPointF> PointVec;
 enum Direction {LeftHeading, RightHeading, UpHeading, DownHeading, None};
@@ -123,6 +124,35 @@ struct Player
 };
 typedef std::map<qint64 /*playerId*/, Player> PlayerMap;
 
+//************
+// Dude
+//************
+struct Dude
+{
+
+    QPointF position; //position of the dude
+    Direction moveDirection;
+    bool visible;
+    bool dying;
+    QPointF paintPosition;
+    SpriteData walking_sprite;
+    SpriteData dead_sprite;
+    int walking_frames;
+    int dead_frames;
+    mutable int current_frame = 0;
+    mutable qint64 last_update;
+    bool just_died = false;
+
+    Dude(QPointF position, Direction direction);
+
+    void updateFramecounter(SpriteData sprite ) const;
+
+
+
+};
+typedef std::vector<Dude> DudeMap;
+
+
 //************************************
 // GameState
 //************************************
@@ -136,6 +166,7 @@ struct GameState
     PointVec mines{};
     PointVec coins{};
     PointVec poison{};
+    DudeMap dudes{};
     MissileMap missiles{};
     TankVec tanks{};
     JoystickMap joystics{};
