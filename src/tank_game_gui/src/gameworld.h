@@ -79,6 +79,7 @@ private:
     SpriteData m_explosion;
     SpriteData m_tankFire;
     SpriteData m_coin;
+    SpriteData m_laser_ammo;
     SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
 
@@ -104,9 +105,11 @@ private:
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
     inline void UpdateCoins(const Board& board);
     inline void UpdatePoison(const Board& board);
+    inline void UpdateLaserAmmo(const Board& boardParser);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
     inline void UpdateTank(const Consoden::TankGame::TankPtr& tank);
     inline void UpdateDude(const Consoden::TankGame::DudePtr& dude);
+
 
     inline void UpdateDudes(const Board& board);
 

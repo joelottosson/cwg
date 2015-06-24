@@ -85,6 +85,15 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 		m_dude.fragments.push_back(QRectF(i*72, 0, 72, 72));
 	}
 
+    //TODO: reconisder this!
+    m_laser_ammo.image=QPixmap(":/images/laser-ammo.png");
+	m_laser_ammo.lifeTime=1200;
+	for (int i=0; i < 27; ++i)
+	{
+		m_laser_ammo.fragments.push_back(QRectF(i*66, 0, 66, 67));
+	}
+
+
 }
 
 void GameWorld::Clear()
@@ -233,7 +242,7 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
             for (auto pos : m_matchState.gameState.coins)
             {
                 m_sprites.push_back(Sprite(m_coin, pos, QDateTime::currentMSecsSinceEpoch(), 0));
-            	m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
+            	//m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
             }
         }
         else
@@ -281,6 +290,68 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
     }
 }
 
+
+void  GameWorld::UpdateLaserAmmo(const Board& boardParser)
+{
+    if (boardParser.LaserAmmo().size()!=m_matchState.gameState.laser_ammo.size())
+    {
+        if (m_matchState.gameState.laser_ammo.empty())
+        {
+
+            //first time after start, immediately place laser ammo on board
+            m_matchState.gameState.laser_ammo.insert(m_matchState.gameState.laser_ammo.begin(), boardParser.LaserAmmo().begin(), boardParser.LaserAmmo().end());
+            for (auto pos : m_matchState.gameState.laser_ammo)
+            {
+
+                m_sprites.push_back(Sprite(m_laser_ammo, pos, QDateTime::currentMSecsSinceEpoch(), 0));
+            	//m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
+            }
+        }
+        else
+        {
+            //laser ammo has changed, we do the update after a halfSquare-time to make it look nicer.
+            m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
+            {
+                //update laser ammo positions
+                m_matchState.gameState.laser_ammo.clear();
+                m_matchState.gameState.laser_ammo.insert(m_matchState.gameState.laser_ammo.begin(), boardParser.LaserAmmo().begin(), boardParser.LaserAmmo().end());
+
+                for (auto spriteIt=m_sprites.begin(); spriteIt!=m_sprites.end();)
+                {
+                    bool remove=true;
+                    if (spriteIt->Data()==&m_laser_ammo)
+                    {
+                        for (auto& laser : m_matchState.gameState.laser_ammo)
+                        {
+                            if (laser==spriteIt->Position())
+                            {
+                                remove=false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (remove)
+                    {
+                        spriteIt=m_sprites.erase(spriteIt);
+                    }
+                    else
+                    {
+                        ++spriteIt;
+                    }
+                }
+
+                //play sound
+/*                if (m_soundEnabled)
+                {
+                    m_tookCoinMediaPlayer.stop();
+                    m_tookCoinMediaPlayer.play();
+                }*/
+            }));
+        }
+    }
+}
+
 void  GameWorld::UpdatePoison(const Board& boardParser)
 {
     if (boardParser.Poison().size()!=m_matchState.gameState.poison.size())
@@ -303,7 +374,6 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
 
 //void  GameWorld::UpdateDudes(const Board& boardParser){}
 
-//TODO: Crap added by meeeeeeee
 void  GameWorld::UpdateDudes(const Board& boardParser)
 {
 	return;
@@ -491,7 +561,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
     UpdateCoins(boardParser);
-
+    UpdateLaserAmmo(boardParser);
 
 
     //UpdateDudes(boardParser);

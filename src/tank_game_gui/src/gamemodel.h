@@ -166,6 +166,7 @@ struct GameState
     PointVec mines{};
     PointVec coins{};
     PointVec poison{};
+    PointVec laser_ammo{};
     DudeMap dudes{};
     MissileMap missiles{};
     TankVec tanks{};

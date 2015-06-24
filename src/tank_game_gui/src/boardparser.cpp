@@ -17,6 +17,7 @@ Board::Board(const std::string& filepath)
     ,m_coins()
     ,m_poison()
 	,m_dudes()
+	,m_laser_ammo()
 {
     std::ifstream is;
     is.open(filepath.c_str());
@@ -57,6 +58,7 @@ Board::Board(const char* binary, int xSize, int ySize)
     ,m_coins()
     ,m_poison()
 	,m_dudes()
+	,m_laser_ammo()
 {
     Parse(binary);
 }
@@ -71,6 +73,7 @@ void Board::ReverseTanks()
     }
 }
 
+//TODO: add ammo here
 void Board::ToBinary(std::vector<char>& bin) const
 {
     bin.clear();
@@ -100,6 +103,13 @@ void Board::ToBinary(std::vector<char>& bin) const
         size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
         bin[index]='d';
     }
+
+    for (const auto& pos : m_laser_ammo)
+    {
+        size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
+        bin[index]='l';
+    }
+
 }
 
 void Board::Save(const std::string& filepath) const
@@ -125,6 +135,7 @@ void Board::Save(const std::string& filepath) const
     os.close();
 }
 
+//TODO: add ammo here
 void Board::Parse(const char* data)
 {
     for (int y=0; y<m_ySize; ++y)
@@ -170,6 +181,13 @@ void Board::Parse(const char* data)
                 m_poison.push_back(QPointF(x, y));
             }
                 break;
+
+            case 'l': //poison
+            {
+                m_laser_ammo.push_back(QPointF(x, y));
+            }
+                break;
+
 
             case '.': //empty square
                 break;
