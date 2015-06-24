@@ -7,6 +7,7 @@
 *******************************************************************************/
 #include "tankinfowidget.h"
 #include "ui_tankinfowidget.h"
+#include <iostream>
 
 #include <qmessagebox.h>
 
@@ -14,9 +15,12 @@ TankInfoWidget::TankInfoWidget(int playerNumber, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TankInfoWidget),
     m_playerNumber(playerNumber),
-    m_on(":/images/ball_blue.png"),
-    m_off(":/images/ball_grey.png"),
-    m_fire(":/images/ball_red.png")
+	m_green_on(":/images/active-green.png"),
+	m_green_off(":/images/inactive-green.png"),
+    m_blue_on(":/images/active-blue.png"),
+    m_blue_off(":/images/inactive-blue.png")
+
+
 {
     ui->setupUi(this);
     m_buttons[0]=ui->moveLeft;
@@ -59,7 +63,12 @@ void TankInfoWidget::ResetLeds()
 {
     for (size_t i=0; i<9; ++i)
     {
-        m_buttons[i]->setPixmap(m_off);
+    	if(i==8){
+    		m_buttons[8]->setPixmap(m_blue_off);
+    	}else{
+    		m_buttons[i]->setPixmap(m_green_off);
+    	}
+
     }
 }
 
@@ -70,16 +79,20 @@ void TankInfoWidget::SetLed(Led led, bool on)
     {
         if (led==Fire)
         {
-            m_buttons[index]->setPixmap(m_fire);
+            m_buttons[8]->setPixmap(m_blue_on);
         }
         else
         {
-            m_buttons[index]->setPixmap(m_on);
+            m_buttons[index]->setPixmap(m_green_on);
         }
     }
     else
     {
-        m_buttons[index]->setPixmap(m_off);
+    	if(led == Fire){
+    		m_buttons[8]->setPixmap(m_blue_off);
+    	}else{
+    		m_buttons[index]->setPixmap(m_green_off);
+    	}
     }
 }
 
@@ -90,10 +103,11 @@ void TankInfoWidget::Update(const Joystick* js)
     {
         return;
     }
-
     if (js->fire)
     {
         SetLed(TankInfoWidget::Fire, true);
+    }else{
+    	SetLed(TankInfoWidget::Fire, false);
     }
     if (js->moveDirection!=None)
     {
