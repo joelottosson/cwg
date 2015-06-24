@@ -19,7 +19,7 @@ To be able to build the tank game one is reqiered to do some things.
 
 First one needs to get the propper QT 5 dependencies. On ubuntu this can be done by running:
 ```
-sudo apt-get install qt5multimedia-dev libqt5multimedia5-plugins
+sudo apt-get install qtmultimedia-dev libqt5multimedia5-plugins
 ```
 
 one also needs to copy the `.dou` files in `dou/` to `<path to safir>/sdk/dots/dots_generated/` 
