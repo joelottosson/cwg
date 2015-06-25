@@ -33,6 +33,8 @@ namespace TankEngine
 
         bool PoisonSquare(int pos_x, int pos_y);
 
+        bool LaserAmmo(int pos_x, int pos_y);
+
         void ClearSquare(int pos_x, int pos_y);
 
         //TODO: Crap added by me

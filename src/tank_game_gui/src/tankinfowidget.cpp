@@ -96,6 +96,10 @@ void TankInfoWidget::SetLed(Led led, bool on)
     }
 }
 
+void TankInfoWidget::SetLaserAmmo(int lasers){
+	ui->laserLcdNumber->display(lasers);
+}
+
 void TankInfoWidget::Update(const Joystick* js)
 {
     ResetLeds();

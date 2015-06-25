@@ -721,7 +721,16 @@ namespace TankEngine
                     AddPoints(1, tank_ptr->TankId(), game_ptr);
                     tank_ptr->TookCoin() = true;
 
-                } else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
+                }else if (gm.LaserAmmo(tank_ptr->PosX(), tank_ptr->PosY())) {
+                    gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //take the coin
+
+
+                    //TODO: remove me
+                    std::wcout << "Picked up some lazorz" << std::endl;
+
+                    tank_ptr->Lasers() = tank_ptr->Lasers().GetVal() + 1;
+
+                }else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
                     // Give one point to the opponent for driving into poison gas. 
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
                     AddPoints(1, OpponentTankId(tank_ptr->TankId()), game_ptr);

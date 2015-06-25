@@ -29,6 +29,7 @@ public:
 
     void SetName(const QString& name);
     void SetPoints(int points);
+    void SetLaserAmmo(int lasers);
     void Update(const Joystick* js);
 
     void ResetLeds();
