@@ -335,7 +335,7 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="fireButton_2">
+  <widget class="QLabel" name="laserActive">
    <property name="geometry">
     <rect>
      <x>90</x>

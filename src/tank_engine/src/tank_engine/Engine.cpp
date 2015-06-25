@@ -288,6 +288,8 @@ namespace TankEngine
         Consoden::TankGame::JoystickPtr joystick_ptr =
             boost::static_pointer_cast<Consoden::TankGame::Joystick>(m_connection.Read(entityId).GetEntity());
 
+        joystick_ptr->FireLaser() = false;
+
         std::string player_str("Player X");
         if (game_ptr->PlayerOneId().GetVal() == joystick_ptr->PlayerId().GetVal()) {
             player_str = "Player One";
@@ -465,12 +467,14 @@ namespace TankEngine
                         tank_ptr->HitTank() = true;
                         tank_ptr->MoveDirection() = joystick_ptr->MoveDirection();
                         tank_ptr->Fire() = false;
+                        tank_ptr->FireLaser() = false;
                         tank_ptr->TookCoin() = false;
                         tank_ptr->HitPoisonGas() = false;
                         tank2_ptr->InFlames() = true;
                         tank2_ptr->HitTank() = true;
                         tank2_ptr->MoveDirection() = joystick2_ptr->MoveDirection();
                         tank2_ptr->Fire() = false;
+                        tank2_ptr->FireLaser() = false;
                         tank2_ptr->TookCoin() = false;
                         tank2_ptr->HitPoisonGas() = false;
                     }                    
@@ -487,6 +491,7 @@ namespace TankEngine
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
         
             tank_ptr->Fire() = false;
+            tank_ptr->FireLaser() = false;
             tank_ptr->TookCoin() = false;
             tank_ptr->HitPoisonGas() = false;
 
@@ -507,6 +512,7 @@ namespace TankEngine
                     joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
                     joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Left);
                     joystick_ptr->Fire().SetVal(false);
+                    joystick_ptr->FireLaser() = false;
                     joystick_ptr->MineDrop().SetVal(false);
                 }
                 mPlayerOneCounter = joystick_ptr->Counter().GetVal();
@@ -522,6 +528,7 @@ namespace TankEngine
                     joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
                     joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Left);
                     joystick_ptr->Fire().SetVal(false);
+                    joystick_ptr->FireLaser() = false;
                     joystick_ptr->MineDrop().SetVal(false);
                 }
                 mPlayerTwoCounter = joystick_ptr->Counter().GetVal();
@@ -616,7 +623,19 @@ namespace TankEngine
                 tank_ptr->TowerDirection().SetNull();
             }
 
-            if (!joystick_ptr->Fire().IsNull() && joystick_ptr->Fire() && !joystick_ptr->TowerDirection().IsNull()) {
+            if(!joystick_ptr->Fire().IsNull() && !joystick_ptr->FireLaser().IsNull() &&
+            		joystick_ptr->Fire() && !joystick_ptr->TowerDirection().IsNull() &&
+					joystick_ptr->FireLaser() && !joystick_ptr->FireLaser().IsNull() && !tank_ptr->FireLaser().IsNull()){
+            	if(tank_ptr->Lasers() > 0){
+            		std::wcout << "FIRED DA LAAAAZOR!!!!!!!!!!!!!" << std::endl;
+            		tank_ptr->Lasers() = tank_ptr->Lasers() - 1;
+            		tank_ptr->FireLaser() = true;
+            	}else{
+            	}
+            }
+
+
+            if (!joystick_ptr->Fire().IsNull() && !joystick_ptr->FireLaser().IsNull() && joystick_ptr->Fire() && !joystick_ptr->TowerDirection().IsNull() && !joystick_ptr->FireLaser()) {
                 int pos_head_x = -1;
                 int pos_head_y = -1;
                 int pos_tail_x = -1;
@@ -866,9 +885,7 @@ namespace TankEngine
         }
     }
 
-    std::pair<int,int> Engine::WrappedPosition(std::pair<int,int> pos, CWG::Direction dir){
 
-    }
 
     bool Engine::CollisionPredicter(CWG::DudePtr& dude,CWG::TankPtr& tank){
     	std::pair<int,int> own_pos(dude->PosX(),dude->PosY());

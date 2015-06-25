@@ -15,9 +15,10 @@ Board::Board(const std::string& filepath)
     ,m_walls()
     ,m_mines()
     ,m_coins()
+	,m_laser_ammo()
     ,m_poison()
 	,m_dudes()
-	,m_laser_ammo()
+
 {
     std::ifstream is;
     is.open(filepath.c_str());
@@ -56,9 +57,10 @@ Board::Board(const char* binary, int xSize, int ySize)
     ,m_walls()
     ,m_mines()
     ,m_coins()
+	,m_laser_ammo()
     ,m_poison()
 	,m_dudes()
-	,m_laser_ammo()
+
 {
     Parse(binary);
 }
@@ -73,7 +75,6 @@ void Board::ReverseTanks()
     }
 }
 
-//TODO: add ammo here
 void Board::ToBinary(std::vector<char>& bin) const
 {
     bin.clear();
@@ -135,7 +136,22 @@ void Board::Save(const std::string& filepath) const
     os.close();
 }
 
-//TODO: add ammo here
+/*bool Board::IsWall(const char* data, int x, int y){
+	size_t index=static_cast<size_t>(y*m_xSize+x);
+	return data[index]  == 'x';
+}*/
+
+const bool Board::isWall(qreal x, qreal y) const{
+	for(auto p : m_walls){
+		if(p.x() == x && p.y() == y){
+			return true;
+		}
+	}
+
+	return false;
+
+}
+
 void Board::Parse(const char* data)
 {
     for (int y=0; y<m_ySize; ++y)

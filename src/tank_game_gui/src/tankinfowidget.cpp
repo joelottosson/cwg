@@ -61,6 +61,7 @@ void TankInfoWidget::SetPoints(int points)
 
 void TankInfoWidget::ResetLeds()
 {
+	ui->laserActive->setPixmap(m_blue_off);
     for (size_t i=0; i<9; ++i)
     {
     	if(i==8){
@@ -112,6 +113,12 @@ void TankInfoWidget::Update(const Joystick* js)
         SetLed(TankInfoWidget::Fire, true);
     }else{
     	SetLed(TankInfoWidget::Fire, false);
+    }
+    if(js->laser){
+    	ui->laserActive->setPixmap(m_blue_on);
+    }else{
+    	ui->laserActive->setPixmap(m_blue_off);
+
     }
     if (js->moveDirection!=None)
     {

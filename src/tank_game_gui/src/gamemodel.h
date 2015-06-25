@@ -47,6 +47,7 @@ struct Joystick
     qint64 playerId;
     int tankId;
     bool fire;
+    bool laser;
     Direction moveDirection;
     Direction towerDirection;
 

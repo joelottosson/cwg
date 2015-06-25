@@ -87,6 +87,14 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     PaintPoison(painter);
 
 
+    //Paint sprites
+    for (auto& s : m_world.Sprites())
+    {
+
+        PaintSprite(s, painter);
+        //s.killToggle();
+    }
+
 
     //Paint tanks
     int blueTank=true;
@@ -96,13 +104,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         blueTank=!blueTank;
     }
 
-    //Paint sprites
-    for (auto& s : m_world.Sprites())
-    {
 
-        PaintSprite(s, painter);
-        //s.killToggle();
-    }
 
     if(m_world.GetGameState().dudes.size() != 0 ){
     	PaintDudes(m_world.GetGameState().dudes.front(), painter);

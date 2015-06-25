@@ -21,7 +21,7 @@ cool_players: .FORCE
 	@cd ../../..
 	cd src/players/tank_player_dumb/src && cmake . && make install
 	@cd ../../..
-	cd src/players/tank_joy_player/src && cmake . && make install
+	cd src/players/tank_player_manual/src && cmake . && make install
 	@cd ../../..
 	cd src/players/tank_player_grandmother/src && cmake . && make install
 	@cd ../../..

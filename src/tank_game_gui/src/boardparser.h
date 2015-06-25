@@ -45,6 +45,8 @@ public:
     const PointVec& Dudes() const {return m_dudes;}
     const PointVec& LaserAmmo() const {return m_laser_ammo;}
 
+    const bool isWall(qreal x, qreal y) const;
+
     void ReverseTanks();
     void ToBinary(std::vector<char>& bin) const;    
     void Save(const std::string& filepath) const;
@@ -61,6 +63,7 @@ private:
     PointVec m_dudes;
 
     void Parse(const char* data);
+    //bool IsWall(const char* data, int x, int y);
 };
 
 #endif

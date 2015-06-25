@@ -48,6 +48,33 @@ GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr)
     }
 }
 
+int GameMap::LaserAmmoCount() const{
+	Safir::Dob::Typesystem::ArrayIndex tankIndex;
+    for (tankIndex = 0;
+         tankIndex < m_gamePtr->TanksArraySize();
+         tankIndex++) {
+
+        if (m_gamePtr->Tanks()[tankIndex].IsNull()) {
+            // empty tank slot, found last tank
+            break;
+        }
+
+        Consoden::TankGame::TankPtr tankPtr =
+                boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_gamePtr->Tanks()[tankIndex].GetPtr());
+
+        //std::pair<int, int> pos = std::make_pair(tankPtr->PosX().GetVal(), tankPtr->PosY().GetVal());
+
+        if (tankPtr->TankId().GetVal() == m_TankId) {
+            // This is our tank!
+            return tankPtr->Lasers().GetVal();
+
+        } else {
+            continue;
+        }
+    }
+    return -1;
+}
+
 bool GameMap::IsWall(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='x';
@@ -56,6 +83,11 @@ bool GameMap::IsWall(const std::pair<int, int>& pos) const
 bool GameMap::IsMine(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='o';
+}
+
+bool GameMap::IsLaserAmmo(const std::pair<int, int>& pos) const
+{
+    return m_gamePtr->Board().GetVal()[Index(pos)]=='l';
 }
 
 bool GameMap::IsCoin(const std::pair<int, int>& pos) const

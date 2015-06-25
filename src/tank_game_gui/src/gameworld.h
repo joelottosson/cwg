@@ -80,6 +80,8 @@ private:
     SpriteData m_tankFire;
     SpriteData m_coin;
     SpriteData m_laser_ammo;
+    SpriteData m_laser_middle;
+    SpriteData m_laser_start;
     SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
 
@@ -107,8 +109,9 @@ private:
     inline void UpdatePoison(const Board& board);
     inline void UpdateLaserAmmo(const Board& boardParser);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
-    inline void UpdateTank(const Consoden::TankGame::TankPtr& tank);
+    inline void UpdateTank(const Consoden::TankGame::TankPtr& tank,const Board& board);
     inline void UpdateDude(const Consoden::TankGame::DudePtr& dude);
+    inline void DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& board);
 
 
     inline void UpdateDudes(const Board& board);
