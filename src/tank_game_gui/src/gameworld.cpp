@@ -46,6 +46,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_explosionMediaPlayer2()
     ,m_tookCoinMediaPlayer()
     ,m_wilhelmScreamMediaPlayer()
+
 {
 	//TODO: This is horrible. Fix at some point
 	m_first = true;
@@ -349,11 +350,11 @@ void  GameWorld::UpdateLaserAmmo(const Board& boardParser)
                 }
 
                 //play sound
-/*                if (m_soundEnabled)
+                if (m_soundEnabled)
                 {
-                    m_tookCoinMediaPlayer.stop();
-                    m_tookCoinMediaPlayer.play();
-                }*/
+                    m_laser_pickup_MediaPlayer.stop();
+                    m_laser_pickup_MediaPlayer.play();
+                }
             }));
         }
     }
@@ -514,7 +515,7 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     }
 
 
-    m_sprites.push_back(Sprite(m_laser_start, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace, 1));
+    m_sprites.push_back(Sprite(m_laser_start, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
     x_pos += dx;
     y_pos += dy;
 
@@ -529,10 +530,20 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     		//outside.
     		break;
     	}
-    	m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace, 1));
+    	m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
     	x_pos += dx;
     	y_pos += dy;
     }
+    m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
+    {
+        //update coin positions
+        //play sound
+        if (m_soundEnabled)
+        {
+            m_laser_fire_MediaPlayer.stop();
+            m_laser_fire_MediaPlayer.play();
+        }
+    }));
 
 }
 
@@ -855,10 +866,11 @@ void GameWorld::Update(const Consoden::TankGame::JoystickConstPtr &joystick)
 
     size_t tankId=static_cast<size_t>(joystick->TankId().GetVal());
     Joystick& js=m_matchState.gameState.joystics[tankId];
-    js.laser = joystick->FireLaser();
+    //js.laser = joystick->FireLaser();
     js.tankId=joystick->TankId().GetVal();
     js.playerId=joystick->PlayerId().GetVal().GetRawValue();
     js.fire=joystick->Fire().IsNull() ? false : joystick->Fire().GetVal();
+    js.fire=joystick->FireLaser().IsNull() ? false : joystick->FireLaser().GetVal();
     js.moveDirection=ToDirection(joystick->MoveDirection());
     js.towerDirection=ToDirection(joystick->TowerDirection());
 }
@@ -1175,6 +1187,8 @@ void GameWorld::InitMediaPlayers()
     QString tookCoin=QDir::cleanPath(path+QDir::separator()+"coin.mp3");
     QString wilhelmScream=QDir::cleanPath(path+QDir::separator()+"wilhelm_scream.mp3");
     QString death_of_dude=QDir::cleanPath(path+QDir::separator()+"dude-dies.mp3");
+    QString laser_pickup=QDir::cleanPath(path+QDir::separator()+"laser-pickup.mp3");
+    QString laser_fire=QDir::cleanPath(path+QDir::separator()+"laser-fire.mp3");
 
     m_fireMediaPlayer1.setMedia(QUrl::fromLocalFile(firePath));
     m_explosionMediaPlayer1.setMedia(QUrl::fromLocalFile(explostionPath));
@@ -1183,6 +1197,8 @@ void GameWorld::InitMediaPlayers()
     m_tookCoinMediaPlayer.setMedia(QUrl::fromLocalFile(tookCoin));
     m_wilhelmScreamMediaPlayer.setMedia(QUrl::fromLocalFile(wilhelmScream));
     m_dude_dies_MediaPlayer.setMedia(QUrl::fromLocalFile(death_of_dude));
+    m_laser_pickup_MediaPlayer.setMedia(QUrl::fromLocalFile(laser_pickup));
+    m_laser_fire_MediaPlayer.setMedia(QUrl::fromLocalFile(laser_fire));
 }
 
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)

@@ -100,6 +100,8 @@ private:
     QMediaPlayer m_tookCoinMediaPlayer;
     QMediaPlayer m_wilhelmScreamMediaPlayer;
     QMediaPlayer m_dude_dies_MediaPlayer;
+    QMediaPlayer m_laser_pickup_MediaPlayer;
+	QMediaPlayer m_laser_fire_MediaPlayer;
 
     void SetTextSmall(const QStringList& lines);
     void SetTextPlayer(int playerNumber, const QStringList& lines);
