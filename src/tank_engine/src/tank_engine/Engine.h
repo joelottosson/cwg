@@ -69,6 +69,7 @@ namespace TankEngine
         bool CollisionPredicter(CWG::DudePtr& dude, CWG::TankPtr& tank);
 
         void dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr);
+        bool fireTheLaser(CWG::TankPtr& own_tank, CWG::TankPtr& enemy_tank , GameMap gm,CWG::GameStatePtr game_ptr);
 
 
         /*

@@ -288,7 +288,9 @@ namespace TankEngine
         Consoden::TankGame::JoystickPtr joystick_ptr =
             boost::static_pointer_cast<Consoden::TankGame::Joystick>(m_connection.Read(entityId).GetEntity());
 
-        joystick_ptr->FireLaser() = false;
+        if(!joystick_ptr->FireLaser().IsNull()){
+        	joystick_ptr->FireLaser() = false;
+        }
 
         std::string player_str("Player X");
         if (game_ptr->PlayerOneId().GetVal() == joystick_ptr->PlayerId().GetVal()) {
@@ -627,10 +629,26 @@ namespace TankEngine
             		joystick_ptr->Fire() && !joystick_ptr->TowerDirection().IsNull() &&
 					joystick_ptr->FireLaser() && !joystick_ptr->FireLaser().IsNull() && !tank_ptr->FireLaser().IsNull()){
             	if(tank_ptr->Lasers() > 0){
-            		std::wcout << "FIRED DA LAAAAZOR!!!!!!!!!!!!!" << std::endl;
             		tank_ptr->Lasers() = tank_ptr->Lasers() - 1;
             		tank_ptr->FireLaser() = true;
+            		tank_ptr->Fire() = true;
+
+            		Consoden::TankGame::TankPtr enemy_ptr =
+            		                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[(tank_index+1) % 2].GetPtr());
+
+            		std::wcout << "We are doing crazy cool laser fajer... " << std::endl;
+            		if(fireTheLaser(tank_ptr, enemy_ptr,gm,game_ptr)){
+            			std::wcout << "We may or may not have hit the tankozarus with the layzer blazer " << std::endl;
+            			enemy_ptr->InFlames() = true;
+            			enemy_ptr->HitMissile() = true;
+            			AddPoints(2, OpponentTankId(tank_ptr->TankId()), game_ptr);
+            		}else{
+            			std::wcout << "So...the laser didnt hit.... " << std::endl;
+            		}
+
             	}else{
+            		tank_ptr->FireLaser() = false;
+            		tank_ptr->Fire() = false;
             	}
             }
 
@@ -848,6 +866,51 @@ namespace TankEngine
 
         m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
     }
+
+    bool Engine::fireTheLaser(CWG::TankPtr& own_tank, CWG::TankPtr& enemy_tank , GameMap gm,CWG::GameStatePtr game_ptr){
+    	int dx = 0;
+    	int dy = 0;
+    	int x_pos = own_tank->PosX();
+    	int y_pos = own_tank->PosY();
+    	switch (own_tank->TowerDirection()) {
+			case CWG::Direction::Up:
+				dy = -1;
+				break;
+			case CWG::Direction::Down:
+				dy = 1;
+				break;
+			case CWG::Direction::Left:
+				dx = -1;
+				break;
+			case CWG::Direction::Right:
+				dx = 1;
+				break;
+
+			default:
+				std::wcout << "tower direction was neutral" << std::endl;
+				return false;
+				break;
+		}
+
+    	while(true){
+    		x_pos += dx;
+    		y_pos += dy;
+    		if(gm.WallSquare(x_pos,y_pos)){
+    			std::wcout << "lazer hti wall " << std::endl;
+    			return false;
+    		}else if(!gm.OnBoard(x_pos, y_pos)){
+    			std::wcout << "laser left board " << std::endl;
+    			return false;
+    		}else if(x_pos == enemy_tank->PosX() && y_pos == enemy_tank->PosY()){
+    			std::wcout << "laser hit da tankinator" << std::endl;
+    			return true;
+    		}
+    	}
+
+    }
+
+
+
 
     void Engine::AddPoints(int points, int tank_id, Consoden::TankGame::GameStatePtr game_ptr) {
         if (mPlayerOneTankId == tank_id) {
