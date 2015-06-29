@@ -10,6 +10,7 @@
 #include <qstyleoption.h>
 #include "sprite.h"
 #include "tankgamewidget.h"
+#include "gameworld.h"
 
 namespace SDob = Safir::Dob::Typesystem;
 namespace CWG= Consoden::TankGame;
@@ -89,6 +90,17 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
     //Paint sprites
     for (auto& s : m_world.Sprites())
+    {
+
+        PaintSprite(s, painter);
+        //s.killToggle();
+    }
+
+    //TODO: Paint passive sprites like a boss.
+    //PassiveGroup why = m_world.getPassiveCoins();
+    std::vector<Sprite> passive = m_world.getPassiveSprites();
+
+    for (auto& s : passive)
     {
 
         PaintSprite(s, painter);
@@ -337,7 +349,11 @@ void TankGameWidget::PaintSprite(const Sprite& sprite, QPainter& painter)
     {        
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(sprite.Position(), m_const.squarePixelSize/2, m_const.squarePixelSize/2),
                                                                      sprite.Fragment(), 1, 1, sprite.Rotation(), 1);
+
         painter.drawPixmapFragments(&pf, 1, sprite.Image());
+
+
+
     }
 }
 

@@ -9,9 +9,11 @@
 #define TANKGAMEWIDGET_H
 
 #include <QWidget>
+
 #include "gameworld.h"
 #include "tankinfowidget.h"
 #include "sprite.h"
+
 
 
 class TankGameWidget : public QWidget

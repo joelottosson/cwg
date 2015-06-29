@@ -13,6 +13,7 @@
 #include <qpixmap.h>
 #include <iostream>
 
+
 struct SpriteData
 {
     QPixmap image;
@@ -116,9 +117,9 @@ public:
         {
             m_currentFragment=(now-m_startTime)/m_timeSlice;
 
-            if (m_repetitions==0 || m_currentFragment<m_spriteData->fragments.size()*m_repetitions)
+            if (m_repetitions==0 || m_currentFragment < m_spriteData->fragments.size()*m_repetitions)
             {
-                m_currentFragment=m_currentFragment%m_spriteData->fragments.size();
+                m_currentFragment = m_currentFragment % m_spriteData->fragments.size();
             }
             else
             {
@@ -129,7 +130,6 @@ public:
             m_pos.setX(m_pos.x()+m_speed.x()*elapsed);
             m_pos.setY(m_pos.y()+m_speed.y()*elapsed);
         }
-
         m_lastUpdated=now;
     }
 

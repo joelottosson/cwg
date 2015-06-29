@@ -18,15 +18,22 @@
 #include <Consoden/TankGame/GameState.h>
 #include <Consoden/TankGame/Joystick.h>
 
+
 #include "gamemodel.h"
 #include "sprite.h"
 #include "boardparser.h"
 #include "screentext.h"
+#include "PassiveGroup.h"
 
 class GameWorld
 {
 public:
     GameWorld(int updateInterval, bool soundEnabled);
+
+
+
+    std::vector<Sprite> getPassiveSprites() const;
+
 
     void Clear();
     void ClearGameState();
@@ -66,6 +73,9 @@ public:
     void SetTextBig(const QStringList& lines);
     const std::vector<ScreenText>& ScreenTexts() const {return m_screenText;}
 
+
+
+
 private:
     MatchState m_matchState;
     PlayerMap m_players;
@@ -85,8 +95,12 @@ private:
     SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
 
-    //TODO: This is horrible. There must be a better way.
-    bool m_first;
+
+    //TODO: CREEPY_THINGS_GO_HEERE_ :O
+    //PassiveGroup m_passive_coins;
+
+    PassiveGroup m_passive_coins;
+
 
     typedef std::multimap<qint64, boost::function<void()> > WorldEvents;
     WorldEvents m_eventQueue;
@@ -119,6 +133,8 @@ private:
 
 
     inline void UpdateDudes(const Board& board);
+
+
 
 
     inline void UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal);
