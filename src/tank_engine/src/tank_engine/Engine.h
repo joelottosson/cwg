@@ -71,6 +71,7 @@ namespace TankEngine
         void dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr);
         bool fireTheLaser(CWG::TankPtr& own_tank, CWG::TankPtr& enemy_tank , GameMap gm,CWG::GameStatePtr game_ptr);
 
+        int wrap(int pos, int size);
 
         /*
          * Creates a random list of the directions.(Each direction occurs only once).

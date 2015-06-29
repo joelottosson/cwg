@@ -516,23 +516,31 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
 
 
     m_sprites.push_back(Sprite(m_laser_start, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
-    x_pos += dx;
-    y_pos += dy;
+    //x_pos += dx;
+    //y_pos += dy;
 
     while(true){
+    	x_pos = wrap(x_pos + dx,m_matchState.gameState.size.x());
+    	y_pos = wrap(y_pos + dy,m_matchState.gameState.size.y());
+    	//std::wcout << "x = "<< x_pos <<" y = "<< y_pos << std::endl;
+    	//y_pos += dy;
     	if(board.isWall(x_pos,y_pos)){
     		//Reaced wally thing play sparks
     		break;
     	}else if(enemy_position == QPointF(x_pos,y_pos)){
     		//Hit enemy tank. just chill
+    		m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
     		break;
-    	}else if(x_pos > m_matchState.gameState.size.x() || x_pos < 0 || y_pos > m_matchState.gameState.size.y() || y_pos < 0){
-    		//outside.
-    		break;
+    	}else if(t.position == QPointF(x_pos,y_pos)){
+			//Hit enemy tank. just chill
+    		m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
+			break;
+    	//}else if(x_pos > m_matchState.gameState.size.x() || x_pos < 0 || y_pos > m_matchState.gameState.size.y() || y_pos < 0){
+    	//	//outside.
+    	//	break;
     	}
     	m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
-    	x_pos += dx;
-    	y_pos += dy;
+
     }
     m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
     {
@@ -555,6 +563,11 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     t.moveDirection=ToDirection(tank->MoveDirection());
     t.fires=tank->Fire().GetVal();
     t.towerDirection=ToDirection(tank->TowerDirection());
+
+    if(!tank->FireLaser().IsNull() && tank->FireLaser() ){
+    	std::wcout << "is fiering laser" << std::endl;
+    	DrawLaser(tank,board);
+    }
 
     if (tank->InFlames().GetVal())
     {
@@ -650,10 +663,7 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     }
     else
     {
-        if(!tank->FireLaser().IsNull() && tank->FireLaser() ){
-        	std::wcout << "is fiering laser" << std::endl;
-        	DrawLaser(tank,board);
-        }
+
         t.paintPosition=t.position;
         t.position=QPointF(tank->PosX().GetVal(), tank->PosY().GetVal());
     }
@@ -680,8 +690,9 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
-    UpdateCoins(boardParser);
     UpdateLaserAmmo(boardParser);
+    UpdateCoins(boardParser);
+
 
 
     //UpdateDudes(boardParser);
@@ -1336,4 +1347,15 @@ void GameWorld::SetTextPlayer(int playerNumber, const QStringList& lines)
                                   true,
                                   1000);
     }
+}
+
+int GameWorld::wrap(int pos, int size){
+   	//return pos == 0 ? 0 : (size - std::abs(pos)*(size/std::abs(pos)));
+	if(pos > size){
+			return 0;
+	}else if(pos < 0){
+			return size - 1;
+	}else{
+		return pos;
+	}
 }

@@ -93,6 +93,8 @@ private:
     void HandleEventQueue(qint64 time);
     void InitMediaPlayers();
 
+    int wrap(int pos, int size);
+
     QMediaPlayer m_fireMediaPlayer1;
     QMediaPlayer m_explosionMediaPlayer1;
     QMediaPlayer m_fireMediaPlayer2;

@@ -639,9 +639,9 @@ namespace TankEngine
             		std::wcout << "We are doing crazy cool laser fajer... " << std::endl;
             		if(fireTheLaser(tank_ptr, enemy_ptr,gm,game_ptr)){
             			std::wcout << "We may or may not have hit the tankozarus with the layzer blazer " << std::endl;
-            			enemy_ptr->InFlames() = true;
-            			enemy_ptr->HitMissile() = true;
-            			AddPoints(2, OpponentTankId(tank_ptr->TankId()), game_ptr);
+            			//enemy_ptr->InFlames() = true;
+            			//enemy_ptr->HitMissile() = true;
+            			//AddPoints(2, tank_ptr->TankId(), game_ptr);
             		}else{
             			std::wcout << "So...the laser didnt hit.... " << std::endl;
             		}
@@ -893,18 +893,31 @@ namespace TankEngine
 		}
 
     	while(true){
-    		x_pos += dx;
-    		y_pos += dy;
+    		//lazer wrapper
+    		x_pos = wrap(x_pos+dx,game_ptr->Width().GetVal());
+    		y_pos = wrap(y_pos+dy,game_ptr->Height().GetVal());
+    		std::wcout << "x = "<< x_pos <<" y = "<< y_pos << std::endl;
+    		//y_pos += dy;
     		if(gm.WallSquare(x_pos,y_pos)){
     			std::wcout << "lazer hti wall " << std::endl;
     			return false;
-    		}else if(!gm.OnBoard(x_pos, y_pos)){
-    			std::wcout << "laser left board " << std::endl;
-    			return false;
+    		//}else if(!gm.OnBoard(x_pos, y_pos)){
+    		//	std::wcout << "laser left board " << std::endl;
+    		//	return false;
     		}else if(x_pos == enemy_tank->PosX() && y_pos == enemy_tank->PosY()){
     			std::wcout << "laser hit da tankinator" << std::endl;
+    			enemy_tank->InFlames() = true;
+    			//todo: Add hit lazer thing for various awesomeness reasons and treasons
+    			enemy_tank->HitMissile() = true;
+    			return true;
+    		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
+    			std::wcout << "stupid tank hit itself ^-^" << std::endl;
+    			own_tank->InFlames() = true;
+    			//todo: Add hit lazer thing for various awesomeness reasons and treasons
+    			own_tank->HitMissile() = true;
     			return true;
     		}
+
     	}
 
     }
@@ -1097,6 +1110,17 @@ namespace TankEngine
 			dude_ptr->Seed() = std::rand();
         }
         std::srand(old_seed);
+    }
+
+    int Engine::wrap(int pos, int size){
+       	//return pos == 0 ? 0 : (size - std::abs(pos)*(size/std::abs(pos)));
+    	if(pos > size){
+    			return 0;
+    	}else if(pos < 0){
+    			return size - 1;
+    	}else{
+    		return pos;
+    	}
     }
 
 
