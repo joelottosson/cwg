@@ -15,8 +15,10 @@ Board::Board(const std::string& filepath)
     ,m_walls()
     ,m_mines()
     ,m_coins()
+	,m_laser_ammo()
     ,m_poison()
 	,m_dudes()
+
 {
     std::ifstream is;
     is.open(filepath.c_str());
@@ -55,8 +57,10 @@ Board::Board(const char* binary, int xSize, int ySize)
     ,m_walls()
     ,m_mines()
     ,m_coins()
+	,m_laser_ammo()
     ,m_poison()
 	,m_dudes()
+
 {
     Parse(binary);
 }
@@ -100,6 +104,13 @@ void Board::ToBinary(std::vector<char>& bin) const
         size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
         bin[index]='d';
     }
+
+    for (const auto& pos : m_laser_ammo)
+    {
+        size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
+        bin[index]='l';
+    }
+
 }
 
 void Board::Save(const std::string& filepath) const
@@ -123,6 +134,22 @@ void Board::Save(const std::string& filepath) const
         }
     }
     os.close();
+}
+
+/*bool Board::IsWall(const char* data, int x, int y){
+	size_t index=static_cast<size_t>(y*m_xSize+x);
+	return data[index]  == 'x';
+}*/
+
+const bool Board::isWall(qreal x, qreal y) const{
+	for(auto p : m_walls){
+		if(p.x() == x && p.y() == y){
+			return true;
+		}
+	}
+
+	return false;
+
 }
 
 void Board::Parse(const char* data)
@@ -170,6 +197,13 @@ void Board::Parse(const char* data)
                 m_poison.push_back(QPointF(x, y));
             }
                 break;
+
+            case 'l': //poison
+            {
+                m_laser_ammo.push_back(QPointF(x, y));
+            }
+                break;
+
 
             case '.': //empty square
                 break;

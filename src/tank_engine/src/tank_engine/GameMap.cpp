@@ -61,6 +61,11 @@ namespace TankEngine
         return (m_Game[pos_x][pos_y] == 'p');
     }
 
+    bool GameMap::LaserAmmo(int pos_x, int pos_y)
+    {
+        return (m_Game[pos_x][pos_y] == 'l');
+    }
+
     void GameMap::ClearSquare(int pos_x, int pos_y)
     {
         m_Game[pos_x][pos_y] = '.';

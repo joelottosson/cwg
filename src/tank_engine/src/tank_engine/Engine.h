@@ -69,7 +69,9 @@ namespace TankEngine
         bool CollisionPredicter(CWG::DudePtr& dude, CWG::TankPtr& tank);
 
         void dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr);
+        bool fireTheLaser(CWG::TankPtr& own_tank, CWG::TankPtr& enemy_tank , GameMap gm,CWG::GameStatePtr game_ptr);
 
+        int wrap(int pos, int size);
 
         /*
          * Creates a random list of the directions.(Each direction occurs only once).
@@ -90,7 +92,6 @@ namespace TankEngine
         Consoden::TankGame::Winner::Enumeration TankIdToWinner(int tank_id) { if (tank_id == mPlayerOneTankId) { return Consoden::TankGame::Winner::PlayerOne; } else { return Consoden::TankGame::Winner::PlayerTwo; } }
         int  OpponentTankId(int tank_id) { if (tank_id == mPlayerOneTankId) { return mPlayerTwoTankId; } else { return mPlayerOneTankId; } }
 
-        std::pair<int,int> WrappedPosition(std::pair<int,int> pos, CWG::Direction dir);
 
         bool mGamePrepare;
         bool mGameRunning;

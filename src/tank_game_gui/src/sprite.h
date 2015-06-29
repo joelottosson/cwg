@@ -11,6 +11,7 @@
 #include <QTime>
 #include <QPixmap>
 #include <qpixmap.h>
+#include <iostream>
 
 struct SpriteData
 {

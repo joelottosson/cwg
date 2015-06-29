@@ -28,6 +28,10 @@
             <type>Boolean</type>
         </member>
         <member>
+            <name>FireLaser</name>
+            <type>Boolean</type>
+        </member>        
+        <member>
             <name>MineDrop</name>
             <type>Boolean</type>
         </member>

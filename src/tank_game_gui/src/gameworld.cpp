@@ -46,6 +46,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_explosionMediaPlayer2()
     ,m_tookCoinMediaPlayer()
     ,m_wilhelmScreamMediaPlayer()
+
 {
 	//TODO: This is horrible. Fix at some point
 	m_first = true;
@@ -77,13 +78,29 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
         m_coin.fragments.push_back(QRectF(i*72, 0, 72, 72));
     }
 
-    //TODO: reconisder this!
+
     m_dude.image=QPixmap(":/images/tux-anim.png");
 	m_dude.lifeTime=500;
 	for (int i=0; i < 3; ++i)
 	{
 		m_dude.fragments.push_back(QRectF(i*72, 0, 72, 72));
 	}
+
+    m_laser_ammo.image=QPixmap(":/images/laser-ammo.png");
+	m_laser_ammo.lifeTime=1200;
+	for (int i=0; i < 27; ++i)
+	{
+		m_laser_ammo.fragments.push_back(QRectF(i*66, 0, 66, 67));
+	}
+
+    m_laser_middle.image=QPixmap(":/images/laser-middle.png");
+	m_laser_middle.lifeTime=1000;
+	m_laser_middle.fragments.push_back(QRectF(0, 0, 72, 72));
+
+    m_laser_start.image=QPixmap(":/images/laser-start.png");
+	m_laser_start.lifeTime=1000;
+	m_laser_start.fragments.push_back(QRectF(0, 0, 72, 72));
+
 
 }
 
@@ -233,7 +250,7 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
             for (auto pos : m_matchState.gameState.coins)
             {
                 m_sprites.push_back(Sprite(m_coin, pos, QDateTime::currentMSecsSinceEpoch(), 0));
-            	m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
+            	//m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
             }
         }
         else
@@ -281,6 +298,68 @@ void  GameWorld::UpdateCoins(const Board& boardParser)
     }
 }
 
+
+void  GameWorld::UpdateLaserAmmo(const Board& boardParser)
+{
+    if (boardParser.LaserAmmo().size()!=m_matchState.gameState.laser_ammo.size())
+    {
+        if (m_matchState.gameState.laser_ammo.empty())
+        {
+
+            //first time after start, immediately place laser ammo on board
+            m_matchState.gameState.laser_ammo.insert(m_matchState.gameState.laser_ammo.begin(), boardParser.LaserAmmo().begin(), boardParser.LaserAmmo().end());
+            for (auto pos : m_matchState.gameState.laser_ammo)
+            {
+
+                m_sprites.push_back(Sprite(m_laser_ammo, pos, QDateTime::currentMSecsSinceEpoch(), 0));
+            	//m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
+            }
+        }
+        else
+        {
+            //laser ammo has changed, we do the update after a halfSquare-time to make it look nicer.
+            m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
+            {
+                //update laser ammo positions
+                m_matchState.gameState.laser_ammo.clear();
+                m_matchState.gameState.laser_ammo.insert(m_matchState.gameState.laser_ammo.begin(), boardParser.LaserAmmo().begin(), boardParser.LaserAmmo().end());
+
+                for (auto spriteIt=m_sprites.begin(); spriteIt!=m_sprites.end();)
+                {
+                    bool remove=true;
+                    if (spriteIt->Data()==&m_laser_ammo)
+                    {
+                        for (auto& laser : m_matchState.gameState.laser_ammo)
+                        {
+                            if (laser==spriteIt->Position())
+                            {
+                                remove=false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (remove)
+                    {
+                        spriteIt=m_sprites.erase(spriteIt);
+                    }
+                    else
+                    {
+                        ++spriteIt;
+                    }
+                }
+
+                //play sound
+                if (m_soundEnabled)
+                {
+                    m_laser_pickup_MediaPlayer.stop();
+                    m_laser_pickup_MediaPlayer.play();
+                }
+            }));
+        }
+    }
+}
+
 void  GameWorld::UpdatePoison(const Board& boardParser)
 {
     if (boardParser.Poison().size()!=m_matchState.gameState.poison.size())
@@ -303,7 +382,6 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
 
 //void  GameWorld::UpdateDudes(const Board& boardParser){}
 
-//TODO: Crap added by meeeeeeee
 void  GameWorld::UpdateDudes(const Board& boardParser)
 {
 	return;
@@ -363,7 +441,121 @@ void GameWorld::UpdateDude(const Consoden::TankGame::DudePtr& dude){
 
 }
 
-void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
+void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& board){
+    int i=tank->TankId().GetVal();
+    Tank& t=m_matchState.gameState.tanks[i];
+    UpdateTankWrapping(tank, t);
+    t.moveDirection=ToDirection(tank->MoveDirection());
+    t.fires=tank->Fire().GetVal();
+    t.towerDirection=ToDirection(tank->TowerDirection());
+    qreal x_pos = t.position.x();
+    qreal y_pos = t.position.y();
+
+
+    qreal rot = 0;
+    qreal dx = 0;
+    qreal dy = 0;
+    //Compensate position for move direction to make
+    //the laser appear at the correct instance and deal with neutral tower direction
+    switch (t.moveDirection){
+    	case Direction::UpHeading:
+    		dy = -1;
+    		y_pos--;
+    		rot = 0;
+    		break;
+    	case Direction::DownHeading:
+			dy = 1;
+			y_pos++;
+			rot = 180;
+			break;
+    	case Direction::LeftHeading:
+			dx = -1;
+			x_pos--;
+			rot = 270;
+			break;
+    	case Direction::RightHeading:
+			dx = 1;
+			x_pos++;
+			rot = 90;
+			break;
+    	default:
+    		return;
+    }
+
+    if(t.towerDirection != Direction::None){
+    	dy = 0;
+    	dx = 0;
+    }
+
+    Tank& enemy=m_matchState.gameState.tanks[(i + 1) %2];
+    QPointF enemy_position = enemy.position;
+
+
+
+    switch (t.towerDirection){
+    	case Direction::UpHeading:
+    		dy = -1;
+    		rot = 0;
+    		break;
+    	case Direction::DownHeading:
+			dy = 1;
+			rot = 180;
+			break;
+    	case Direction::LeftHeading:
+			dx = -1;
+			rot = 270;
+			break;
+    	case Direction::RightHeading:
+			dx = 1;
+			rot = 90;
+			break;
+    	default:
+    		std::wcout << "Tried to fire laser without tower direction" << std::endl;
+    		//return;
+    }
+
+
+    m_sprites.push_back(Sprite(m_laser_start, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
+    //x_pos += dx;
+    //y_pos += dy;
+
+    while(true){
+    	x_pos = wrap(x_pos + dx,m_matchState.gameState.size.x());
+    	y_pos = wrap(y_pos + dy,m_matchState.gameState.size.y());
+    	//std::wcout << "x = "<< x_pos <<" y = "<< y_pos << std::endl;
+    	//y_pos += dy;
+    	if(board.isWall(x_pos,y_pos)){
+    		//Reaced wally thing play sparks
+    		break;
+    	}else if(enemy_position == QPointF(x_pos,y_pos)){
+    		//Hit enemy tank. just chill
+    		m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
+    		break;
+    	}else if(t.position == QPointF(x_pos,y_pos)){
+			//Hit enemy tank. just chill
+    		m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
+			break;
+    	//}else if(x_pos > m_matchState.gameState.size.x() || x_pos < 0 || y_pos > m_matchState.gameState.size.y() || y_pos < 0){
+    	//	//outside.
+    	//	break;
+    	}
+    	m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, 1));
+
+    }
+    m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
+    {
+        //update coin positions
+        //play sound
+        if (m_soundEnabled)
+        {
+            m_laser_fire_MediaPlayer.stop();
+            m_laser_fire_MediaPlayer.play();
+        }
+    }));
+
+}
+
+void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board& board)
 {
     int i=tank->TankId().GetVal();
     Tank& t=m_matchState.gameState.tanks[i];
@@ -371,6 +563,11 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
     t.moveDirection=ToDirection(tank->MoveDirection());
     t.fires=tank->Fire().GetVal();
     t.towerDirection=ToDirection(tank->TowerDirection());
+
+    if(!tank->FireLaser().IsNull() && tank->FireLaser() ){
+    	std::wcout << "is fiering laser" << std::endl;
+    	DrawLaser(tank,board);
+    }
 
     if (tank->InFlames().GetVal())
     {
@@ -437,6 +634,8 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
             break;
         }
 
+
+
         if (!tank->HitWall().IsNull() && tank->HitWall())
         {
             t.deathCause=Tank::HitWall;
@@ -464,6 +663,7 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank)
     }
     else
     {
+
         t.paintPosition=t.position;
         t.position=QPointF(tank->PosX().GetVal(), tank->PosY().GetVal());
     }
@@ -490,6 +690,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
+    UpdateLaserAmmo(boardParser);
     UpdateCoins(boardParser);
 
 
@@ -614,7 +815,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         if (!game->Tanks()[i].IsNull())
         {
             const Consoden::TankGame::TankPtr& tank=game->Tanks()[i].GetPtr();
-            UpdateTank(tank);
+            UpdateTank(tank, boardParser);
         }
     }
 
@@ -676,9 +877,11 @@ void GameWorld::Update(const Consoden::TankGame::JoystickConstPtr &joystick)
 
     size_t tankId=static_cast<size_t>(joystick->TankId().GetVal());
     Joystick& js=m_matchState.gameState.joystics[tankId];
+    //js.laser = joystick->FireLaser();
     js.tankId=joystick->TankId().GetVal();
     js.playerId=joystick->PlayerId().GetVal().GetRawValue();
     js.fire=joystick->Fire().IsNull() ? false : joystick->Fire().GetVal();
+    js.fire=joystick->FireLaser().IsNull() ? false : joystick->FireLaser().GetVal();
     js.moveDirection=ToDirection(joystick->MoveDirection());
     js.towerDirection=ToDirection(joystick->TowerDirection());
 }
@@ -854,33 +1057,6 @@ void GameWorld::Update()
     //TODO:
     //update of our dude
     for (auto& dude : m_matchState.gameState.dudes){
-    	//std::wcout << "LOOOK_WE_ARE_DOING_THINGS  " << std::endl;
-    	//dude.position.setX(dude.position.x()+movement),
-		//dude.position.setX(dude.position.x()+movement),
-    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
-
-
-
-        QPointF animationMoveSpeed(0,0);
-        switch(dude.moveDirection)
-        {
-        case LeftHeading:
-            animationMoveSpeed.setX(-1*m_moveSpeed);
-            break;
-        case RightHeading:
-            animationMoveSpeed.setX(m_moveSpeed);
-            break;
-        case UpHeading:
-            animationMoveSpeed.setY(-1*m_moveSpeed);
-            break;
-        case DownHeading:
-            animationMoveSpeed.setY(m_moveSpeed);
-            break;
-        case None:
-            break;
-        }
-    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, animationMoveSpeed, 0, now, 1));
-        //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, now, 0,true));
         if(dude.just_died){
         	UpdatePosition(timeToNextUpdate, .5*movement, dude,false);
 
@@ -995,6 +1171,8 @@ void GameWorld::InitMediaPlayers()
     QString tookCoin=QDir::cleanPath(path+QDir::separator()+"coin.mp3");
     QString wilhelmScream=QDir::cleanPath(path+QDir::separator()+"wilhelm_scream.mp3");
     QString death_of_dude=QDir::cleanPath(path+QDir::separator()+"dude-dies.mp3");
+    QString laser_pickup=QDir::cleanPath(path+QDir::separator()+"laser-pickup.mp3");
+    QString laser_fire=QDir::cleanPath(path+QDir::separator()+"laser-fire.mp3");
 
     m_fireMediaPlayer1.setMedia(QUrl::fromLocalFile(firePath));
     m_explosionMediaPlayer1.setMedia(QUrl::fromLocalFile(explostionPath));
@@ -1003,6 +1181,8 @@ void GameWorld::InitMediaPlayers()
     m_tookCoinMediaPlayer.setMedia(QUrl::fromLocalFile(tookCoin));
     m_wilhelmScreamMediaPlayer.setMedia(QUrl::fromLocalFile(wilhelmScream));
     m_dude_dies_MediaPlayer.setMedia(QUrl::fromLocalFile(death_of_dude));
+    m_laser_pickup_MediaPlayer.setMedia(QUrl::fromLocalFile(laser_pickup));
+    m_laser_fire_MediaPlayer.setMedia(QUrl::fromLocalFile(laser_fire));
 }
 
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)
@@ -1140,4 +1320,15 @@ void GameWorld::SetTextPlayer(int playerNumber, const QStringList& lines)
                                   true,
                                   1000);
     }
+}
+
+int GameWorld::wrap(int pos, int size){
+   	//return pos == 0 ? 0 : (size - std::abs(pos)*(size/std::abs(pos)));
+	if(pos > size){
+			return 0;
+	}else if(pos < 0){
+			return size - 1;
+	}else{
+		return pos;
+	}
 }

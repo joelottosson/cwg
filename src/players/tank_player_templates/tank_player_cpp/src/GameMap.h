@@ -34,6 +34,11 @@ public:
     int SizeY() const {return m_sizeY;}
 
     /**
+     * Returns the amount of lasers the tank has
+     */
+    int LaserAmmoCount() const;
+
+    /**
      * Location of the players tank.
      */
     std::pair<int, int> OwnPosition() const {return m_ownPos;}
@@ -52,6 +57,12 @@ public:
      * Check if there is a mine in this square.
      */
     bool IsMine(const std::pair<int, int>& pos) const;
+
+
+    /**
+     * Check if there is laser ammo in this square.
+     */
+    bool IsLaserAmmo(const std::pair<int, int>& pos) const;
 
     /**
      * Check if there is a coin in this square.

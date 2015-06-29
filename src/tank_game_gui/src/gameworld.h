@@ -79,6 +79,9 @@ private:
     SpriteData m_explosion;
     SpriteData m_tankFire;
     SpriteData m_coin;
+    SpriteData m_laser_ammo;
+    SpriteData m_laser_middle;
+    SpriteData m_laser_start;
     SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
 
@@ -90,6 +93,8 @@ private:
     void HandleEventQueue(qint64 time);
     void InitMediaPlayers();
 
+    int wrap(int pos, int size);
+
     QMediaPlayer m_fireMediaPlayer1;
     QMediaPlayer m_explosionMediaPlayer1;
     QMediaPlayer m_fireMediaPlayer2;
@@ -97,6 +102,8 @@ private:
     QMediaPlayer m_tookCoinMediaPlayer;
     QMediaPlayer m_wilhelmScreamMediaPlayer;
     QMediaPlayer m_dude_dies_MediaPlayer;
+    QMediaPlayer m_laser_pickup_MediaPlayer;
+	QMediaPlayer m_laser_fire_MediaPlayer;
 
     void SetTextSmall(const QStringList& lines);
     void SetTextPlayer(int playerNumber, const QStringList& lines);
@@ -104,9 +111,12 @@ private:
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
     inline void UpdateCoins(const Board& board);
     inline void UpdatePoison(const Board& board);
+    inline void UpdateLaserAmmo(const Board& boardParser);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
-    inline void UpdateTank(const Consoden::TankGame::TankPtr& tank);
+    inline void UpdateTank(const Consoden::TankGame::TankPtr& tank,const Board& board);
     inline void UpdateDude(const Consoden::TankGame::DudePtr& dude);
+    inline void DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& board);
+
 
     inline void UpdateDudes(const Board& board);
 
@@ -196,6 +206,7 @@ private:
             }
                 break;
             case None:
+            	item.paintPosition=item.position;
                 break;
             }
         }

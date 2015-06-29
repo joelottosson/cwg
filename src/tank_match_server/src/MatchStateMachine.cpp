@@ -223,6 +223,7 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank1->HitTank()=false;
     tank1->TookCoin()=false;
     tank1->HitPoisonGas()=false;
+    tank1->Lasers() = 0;
 
 
 
@@ -237,6 +238,7 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank2->HitTank()=false;
     tank2->TookCoin()=false;
     tank2->HitPoisonGas()=false;
+    tank2->Lasers() = 0;
 
     if (!reversedPlayers)
     {

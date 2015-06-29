@@ -24,6 +24,14 @@
             <type>Boolean</type>
         </member>
         <member>
+            <name>FireLaser</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <name>Lasers</name>
+            <type>Int32</type>
+        </member>
+        <member>
             <name>MoveDirection</name>
             <type>Consoden.TankGame.Direction</type>
         </member>

@@ -55,6 +55,9 @@ private:
     void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                      Consoden::TankGame::Direction::Enumeration towerDirection,
                      bool fire, bool dropMine);
+    void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
+                     Consoden::TankGame::Direction::Enumeration towerDirection,
+                     bool fire, bool dropMine,bool fireLaser);
 };
 
 #endif

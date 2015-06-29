@@ -14,7 +14,7 @@
 typedef boost::function<void(Consoden::TankGame::Direction::Enumeration,
                              Consoden::TankGame::Direction::Enumeration,
                              bool,
-                             bool)> MoveJoystick;
+                             bool,bool)> MoveJoystick;
 class TankLogic
 {
 public:
@@ -51,14 +51,30 @@ private:
      * Call this method to change the joystick state.
      * @param moveDirection The tanks movement direction.
      * @param towerDirection The tanks canon tower direction.
-     * @param fire True if tha tank wants to fire a missile, else false.
+     * @param fire True if the tank wants to fire a missile, else false.
      */
     inline void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                             Consoden::TankGame::Direction::Enumeration towerDirection,
                             bool fire, bool dropMine)
     {
-        m_joystick(moveDirection, towerDirection, fire, dropMine);
+        m_joystick(moveDirection, towerDirection, fire, dropMine,false);
     }
+
+
+    /**
+     * Call this method to change the joystick state.
+     * @param moveDirection The tanks movement direction.
+     * @param towerDirection The tanks canon tower direction.
+     * @param fire True if the tank wants to fire a missile, else false.
+     * @param fireLaser True if the tank should fire the laser. Has no effect if lasercount <= 0
+     */
+    inline void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
+                            Consoden::TankGame::Direction::Enumeration towerDirection,
+                            bool fire, bool dropMine, bool fireLaser)
+    {
+        m_joystick(moveDirection, towerDirection, fire, dropMine, fireLaser);
+    }
+
 };
 
 #endif

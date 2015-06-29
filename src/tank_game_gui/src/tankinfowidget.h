@@ -29,6 +29,7 @@ public:
 
     void SetName(const QString& name);
     void SetPoints(int points);
+    void SetLaserAmmo(int lasers);
     void Update(const Joystick* js);
 
     void ResetLeds();
@@ -38,9 +39,10 @@ private:
     Ui::TankInfoWidget *ui;
     int m_playerNumber;
     QLabel* m_buttons[9];
-    QPixmap m_on;
-    QPixmap m_off;
-    QPixmap m_fire;
+    QPixmap m_green_on;
+    QPixmap m_green_off;
+    QPixmap m_blue_on;
+    QPixmap m_blue_off;
 };
 
 #endif // TANKINFOWIDGET_H

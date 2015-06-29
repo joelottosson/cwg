@@ -43,6 +43,9 @@ public:
     const PointVec& Coins() const {return m_coins;}
     const PointVec& Poison() const {return m_poison;}
     const PointVec& Dudes() const {return m_dudes;}
+    const PointVec& LaserAmmo() const {return m_laser_ammo;}
+
+    const bool isWall(qreal x, qreal y) const;
 
     void ReverseTanks();
     void ToBinary(std::vector<char>& bin) const;    
@@ -55,10 +58,12 @@ private:
     PointVec m_walls;
     PointVec m_mines;
     PointVec m_coins;
+    PointVec m_laser_ammo;
     PointVec m_poison;
     PointVec m_dudes;
 
     void Parse(const char* data);
+    //bool IsWall(const char* data, int x, int y);
 };
 
 #endif

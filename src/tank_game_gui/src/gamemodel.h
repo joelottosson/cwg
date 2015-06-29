@@ -47,6 +47,7 @@ struct Joystick
     qint64 playerId;
     int tankId;
     bool fire;
+    bool laser;
     Direction moveDirection;
     Direction towerDirection;
 
@@ -166,6 +167,7 @@ struct GameState
     PointVec mines{};
     PointVec coins{};
     PointVec poison{};
+    PointVec laser_ammo{};
     DudeMap dudes{};
     MissileMap missiles{};
     TankVec tanks{};

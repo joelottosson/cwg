@@ -13,7 +13,19 @@ server: .FORCE
 	@cd ../../..
 	
 random_player: .FORCE
-	cd src/tank_random_player/src && cmake . && make install
+	@cd src/tank_random_player/src && cmake . && make install
+	@cd ../../..
+
+cool_players: .FORCE
+	cd src/players/tank_random_player/src && cmake . && make install
+	@cd ../../..
+	cd src/players/tank_player_dumb/src && cmake . && make install
+	@cd ../../..
+	cd src/players/tank_player_manual/src && cmake . && make install
+	@cd ../../..
+	cd src/players/tank_player_grandmother/src && cmake . && make install
+	@cd ../../..
+	cd src/players/tank_player_templates/tank_player_cpp/src && cmake . && make install
 	@cd ../../..
 
 backend: remove_cache engine gui server

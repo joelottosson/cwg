@@ -105,7 +105,7 @@ bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std
         for (size_t i=0; i<line.size(); ++i)
         {
             char c=line[i];
-            if (c=='.' || c=='o' || c=='$' || c=='p' || c=='x')
+            if (c=='.' || c=='o' || c=='$' || c=='p' || c=='x' || c == 'l')
             {
                 continue;
             }
@@ -190,6 +190,8 @@ std::string BoardHandler::GenerateRandomFile()
         }
     }
 
+
+
     while(true){
     	int dude_start = rand()%size;
     	if(board[dude_start] != 't'){
@@ -197,6 +199,14 @@ std::string BoardHandler::GenerateRandomFile()
     		break;
     	}
     }
+
+    for(int i = 0 ; i < 3 ; i++){
+        	int dude_start = rand()%size;
+        	if(board[dude_start] != 't' && board[dude_start] != 'd'){
+        		board[dude_start] = 'l';
+        		break;
+        	}
+        }
 
     size_t index=0;
     for (int y=0; y<ySize; ++y)

@@ -19,6 +19,13 @@
      <file>../images/ball_grey.png</file>
      <file>../images/ball_red.png</file>
      <file>../images/ball_blue.png</file>
+     <file>../images/inactive-blue.png</file>     
+     <file>../images/active-blue.png</file>
+     <file>../images/inactive-green.png</file>
+     <file>../images/active-green.png</file>
+     <file>../images/laser-ammo.png</file>
+     <file>../images/laser-start.png</file>
+     <file>../images/laser-middle.png</file>              
  </qresource>  
  </RCC>
 

@@ -169,6 +169,13 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     {
         m_world.Update(game);
         UpdateStatusGameTime();
+        //TODO: REMOVE_ME
+
+
+        m_tankInfoWidget[0]->SetLaserAmmo(game->Tanks()[0]->Lasers());
+        m_tankInfoWidget[1]->SetLaserAmmo(game->Tanks()[1]->Lasers());
+
+
         return;
     }
 
@@ -187,6 +194,7 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
         //updated match
         m_world.Update(match);
         QTimer::singleShot(m_world.GetMatchState().gameState.pace, this, SLOT(UpdatePoints()));
+
         return;
     }
 }
@@ -281,6 +289,8 @@ void MainWindow::OnActionNewGame()
 
         m_tankInfoWidget[0]->SetPoints(0);
         m_tankInfoWidget[1]->SetPoints(0);
+        m_tankInfoWidget[0]->SetLaserAmmo(0);
+        m_tankInfoWidget[1]->SetLaserAmmo(0);
 
         m_dobConnection.CreateRequest(match, Safir::Dob::Typesystem::HandlerId(), this);
     }
@@ -296,8 +306,10 @@ void MainWindow::OnActionStopGame()
 
 void MainWindow::UpdatePoints()
 {
+
     m_tankInfoWidget[0]->SetPoints(m_world.GetPlayerOneTotalPoints());
     m_tankInfoWidget[1]->SetPoints(m_world.GetPlayerTwoTotalPoints());
+
 }
 
 void MainWindow::OnActionRestartGame()
