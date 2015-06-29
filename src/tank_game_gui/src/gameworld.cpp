@@ -6,6 +6,7 @@
 *
 *******************************************************************************/
 #include "gameworld.h"
+#include "PassiveGroup.h"
 
 namespace CWG = Consoden::TankGame;
 namespace
@@ -46,10 +47,13 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_explosionMediaPlayer2()
     ,m_tookCoinMediaPlayer()
     ,m_wilhelmScreamMediaPlayer()
+	,m_passive_coins(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0)
+
 
 {
-	//TODO: This is horrible. Fix at some point
-	m_first = true;
+	//m_passive_coins = PassiveGroup(m_matchState,NULL,":/images/coin_sheet.png", 8, 72, 72,1000,0,0);
+
+	//m_passive_coins = PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0);
 
     if (m_soundEnabled)
     {
@@ -75,7 +79,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     m_coin.lifeTime=1000;
     for (int i=0; i<8; ++i)
     {
-        m_coin.fragments.push_back(QRectF(i*72, 0, 72, 72));
+       m_coin.fragments.push_back(QRectF(i*72, 0, 72, 72));
     }
 
 
@@ -101,13 +105,22 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 	m_laser_start.lifeTime=1000;
 	m_laser_start.fragments.push_back(QRectF(0, 0, 72, 72));
 
+	m_passive_coins.setSoundPlayer("coin.mp3",soundEnabled);
+
+
+
 
 }
 
+
+std::vector<Sprite> GameWorld::getPassiveSprites() const{
+	return m_passive_coins.m_sprites;
+}
 void GameWorld::Clear()
 {
     m_matchState=MatchState();
     m_matchState.finished=true;
+    m_passive_coins.clear();
     m_sprites.clear();
     m_sprites_dude.clear();
     m_screenText.clear();
@@ -117,6 +130,7 @@ void GameWorld::ClearGameState()
 {
     m_matchState.gameState=GameState();
     m_matchState.gameState.finished=true;
+    m_passive_coins.clear();
     m_sprites.clear();
     m_sprites_dude.clear();
     m_screenText.clear();
@@ -129,6 +143,7 @@ void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t 
     m_matchState.players[0]=match->PlayerOneId().GetVal().GetRawValue();
     m_matchState.players[1]=match->PlayerTwoId().GetVal().GetRawValue();
     m_matchState.totalNumberOfGames=match->TotalNumberOfGames();
+    m_passive_coins.clear();
     m_sprites.clear();
     m_sprites_dude.clear();
     m_screenText.clear();
@@ -150,6 +165,7 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_sprites.clear();
     m_sprites_dude.clear();
     m_screenText.clear();
+    m_passive_coins.clear();
 
     if (!game->GamePace().IsNull())
     {
@@ -161,9 +177,6 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_matchState.gameState.size.setY(boardParser.GetYSize());
     m_matchState.gameState.walls.insert(m_matchState.gameState.walls.begin(), boardParser.Walls().begin(), boardParser.Walls().end());
     m_matchState.gameState.poison.insert(m_matchState.gameState.poison.begin(), boardParser.Poison().begin(), boardParser.Poison().end());
-
-    //TODO: Crap added by me
-    //m_matchState.gameState.dudes.insert(m_matchState.gameState.dudes.begin(), boardParser.Dudes().begin(), boardParser.Dudes().end());
 
 
     for (int i=0; i<game->TanksArraySize(); ++i)
@@ -239,8 +252,7 @@ void GameWorld::Update(const Consoden::TankGame::MatchPtr& match)
     }
 }
 
-void  GameWorld::UpdateCoins(const Board& boardParser)
-{
+void  GameWorld::UpdateCoins(const Board& boardParser){
     if (boardParser.Coins().size()!=m_matchState.gameState.coins.size())
     {
         if (m_matchState.gameState.coins.empty())
@@ -311,7 +323,7 @@ void  GameWorld::UpdateLaserAmmo(const Board& boardParser)
             for (auto pos : m_matchState.gameState.laser_ammo)
             {
 
-                m_sprites.push_back(Sprite(m_laser_ammo, pos, QDateTime::currentMSecsSinceEpoch(), 0));
+                //m_sprites.push_back(Sprite(m_laser_ammo, pos, QDateTime::currentMSecsSinceEpoch(), 0));
             	//m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
             }
         }
@@ -686,23 +698,20 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     m_matchState.gameState.mines.clear();
 
-
+    //Todo: apparently the insert the mines here for some cryptic reason.
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
     UpdateLaserAmmo(boardParser);
-    UpdateCoins(boardParser);
+    //UpdateCoins(boardParser);
+    std::wcout << "We are entering the update with change function now " << std::endl;
+    m_passive_coins.updateGroupOnChange(boardParser.Coins(),m_matchState.gameState, m_eventQueue);
 
 
 
     //UpdateDudes(boardParser);
 
 
-    /*
-     * Well... lets try to get this dude on the road.
-     *
-     * todo:BOB
-     */
     if(!game->TheDude().IsNull()){
     	auto& dude_game = game->TheDude().GetPtr();
     	auto& dude = m_matchState.gameState.dudes.front();
@@ -732,10 +741,6 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     }
 
-
-
-
-
     //if hit poison gas square, play a terrible sound
     if (game->Tanks()[0].GetPtr()->HitPoisonGas().GetVal() || game->Tanks()[1].GetPtr()->HitPoisonGas().GetVal())
     {
@@ -764,8 +769,6 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             ++it;
         }
     }
-
-
 
     //creates and updates missiles
     for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
@@ -840,17 +843,6 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             m_matchState.gameState.winnerPlayerId=game->PlayerTwoId().GetVal().GetRawValue();
         }
             break;
-            //TODO: Is this code dead !?
-            /*if (m_matchState.currentGameNumber==1 && m_matchState.finished)
-            {
-                QStringList sl;
-                sl.append("Start new match");
-                SetTextBig(sl);
-            }
-            else if (m_matchState.finished)
-            {
-
-            }*/
 
         default:
         {
@@ -1065,6 +1057,23 @@ void GameWorld::Update()
         }
 
     }
+
+    //Todo: Updating passive sprites. Move this to PasiveGroup class
+    for (auto it=m_passive_coins.m_sprites.begin(); it!=m_passive_coins.m_sprites.end();)
+    {
+        if (it->Finished())
+        {
+            it=m_passive_coins.m_sprites.erase(it);
+        }
+        else
+        {
+        	//std::wcout << "We updated a sprite." << std::endl;
+            it->Update();
+
+            ++it;
+        }
+    }
+
 
     for (auto it=m_sprites.begin(); it!=m_sprites.end();)
     {
