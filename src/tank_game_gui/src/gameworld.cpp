@@ -1057,33 +1057,6 @@ void GameWorld::Update()
     //TODO:
     //update of our dude
     for (auto& dude : m_matchState.gameState.dudes){
-    	//std::wcout << "LOOOK_WE_ARE_DOING_THINGS  " << std::endl;
-    	//dude.position.setX(dude.position.x()+movement),
-		//dude.position.setX(dude.position.x()+movement),
-    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
-
-
-
-        QPointF animationMoveSpeed(0,0);
-        switch(dude.moveDirection)
-        {
-        case LeftHeading:
-            animationMoveSpeed.setX(-1*m_moveSpeed);
-            break;
-        case RightHeading:
-            animationMoveSpeed.setX(m_moveSpeed);
-            break;
-        case UpHeading:
-            animationMoveSpeed.setY(-1*m_moveSpeed);
-            break;
-        case DownHeading:
-            animationMoveSpeed.setY(m_moveSpeed);
-            break;
-        case None:
-            break;
-        }
-    	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, animationMoveSpeed, 0, now, 1));
-        //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, now, 0,true));
         if(dude.just_died){
         	UpdatePosition(timeToNextUpdate, .5*movement, dude,false);
 

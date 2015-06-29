@@ -206,6 +206,7 @@ private:
             }
                 break;
             case None:
+            	item.paintPosition=item.position;
                 break;
             }
         }

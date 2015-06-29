@@ -1023,8 +1023,8 @@ namespace TankEngine
 
     void Engine::dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr){
 
-        int lame_x = -1;
-        int lame_y = -1;
+        int lame_x = dude_ptr->OldX();
+        int lame_y = dude_ptr->OldY();
         int old_seed = std::rand();
         CWG::Direction::Enumeration candidate_direction = CWG::Direction::Neutral;
         CWG::Direction::Enumeration lame_direction = CWG::Direction::Neutral;
