@@ -7,6 +7,8 @@
 *******************************************************************************/
 #include "gameworld.h"
 #include "PassiveGroup.h"
+#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace CWG = Consoden::TankGame;
 namespace
@@ -41,19 +43,15 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 	,m_sprites_dude()
     ,m_explosion()
     ,m_tankFire()
+	,m_passive_objects()
     ,m_fireMediaPlayer1()
     ,m_explosionMediaPlayer1()
     ,m_fireMediaPlayer2()
     ,m_explosionMediaPlayer2()
     ,m_tookCoinMediaPlayer()
     ,m_wilhelmScreamMediaPlayer()
-	,m_passive_coins(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0)
-
 
 {
-	//m_passive_coins = PassiveGroup(m_matchState,NULL,":/images/coin_sheet.png", 8, 72, 72,1000,0,0);
-
-	//m_passive_coins = PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0);
 
     if (m_soundEnabled)
     {
@@ -74,14 +72,6 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     {
         m_tankFire.fragments.push_back(QRectF(i*72, 0, 72, 72));
     }
-
-    m_coin.image=QPixmap(":/images/coin_sheet.png");
-    m_coin.lifeTime=1000;
-    for (int i=0; i<8; ++i)
-    {
-       m_coin.fragments.push_back(QRectF(i*72, 0, 72, 72));
-    }
-
 
     m_dude.image=QPixmap(":/images/tux-anim.png");
 	m_dude.lifeTime=500;
@@ -105,35 +95,55 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 	m_laser_start.lifeTime=1000;
 	m_laser_start.fragments.push_back(QRectF(0, 0, 72, 72));
 
-	m_passive_coins.setSoundPlayer("coin.mp3",soundEnabled);
+	//m_matchState.gameState.
+
+
+	//m_passive_objects.push(new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,"coin.mp3",soundEnabled));
+	PassiveGroup* glenn = new PassiveGroup(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo);
+	glenn->setSoundPlayer("laser-pickup.mp3",soundEnabled);
+	m_passive_objects.push(glenn);
+	glenn = new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,0.75, &Board::Coins);
+	glenn->setSoundPlayer("coin.mp3",soundEnabled);
+	m_passive_objects.push(glenn);
 
 
 
 
 }
 
-
-std::vector<Sprite> GameWorld::getPassiveSprites() const{
-	return m_passive_coins.m_sprites;
+std::priority_queue<PassiveGroup*>  GameWorld::getPassiveGroups() const{
+	return m_passive_objects;
 }
+
+void GameWorld::clearPassiveObjects(){
+    std::priority_queue<PassiveGroup*> creepy_copy = m_passive_objects;
+    while(!creepy_copy.empty()){
+    	PassiveGroup* a = creepy_copy.top();
+    	creepy_copy.pop();
+    	 a->clear();
+    }
+}
+
 void GameWorld::Clear()
 {
     m_matchState=MatchState();
     m_matchState.finished=true;
-    m_passive_coins.clear();
     m_sprites.clear();
-    m_sprites_dude.clear();
     m_screenText.clear();
+    clearPassiveObjects();
+
+
+
 }
 
 void GameWorld::ClearGameState()
 {
     m_matchState.gameState=GameState();
     m_matchState.gameState.finished=true;
-    m_passive_coins.clear();
     m_sprites.clear();
-    m_sprites_dude.clear();
     m_screenText.clear();
+    clearPassiveObjects();
+
 }
 
 void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t id)
@@ -143,11 +153,12 @@ void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t 
     m_matchState.players[0]=match->PlayerOneId().GetVal().GetRawValue();
     m_matchState.players[1]=match->PlayerTwoId().GetVal().GetRawValue();
     m_matchState.totalNumberOfGames=match->TotalNumberOfGames();
-    m_passive_coins.clear();
     m_sprites.clear();
-    m_sprites_dude.clear();
     m_screenText.clear();
+    clearPassiveObjects();
+
     Update(match);
+
 
     if (m_matchState.currentGameNumber==1 && !m_matchState.finished)
     {
@@ -165,7 +176,7 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
     m_sprites.clear();
     m_sprites_dude.clear();
     m_screenText.clear();
-    m_passive_coins.clear();
+    clearPassiveObjects();
 
     if (!game->GamePace().IsNull())
     {
@@ -251,127 +262,6 @@ void GameWorld::Update(const Consoden::TankGame::MatchPtr& match)
             m_matchState.winnerPlayerId=0;
     }
 }
-
-void  GameWorld::UpdateCoins(const Board& boardParser){
-    if (boardParser.Coins().size()!=m_matchState.gameState.coins.size())
-    {
-        if (m_matchState.gameState.coins.empty())
-        {
-            //first time after start, immediately place coins on board
-            m_matchState.gameState.coins.insert(m_matchState.gameState.coins.begin(), boardParser.Coins().begin(), boardParser.Coins().end());
-            for (auto pos : m_matchState.gameState.coins)
-            {
-                m_sprites.push_back(Sprite(m_coin, pos, QDateTime::currentMSecsSinceEpoch(), 0));
-            	//m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
-            }
-        }
-        else
-        {
-            //coin has changed, we do the update after a halfSquare-time to make it look nicer.
-            m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
-            {
-                //update coin positions
-                m_matchState.gameState.coins.clear();
-                m_matchState.gameState.coins.insert(m_matchState.gameState.coins.begin(), boardParser.Coins().begin(), boardParser.Coins().end());
-
-                for (auto spriteIt=m_sprites.begin(); spriteIt!=m_sprites.end();)
-                {
-                    bool remove=true;
-                    if (spriteIt->Data()==&m_coin)
-                    {
-                        for (auto& coin : m_matchState.gameState.coins)
-                        {
-                            if (coin==spriteIt->Position())
-                            {
-                                remove=false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (remove)
-                    {
-                        spriteIt=m_sprites.erase(spriteIt);
-                    }
-                    else
-                    {
-                        ++spriteIt;
-                    }
-                }
-
-                //play sound
-                if (m_soundEnabled)
-                {
-                    m_tookCoinMediaPlayer.stop();
-                    m_tookCoinMediaPlayer.play();
-                }
-            }));
-        }
-    }
-}
-
-
-void  GameWorld::UpdateLaserAmmo(const Board& boardParser)
-{
-    if (boardParser.LaserAmmo().size()!=m_matchState.gameState.laser_ammo.size())
-    {
-        if (m_matchState.gameState.laser_ammo.empty())
-        {
-
-            //first time after start, immediately place laser ammo on board
-            m_matchState.gameState.laser_ammo.insert(m_matchState.gameState.laser_ammo.begin(), boardParser.LaserAmmo().begin(), boardParser.LaserAmmo().end());
-            for (auto pos : m_matchState.gameState.laser_ammo)
-            {
-
-                //m_sprites.push_back(Sprite(m_laser_ammo, pos, QDateTime::currentMSecsSinceEpoch(), 0));
-            	//m_sprites.push_back(Sprite(m_coin, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
-            }
-        }
-        else
-        {
-            //laser ammo has changed, we do the update after a halfSquare-time to make it look nicer.
-            m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*0.75, [=]
-            {
-                //update laser ammo positions
-                m_matchState.gameState.laser_ammo.clear();
-                m_matchState.gameState.laser_ammo.insert(m_matchState.gameState.laser_ammo.begin(), boardParser.LaserAmmo().begin(), boardParser.LaserAmmo().end());
-
-                for (auto spriteIt=m_sprites.begin(); spriteIt!=m_sprites.end();)
-                {
-                    bool remove=true;
-                    if (spriteIt->Data()==&m_laser_ammo)
-                    {
-                        for (auto& laser : m_matchState.gameState.laser_ammo)
-                        {
-                            if (laser==spriteIt->Position())
-                            {
-                                remove=false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (remove)
-                    {
-                        spriteIt=m_sprites.erase(spriteIt);
-                    }
-                    else
-                    {
-                        ++spriteIt;
-                    }
-                }
-
-                //play sound
-                if (m_soundEnabled)
-                {
-                    m_laser_pickup_MediaPlayer.stop();
-                    m_laser_pickup_MediaPlayer.play();
-                }
-            }));
-        }
-    }
-}
-
 void  GameWorld::UpdatePoison(const Board& boardParser)
 {
     if (boardParser.Poison().size()!=m_matchState.gameState.poison.size())
@@ -391,25 +281,6 @@ void  GameWorld::UpdatePoison(const Board& boardParser)
         }));
     }
 }
-
-//void  GameWorld::UpdateDudes(const Board& boardParser){}
-
-void  GameWorld::UpdateDudes(const Board& boardParser)
-{
-	return;
-        	//std::wcout << "There are " << m_matchState.gameState.dudes.size() << " Lights!" << std::endl;
-//            for (auto& dude : m_matchState.gameState.dudes)
-//            {
-                //m_sprites.push_back(Sprite(m_dude, pos, QPointF(1.0, 0), 0.0, QDateTime::currentMSecsSinceEpoch(), 0));
-            	//std::wcout << "Dude is at: " << dude.position.x() <<","<< dude.position.y() <<
-            	//		" and its paint position is : "<< dude.paintPosition.x() <<","<< dude.paintPosition.y()<< std::endl;
-                //m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QDateTime::currentMSecsSinceEpoch(), 0));
-            	//m_sprites.push_back(Sprite(m_dude, dude.paintPosition, QPointF(1.0, 0), 5.0, QDateTime::currentMSecsSinceEpoch(), 0));
-//            }
-
-}
-
-
 
 void GameWorld::UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal)
 {
@@ -702,10 +573,17 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
     m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
-    UpdateLaserAmmo(boardParser);
+    //UpdateLaserAmmo(boardParser);
     //UpdateCoins(boardParser);
 
-    m_passive_coins.updateGroupOnChange(boardParser.Coins(),m_matchState.gameState, m_eventQueue);
+
+
+    std::priority_queue<PassiveGroup*> creepy_copy = m_passive_objects;
+    while(!creepy_copy.empty()){
+    	PassiveGroup* a = creepy_copy.top();
+    	creepy_copy.pop();
+    	a->updateGroupOnChange(boardParser ,m_matchState.gameState, m_eventQueue);
+    }
 
 
 
@@ -1058,20 +936,15 @@ void GameWorld::Update()
 
     }
 
-    //Todo: Updating passive sprites. Move this to PasiveGroup class
-    for (auto it=m_passive_coins.m_sprites.begin(); it!=m_passive_coins.m_sprites.end();)
-    {
-        if (it->Finished())
-        {
-            it=m_passive_coins.m_sprites.erase(it);
-        }
-        else
-        {
-        	//std::wcout << "We updated a sprite." << std::endl;
-            it->Update();
 
-            ++it;
-        }
+
+
+
+    std::priority_queue<PassiveGroup*> creepy_copy = m_passive_objects;
+    while(!creepy_copy.empty()){
+    	PassiveGroup* a = creepy_copy.top();
+    	creepy_copy.pop();
+    	a->updateSprites();
     }
 
 
