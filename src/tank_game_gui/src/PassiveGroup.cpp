@@ -69,7 +69,10 @@ void  PassiveGroup::updateGroupOnChange(const PointVec& board_positions,GameStat
 	updateGroupOnChange(board_positions, game_state,events_queue,1.0);
 }
 
-
+/*
+ * This function removes sprites on the board only when the amount of objects in this class differs from the amount on the board.
+ * Will also play sound if sound is enabled and the sound is not already playing.
+ */
 void  PassiveGroup::updateGroupOnChange(const PointVec& board_positions,GameState game_state,std::multimap<qint64, boost::function<void()>>&  events_queue,double delay){
     if (board_positions.size() != m_positions.size())
     {
@@ -85,13 +88,15 @@ void  PassiveGroup::updateGroupOnChange(const PointVec& board_positions,GameStat
         }
         else
         {
-        	std::wcout << "We are inserting something startge here........." << std::endl;
-        	std::wcout << "Our size is " << m_positions.size() << " whist the onboard isze is" <<  board_positions.size() << std::endl;
+
+
+            m_positions.clear();
+            m_positions.insert(m_positions.begin(), board_positions.begin(), board_positions.end());
+
             events_queue.insert(std::multimap<qint64, boost::function<void()>>::value_type(game_state.lastUpdate+game_state.pace*delay, [=]
             {
 
-                m_positions.clear();
-                m_positions.insert(m_positions.begin(), board_positions.begin(), board_positions.end());
+
 
                 for (auto spriteIt=m_sprites.begin(); spriteIt!=m_sprites.end();)
                 {
@@ -122,10 +127,10 @@ void  PassiveGroup::updateGroupOnChange(const PointVec& board_positions,GameStat
                 //play sound
                 if (m_sound_enabled)
                 {
-                	if(m_media_player.state() != m_media_player.PlayingState){
+                	if(true || m_media_player.state() != m_media_player.PlayingState){
 						m_media_player.stop();
 						m_media_player.play();
-						std::wcout << "WE_ARE_JUST_DOING_THIS_ONCE_FFS!!!!!!" << std::endl;
+
                 	}
                 }
             }));
