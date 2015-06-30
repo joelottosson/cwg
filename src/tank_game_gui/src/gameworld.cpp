@@ -704,7 +704,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     UpdateLaserAmmo(boardParser);
     //UpdateCoins(boardParser);
-    std::wcout << "We are entering the update with change function now " << std::endl;
+
     m_passive_coins.updateGroupOnChange(boardParser.Coins(),m_matchState.gameState, m_eventQueue);
 
 
