@@ -72,7 +72,6 @@ public:
     const GameState& GetGameState() const {return m_matchState.gameState;}
 
     const std::vector<Sprite>& Sprites() const {return m_sprites;}
-    const std::vector<Sprite>& DudeSprites() const {return m_sprites_dude;}
 
     void SetTextBig(const QStringList& lines);
     const std::vector<ScreenText>& ScreenTexts() const {return m_screenText;}
@@ -89,11 +88,8 @@ private:
     qreal m_towerSpeed;
     qint64 m_lastAnimationUpdate;
     std::vector<Sprite> m_sprites;
-    std::vector<Sprite> m_sprites_dude;
     SpriteData m_explosion;
     SpriteData m_tankFire;
-    SpriteData m_coin;
-    SpriteData m_laser_ammo;
     SpriteData m_laser_middle;
     SpriteData m_laser_start;
     SpriteData m_dude;
@@ -115,10 +111,7 @@ private:
     QMediaPlayer m_explosionMediaPlayer1;
     QMediaPlayer m_fireMediaPlayer2;
     QMediaPlayer m_explosionMediaPlayer2;
-    QMediaPlayer m_tookCoinMediaPlayer;
-    QMediaPlayer m_wilhelmScreamMediaPlayer;
     QMediaPlayer m_dude_dies_MediaPlayer;
-    QMediaPlayer m_laser_pickup_MediaPlayer;
 	QMediaPlayer m_laser_fire_MediaPlayer;
 
     void SetTextSmall(const QStringList& lines);

@@ -423,6 +423,11 @@ namespace TankEngine
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
+
+
+            /**
+             * TODO: COLLISION DETECTION AND SILLY MOVE DIrections happens here
+             */
             for (Safir::Dob::Typesystem::ArrayIndex tank2_index = tank_index + 1;
                  (tank2_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank2_index].IsNull());
                  tank2_index++) {
@@ -544,8 +549,9 @@ namespace TankEngine
                 joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
             }
 
-            if (joystick_ptr->MoveDirection() != Consoden::TankGame::Direction::Neutral) 
-            {
+            if (joystick_ptr->MoveDirection() == Consoden::TankGame::Direction::Neutral){
+            	tank_ptr->MoveDirection() = joystick_ptr->MoveDirection(); //We still need to set the move direction!
+            }else{
                 // move tank unless it is moving into a missile
                 tank_ptr->MoveDirection() = joystick_ptr->MoveDirection();
                 if (!(gm.TankMoveAgainstMissile(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal(), joystick_ptr->MoveDirection()))) 
@@ -627,8 +633,11 @@ namespace TankEngine
 
             if(!joystick_ptr->Fire().IsNull() && !joystick_ptr->FireLaser().IsNull() &&
             		joystick_ptr->Fire() && !joystick_ptr->TowerDirection().IsNull() &&
-					joystick_ptr->FireLaser() && !joystick_ptr->FireLaser().IsNull() && !tank_ptr->FireLaser().IsNull()){
+					joystick_ptr->FireLaser() && !joystick_ptr->FireLaser().IsNull() &&
+					joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
+
             	if(tank_ptr->Lasers() > 0){
+
             		tank_ptr->Lasers() = tank_ptr->Lasers() - 1;
             		tank_ptr->FireLaser() = true;
             		tank_ptr->Fire() = true;
@@ -638,10 +647,7 @@ namespace TankEngine
 
             		std::wcout << "We are doing crazy cool laser fajer... " << std::endl;
             		if(fireTheLaser(tank_ptr, enemy_ptr,gm,game_ptr)){
-            			std::wcout << "We may or may not have hit the tankozarus with the layzer blazer " << std::endl;
-            			//enemy_ptr->InFlames() = true;
-            			//enemy_ptr->HitMissile() = true;
-            			//AddPoints(2, tank_ptr->TankId(), game_ptr);
+
             		}else{
             			std::wcout << "So...the laser didnt hit.... " << std::endl;
             		}
@@ -713,14 +719,6 @@ namespace TankEngine
                 tank_ptr->HitMine() = true;
             }
 
-            //TODO: dude detection
-            // Killed the dude :'(
-/*            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || CollisionPredicter(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
-            	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
-                dude_ptr->Dying().SetVal(true);
-                AddPoints(-5, tank_ptr->TankId(), game_ptr);
-
-            }*/
 
             // Hit by missile?
             if (gm.IsTankHit(tank_ptr->PosX(), tank_ptr->PosY())) {
@@ -760,10 +758,6 @@ namespace TankEngine
 
                 }else if (gm.LaserAmmo(tank_ptr->PosX(), tank_ptr->PosY())) {
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //take the coin
-
-
-                    //TODO: remove me
-                    std::wcout << "Picked up some lazorz" << std::endl;
 
                     tank_ptr->Lasers() = tank_ptr->Lasers().GetVal() + 1;
 
