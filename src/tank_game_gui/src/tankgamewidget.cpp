@@ -96,16 +96,18 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         //s.killToggle();
     }
 
-    //TODO: Paint passive sprites like a boss.
-    //PassiveGroup why = m_world.getPassiveCoins();
-    std::vector<Sprite> passive = m_world.getPassiveSprites();
+    std::priority_queue<PassiveGroup*>  passives = m_world.getPassiveGroups();
+    std::priority_queue<PassiveGroup*> creepy_copy = passives;
+    while(!creepy_copy.empty()){
+    	PassiveGroup* a = creepy_copy.top();
+    	creepy_copy.pop();
+	    for (auto& s : a->m_sprites)
+	    {
 
-    for (auto& s : passive)
-    {
-
-        PaintSprite(s, painter);
-        //s.killToggle();
-    }
+	        PaintSprite(s, painter);
+	        //s.killToggle();
+	    }
+	}
 
 
     //Paint tanks

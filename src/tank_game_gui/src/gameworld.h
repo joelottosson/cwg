@@ -17,6 +17,9 @@
 #include <Consoden/TankGame/Match.h>
 #include <Consoden/TankGame/GameState.h>
 #include <Consoden/TankGame/Joystick.h>
+#include <memory>
+#include <queue>
+#include <boost/make_shared.hpp>
 
 
 #include "gamemodel.h"
@@ -33,6 +36,7 @@ public:
 
 
     std::vector<Sprite> getPassiveSprites() const;
+    std::priority_queue<PassiveGroup*>  getPassiveGroups() const;
 
 
     void Clear();
@@ -95,11 +99,9 @@ private:
     SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
 
+    std::priority_queue<PassiveGroup*> m_passive_objects;
 
-    //TODO: CREEPY_THINGS_GO_HEERE_ :O
-    //PassiveGroup m_passive_coins;
 
-    PassiveGroup m_passive_coins;
 
 
     typedef std::multimap<qint64, boost::function<void()> > WorldEvents;
@@ -121,6 +123,7 @@ private:
 
     void SetTextSmall(const QStringList& lines);
     void SetTextPlayer(int playerNumber, const QStringList& lines);
+    void clearPassiveObjects();
 
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
     inline void UpdateCoins(const Board& board);
