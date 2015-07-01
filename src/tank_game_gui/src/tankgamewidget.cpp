@@ -267,37 +267,21 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 
     if (tank.explosion==Destroyed)
     {
+    	drawWithTranslationAndRotation(painter,m_tankWreck,tank.paintPosition,rotation);
 
-        const int xoffset=(m_const.squarePixelSize-m_tankWreck.width())/2;
-        const int yoffset=(m_const.squarePixelSize-m_tankWreck.height())/2;
-        const int x=xoffset+(tank.paintPosition.x())*m_const.squarePixelSize;
-        const int y=yoffset+(tank.paintPosition.y())*m_const.squarePixelSize;
-        painter.save();
-        painter.translate(x+m_tankWreck.width()/2, y+m_tankWreck.height()/2);
-        painter.rotate(rotation);
-
-        painter.translate(m_tankWreck.width()/-2, m_tankWreck.height()/-2);
-        painter.drawPixmap(0, 0, m_tankWreck);
-        painter.restore();
-        return;
     }
 
     const QPixmap& tankImage=blueTank ? m_tankBlue : m_tankRed;
     //tank body
     {
-        const int xoffset=(m_const.squarePixelSize-tankImage.width())/2;
-        const int yoffset=(m_const.squarePixelSize-tankImage.height())/2;
-        const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
-        const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
-        painter.save();
-        painter.translate(x+tankImage.width()/2, y+tankImage.height()/2);
-        painter.rotate(rotation);
-        painter.translate(tankImage.width()/-2, tankImage.height()/-2);
-        painter.drawPixmap(0, 0, tankImage);        
-        painter.restore();
+    	drawWithTranslationAndRotation(painter,tankImage,tank.paintPosition,rotation);
 
         if (tank.isWrapping)
         {
+            const int xoffset=(m_const.squarePixelSize-tankImage.width())/2;
+            const int yoffset=(m_const.squarePixelSize-tankImage.height())/2;
+            const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
+            const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
             const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-tankImage.width(), m_const.boardPixelSizeInt.x());
             const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-tankImage.height(), m_const.boardPixelSizeInt.y());
             painter.save();
@@ -311,19 +295,15 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 
     //tank tower
     {        
-        const int xoffset=(m_const.squarePixelSize-m_tankTower.width())/2;
-        const int yoffset=(m_const.squarePixelSize-m_tankTower.height())/2;
-        const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
-        const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
-        painter.save();
-        painter.translate(x+m_tankTower.width()/2, y+m_tankTower.height()/2);
-        painter.rotate(tank.paintTowerAngle);
-        painter.translate(m_tankTower.width()/-2, tankImage.height()/-2);
-        painter.drawPixmap(0, 0, m_tankTower);
-        painter.restore();
+
+    	drawWithTranslationAndRotation(painter,m_tankTower,tank.paintPosition,tank.paintTowerAngle);
 
         if (tank.isWrapping)
         {
+        	const int xoffset=(m_const.squarePixelSize-m_tankTower.width())/2;
+        	const int yoffset=(m_const.squarePixelSize-m_tankTower.height())/2;
+        	const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
+        	const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
             const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-m_tankTower.width(), m_const.boardPixelSizeInt.x());
             const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-m_tankTower.height(), m_const.boardPixelSizeInt.y());
             painter.save();
@@ -338,22 +318,11 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 
 void TankGameWidget::PaintMissile(const Missile& missile, QPainter& painter)
 {
-    const int xoffset=(m_const.squarePixelSize-m_missile.width())/2;
-    const int yoffset=(m_const.squarePixelSize-m_missile.height())/2;
-    const int x=xoffset+missile.paintPosition.x()*m_const.squarePixelSize;
-    const int y=yoffset+missile.paintPosition.y()*m_const.squarePixelSize;
-
     if (!missile.visible)
     {
         return;
     }
-
-    painter.save();
-    painter.translate(x+m_missile.width()/2, y+m_missile.height()/2);
-    painter.rotate(DirectionToAngle(missile.moveDirection));
-    painter.translate(m_missile.width()/-1, m_missile.height()/-2);
-    painter.drawPixmap(0, 0, m_missile);
-    painter.restore();
+    drawWithTranslationAndRotation(painter,m_missile,missile.paintPosition,DirectionToAngle(missile.moveDirection));
 }
 
 void TankGameWidget::PaintSprite(const Sprite& sprite, QPainter& painter)
@@ -412,75 +381,28 @@ void TankGameWidget::PaintText(const ScreenText& txt, QPainter& painter)
     painter.restore();
 }
 
+/*
+ *
+ */
+void TankGameWidget::drawWithTranslationAndRotation(QPainter& painter,QPixmap image,QPointF position, qreal rotation){
+	const int xoffset=(m_const.squarePixelSize-image.width())/2;
+	const int yoffset=(m_const.squarePixelSize-image.height())/2;
+	const int x=xoffset+position.x()*m_const.squarePixelSize;
+	const int y=yoffset+position.y()*m_const.squarePixelSize;
+	painter.save();
+	painter.translate(x+image.width()/2, y+image.height()/2);
+	painter.rotate(rotation);
+	painter.translate(image.width()/-2, image.height()/-2);
+	painter.drawPixmap(0, 0, image);
+	painter.restore();
+
+
+}
+
+
+
 void TankGameWidget::PaintWinner(QPainter& painter)
 {
-//    QStringList sl;
-
-//    if (m_world.GetGameState().winnerPlayerId==0)
-//    {
-//        sl.append("Game was a draw");
-//    }
-//    else
-//    {
-//        const Player* p1=m_world.GetPlayerOne();
-//        const Player* p2=m_world.GetPlayerTwo();
-//        if (!p1 || !p2)
-//        {
-//            return;
-//        }
-
-//        const Player* winner=NULL;
-//        const Player* loser=NULL;
-//        const Tank* loserTank=NULL;
-
-//        if (m_world.GetGameState().winnerPlayerId==p1->id)
-//        {
-//            //player 1 won
-//            winner=p1;
-//            loser=p2;
-//            loserTank=m_world.GetTankTwo();
-//        }
-//        else if (m_world.GetGameState().winnerPlayerId==p2->id)
-//        {
-//            //player 2 won
-//            winner=p2;
-//            loser=p1;
-//            loserTank=m_world.GetTankOne();
-//        }
-
-//        if (winner)
-//        {
-//            sl.append("Current game winner: "+winner->name);
-
-//            if (loser && loserTank)
-//            {
-//                QString loserTxt=loser->name;
-//                switch (loserTank->deathCause)
-//                {
-//                case Tank::HitMissile:
-//                    loserTxt+=" was hit by a missile!";
-//                    break;
-//                case Tank::HitMine:
-//                    loserTxt+=" hit a mine!";
-//                    break;
-//                case Tank::HitTank:
-//                    loserTxt+=" drove into another tank!";
-//                    break;
-//                case Tank::HitWall:
-//                    loserTxt+=" drove into a wall!";
-//                    break;
-//                case Tank::None:
-//                    loserTxt="Time limit expired.";
-//                    break;
-//                }
-//                sl.append(loserTxt);
-//            }
-//        }
-//        else
-//        {
-//            sl.append("Winner has an unknown player id!");
-//        }
-//    }
-
-//    PaintText(sl, 18, 3, m_const.boardPixelSize.y()/2, painter);
+	//old and islly function
+	return;
 }
