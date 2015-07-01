@@ -517,7 +517,7 @@ namespace TankEngine
                                             L"Player one didn't make a move in time!");
                     // Treat as neutral move
                     joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
-                    joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Left);
+                    joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Neutral);
                     joystick_ptr->Fire().SetVal(false);
                     joystick_ptr->FireLaser() = false;
                     joystick_ptr->MineDrop().SetVal(false);
@@ -533,7 +533,7 @@ namespace TankEngine
                                             L"Player two didn't make a move in time!");
                     // Treat as neutral move
                     joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
-                    joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Left);
+                    joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Neutral);
                     joystick_ptr->Fire().SetVal(false);
                     joystick_ptr->FireLaser() = false;
                     joystick_ptr->MineDrop().SetVal(false);
@@ -626,7 +626,9 @@ namespace TankEngine
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
             if (!joystick_ptr->TowerDirection().IsNull()) {
-                tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
+            	if(joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
+            		tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
+            	}
             } else {
                 tank_ptr->TowerDirection().SetNull();
             }
