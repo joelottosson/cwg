@@ -72,6 +72,8 @@ struct Tank
     QPointF position;
     Direction moveDirection;
     Direction towerDirection;
+    mutable Direction oldTowerDirection;
+    mutable Direction oldMoveDirection;
     bool fires;
     ExplosionStatus explosion;
     Death deathCause;
@@ -83,21 +85,8 @@ struct Tank
     qreal paintTowerAngle;
     bool isWrapping;
 
-    Tank(QPointF pos, Direction direction)
-        :playerId(0)
-        ,position(pos)        
-        ,moveDirection(direction)
-        ,towerDirection(direction)
-        ,fires(false)
-        ,explosion(NotInFlames)
-        ,deathCause(None)
-        ,paintPosition(pos)
-        ,paintTankAngle(DirectionToAngle(direction))
-        ,paintTowerAngle(DirectionToAngle(direction))
-        ,isWrapping(false)
-    	//,accepts_updates(true)
-    {
-    }
+    Tank(QPointF pos, Direction direction);
+
 };
 typedef std::vector<Tank> TankVec;
 

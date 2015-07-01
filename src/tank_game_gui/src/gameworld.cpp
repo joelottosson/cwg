@@ -27,7 +27,7 @@ namespace
         case Consoden::TankGame::Direction::Right: return RightHeading;
         case Consoden::TankGame::Direction::Neutral: return None;
         }
-        return LeftHeading;
+        return UpHeading;
     }
 }
 
@@ -375,7 +375,7 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     		m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*laser_delay, 1));
     		break;
     	}else if(t.position == QPointF(x_pos,y_pos)){
-			//Hit enemy tank. just chill
+			//Hit our own tank tank. just chill
     		m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*laser_delay, 1));
 			break;
     	}
@@ -1002,7 +1002,16 @@ void GameWorld::InitMediaPlayers()
 
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)
 {
-    qreal endAngle=DirectionToAngle(tank.towerDirection);
+
+	qreal endAngle;
+
+        if(tank.towerDirection == Direction::None){
+        	endAngle = DirectionToAngle(tank.oldTowerDirection);
+        }else{
+        	endAngle = DirectionToAngle(tank.towerDirection);
+        	tank.oldTowerDirection = tank.towerDirection;
+        }
+
 
     if (timeToNextUpdate<=m_animationUpdateInterval)
     {
