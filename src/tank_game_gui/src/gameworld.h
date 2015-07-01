@@ -224,6 +224,81 @@ private:
         }
     }
 
+    /**
+        * This function updates the paint position of the item according to its movement and speed.
+        *
+        * timeToNextUpdate: The time to the next game update update (irrelevant if force_set is true)
+        * movement: The distance (in board squares) that the item will move within this state udpdate.
+        * item: The thing to be moved
+        * force_set: if true the paint position will be set to the actual position of the item even
+        * if the movement is not finished
+        *
+        */
+       template <class T>
+       inline void UpdatePositionNoOvershoot(qint64 timeToNextUpdate, qreal movement, T& item,bool force_set){
+    	    {
+    	        if (item.position==item.paintPosition)
+    	        {
+    	            return;
+    	        }
+
+    	        if (timeToNextUpdate<=m_animationUpdateInterval && force_set)
+    	        {
+    	            item.paintPosition=item.position;
+    	        }
+    	        else
+    	        {
+    	            switch (item.moveDirection)
+    	            {
+    	            case LeftHeading:
+    	            {
+    	                qreal prev=item.paintPosition.x();
+    	                item.paintPosition.setX(prev-movement);
+    	                if (item.paintPosition.x()<item.position.x())
+    	                {
+    	                    item.paintPosition=item.position;
+    	                }
+    	            }
+    	                break;
+    	            case RightHeading:
+    	            {
+    	                qreal prev=item.paintPosition.x();
+    	                item.paintPosition.setX(prev+movement);
+    	                if (item.paintPosition.x()>item.position.x())
+    	                {
+    	                    item.paintPosition=item.position;
+    	                }
+    	            }
+    	                break;
+    	            case UpHeading:
+    	            {
+    	                qreal prev=item.paintPosition.y();
+    	                item.paintPosition.setY(prev-movement);
+    	                if (item.paintPosition.y()<item.position.y())
+    	                {
+    	                    item.paintPosition=item.position;
+    	                }
+    	            }
+    	                break;
+    	            case DownHeading:
+    	            {
+    	                qreal prev=item.paintPosition.y();
+    	                item.paintPosition.setY(prev+movement);
+    	                if (item.paintPosition.y()>item.position.y())
+    	                {
+    	                    item.paintPosition=item.position;
+    	                }
+    	            }
+    	                break;
+    	            case None:
+    	            	item.paintPosition=item.position;
+    	                break;
+    	            }
+    	        }
+    	    }
+
+       }
+
 };
 
 #endif

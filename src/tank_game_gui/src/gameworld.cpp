@@ -410,100 +410,86 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     	DrawLaser(tank,board);
     }
 
-    if (tank->InFlames().GetVal())
-    {
+
+    if (tank->InFlames().GetVal()){
         switch (t.explosion)
         {
-        case NotInFlames:
-        {
-            t.explosion=SetInFlames;
+			case NotInFlames:
+			{
+				t.explosion=SetInFlames;
 
-            if (t.deathCause==Tank::HitWall || t.deathCause==Tank::HitTank)
-            {
-                return;
-            }
+				if (t.deathCause==Tank::HitWall || t.deathCause==Tank::HitTank){
+					return;
+				}
 
-            t.paintPosition=t.position;
-            t.position=QPointF(tank->PosX().GetVal(), tank->PosY().GetVal());
+				t.paintPosition=t.position;
+				t.position=QPointF(tank->PosX().GetVal(), tank->PosY().GetVal());
 
-            bool hasSpecialEndPos=false;
-            qreal specialEndPos=0;
-            if (tank->HitWall().IsNull()==false && tank->HitWall().GetVal()==true)
-            {
-                t.deathCause=Tank::HitWall;
-                specialEndPos=0.5;
-                hasSpecialEndPos=true;
-            }
-            else if (tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true)
-            {
-                t.deathCause=Tank::HitTank;
-                specialEndPos=0.25;
-                hasSpecialEndPos=true;
-            }
+				bool hasSpecialEndPos=false;
+				qreal specialEndPos=0;
+				if (tank->HitWall().IsNull()==false && tank->HitWall().GetVal()==true){
+					t.deathCause=Tank::HitWall;
+					specialEndPos=0.5;
+					hasSpecialEndPos=true;
+				}else if (tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true){
+					t.deathCause=Tank::HitTank;
+					specialEndPos=0.25;
+					hasSpecialEndPos=true;
+				}
 
-            //if tank hit wall or drove into other tank, we calculate a position half inside the
-            //next square before start explosion.
-            if (hasSpecialEndPos)
-            {
-                //didnt know this before, calculate a special end position inside wall
-                switch (t.moveDirection)
-                {
-                case LeftHeading:
-                    t.position.setX(t.position.x()-specialEndPos);
-                    break;
-                case RightHeading:
-                    t.position.setX(t.position.x()+specialEndPos);
-                    break;
-                case UpHeading:
-                    t.position.setY(t.position.y()-specialEndPos);
-                    break;
-                case DownHeading:
-                    t.position.setY(t.position.y()+specialEndPos);
-                    break;
-                case None:
-                    break;
-                }
+				//if tank hit wall or drove into other tank, we calculate a position half inside the
+				//next square before start explosion.
+				if (hasSpecialEndPos){
+					//didnt know this before, calculate a special end position inside wall
+					switch (t.moveDirection)
+					{
+					case LeftHeading:
+						t.position.setX(t.position.x()+specialEndPos);
+						break;
+					case RightHeading:
+						t.position.setX(t.position.x()-specialEndPos);
+						break;
+					case UpHeading:
+						t.position.setY(t.position.y()+specialEndPos);
+						break;
+					case DownHeading:
+						t.position.setY(t.position.y()-specialEndPos);
+						break;
+					case None:
+						break;
+					}
 
-                return;
-            }
-        }
-            break;
-        case SetInFlames:
-            t.explosion=Burning;
-            break;
-        default:
-            break;
+					return;
+				}
+			}
+				break;
+			case SetInFlames:
+				t.explosion=Burning;
+				return;
+				break;
+			default:
+				break;
         }
 
 
 
-        if (!tank->HitWall().IsNull() && tank->HitWall())
-        {
+        if (!tank->HitWall().IsNull() && tank->HitWall()){
             t.deathCause=Tank::HitWall;
-        }
-        else if (!tank->HitMine().IsNull() && tank->HitMine())
-        {
+        }else if (!tank->HitMine().IsNull() && tank->HitMine()){
             t.deathCause=Tank::HitMine;
-        }
-        else if (!tank->HitMissile().IsNull() && tank->HitMissile())
-        {
+        }else if (!tank->HitMissile().IsNull() && tank->HitMissile()){
             t.deathCause=Tank::HitMissile;
-        }
-        else if (!tank->HitTank().IsNull() && tank->HitTank())
-        {
+        }else if (!tank->HitTank().IsNull() && tank->HitTank()){
             t.deathCause=Tank::HitTank;
-        }
-        else
-        {
+        }else{
             t.deathCause=Tank::None;
         }
-    }
-    else if (t.explosion!=NotInFlames)
-    {
+
+    }else if (t.explosion!=NotInFlames){
+
         t.explosion=Destroyed;
-    }
-    else
-    {
+
+    }else{
 
         t.paintPosition=t.position;
         t.position=QPointF(tank->PosX().GetVal(), tank->PosY().GetVal());
@@ -525,14 +511,9 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
     m_matchState.gameState.elapsedTime=static_cast<int>(game->ElapsedTime().GetVal());
 
-    m_matchState.gameState.mines.clear();
-
-    //Todo: apparently the insert the mines here for some cryptic reason.
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
 
-
-    //m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
-
+    //TODO fix so that no copying is required
     std::priority_queue<PassiveGroup*> creepy_copy = m_passive_objects;
     while(!creepy_copy.empty()){
     	PassiveGroup* a = creepy_copy.top();
@@ -626,7 +607,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
         if (missile->InFlames().GetVal())
         {
-            m.explosion=m.explosion==NotInFlames ? SetInFlames : Burning;
+            m.explosion = m.explosion == NotInFlames ? SetInFlames : Burning;
         }
         else if (m.explosion!=NotInFlames)
         {
@@ -725,9 +706,13 @@ void GameWorld::Update()
     {
     	//if(tank.explosion == SetInFlames){
 
+    	//std::wcout << tank.playerId <<" explosion status is " <<  tank.explosion <<std::endl;
+
 			if(tank.deathCause == tank.Death::HitWall){
 
 				UpdatePosition(timeToNextUpdate, movement*0.5, tank);
+			}else if(tank.deathCause == tank.Death::HitTank){
+				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank,false);
 			}else{
 				UpdatePosition(timeToNextUpdate, movement, tank);
 			}
