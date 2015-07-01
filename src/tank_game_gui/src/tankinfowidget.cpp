@@ -97,6 +97,20 @@ void TankInfoWidget::SetLed(Led led, bool on)
     }
 }
 
+void TankInfoWidget::turnOfDirectionLeds(){
+    m_buttons[0]->setPixmap(m_green_off);
+    m_buttons[1]->setPixmap(m_green_off);
+    m_buttons[2]->setPixmap(m_green_off);
+    m_buttons[3]->setPixmap(m_green_off);
+}
+
+void TankInfoWidget::turnOfTowerLeds(){
+    m_buttons[4]->setPixmap(m_green_off);
+    m_buttons[5]->setPixmap(m_green_off);
+    m_buttons[6]->setPixmap(m_green_off);
+    m_buttons[7]->setPixmap(m_green_off);
+}
+
 void TankInfoWidget::SetLaserAmmo(int lasers){
 	ui->laserLcdNumber->display(lasers);
 }
@@ -104,6 +118,7 @@ void TankInfoWidget::SetLaserAmmo(int lasers){
 void TankInfoWidget::Update(const Joystick* js)
 {
     ResetLeds();
+
     if (!js)
     {
         return;
@@ -114,22 +129,27 @@ void TankInfoWidget::Update(const Joystick* js)
     }else{
     	SetLed(TankInfoWidget::Fire, false);
     }
+
     if(js->laser){
     	ui->laserActive->setPixmap(m_blue_on);
     }else{
     	ui->laserActive->setPixmap(m_blue_off);
 
     }
-    if (js->moveDirection!=None)
-    {
+
+    if (js->moveDirection!=None){
         TankInfoWidget::Led led=static_cast<TankInfoWidget::Led>(js->moveDirection);
         SetLed(led, true);
+    }else{
+    	turnOfDirectionLeds();
     }
-    if (js->towerDirection!=None)
-    {
+
+    if (js->towerDirection!=None){
         TankInfoWidget::Led led=static_cast<TankInfoWidget::Led>(
                     static_cast<int>(TankInfoWidget::TowerLeft)+
                     static_cast<int>(js->towerDirection));
         SetLed(led, true);
+    }else{
+    	turnOfTowerLeds();
     }
 }

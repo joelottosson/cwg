@@ -35,6 +35,9 @@ public:
     void ResetLeds();
     void SetLed(Led led, bool on);
 
+    void turnOfDirectionLeds();
+    void turnOfTowerLeds();
+
 private:
     Ui::TankInfoWidget *ui;
     int m_playerNumber;

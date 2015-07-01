@@ -185,6 +185,7 @@ void GameWorld::Reset(const Consoden::TankGame::GameStatePtr &game, boost::int64
             Tank t(QPointF(tank->PosX().GetVal(), tank->PosY().GetVal()), ToDirection(tank->MoveDirection()));
             t.fires=tank->Fire().GetVal();
             t.towerDirection=ToDirection(tank->TowerDirection());
+
             t.playerId=tank->PlayerId().GetVal().GetRawValue();
             if (tank->InFlames().GetVal())
             {
@@ -294,6 +295,8 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     t.moveDirection=ToDirection(tank->MoveDirection());
     t.fires=tank->Fire().GetVal();
     t.towerDirection=ToDirection(tank->TowerDirection());
+
+
     qreal x_pos = t.position.x();
     qreal y_pos = t.position.y();
 
@@ -692,7 +695,7 @@ void GameWorld::Update(const Consoden::TankGame::JoystickConstPtr &joystick)
     js.tankId=joystick->TankId().GetVal();
     js.playerId=joystick->PlayerId().GetVal().GetRawValue();
     js.fire=joystick->Fire().IsNull() ? false : joystick->Fire().GetVal();
-    js.fire=joystick->FireLaser().IsNull() ? false : joystick->FireLaser().GetVal();
+    js.laser=joystick->FireLaser().IsNull() ? false : joystick->FireLaser().GetVal();
     js.moveDirection=ToDirection(joystick->MoveDirection());
     js.towerDirection=ToDirection(joystick->TowerDirection());
 }
@@ -1003,14 +1006,18 @@ void GameWorld::InitMediaPlayers()
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)
 {
 
-	qreal endAngle;
+	qreal endAngle = DirectionToAngle(tank.towerDirection);
 
-        if(tank.towerDirection == Direction::None){
-        	endAngle = DirectionToAngle(tank.oldTowerDirection);
-        }else{
-        	endAngle = DirectionToAngle(tank.towerDirection);
-        	tank.oldTowerDirection = tank.towerDirection;
-        }
+/*	std::wcout << "Tower direction is     " << tank.towerDirection << std::endl;
+	std::wcout << "Old Tower direction is " << tank.towerDirection << std::endl;
+	std::wcout << std::endl;
+
+	if(tank.towerDirection == Direction::None){
+		endAngle = DirectionToAngle(tank.oldTowerDirection);
+	}else{
+		endAngle = DirectionToAngle(tank.towerDirection);
+		tank.oldTowerDirection = tank.towerDirection;
+	}*/
 
 
     if (timeToNextUpdate<=m_animationUpdateInterval)

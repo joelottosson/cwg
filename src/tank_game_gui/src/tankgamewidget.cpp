@@ -395,8 +395,6 @@ void TankGameWidget::drawWithTranslationAndRotation(QPainter& painter,QPixmap im
 	painter.translate(image.width()/-2, image.height()/-2);
 	painter.drawPixmap(0, 0, image);
 	painter.restore();
-
-
 }
 
 
