@@ -79,13 +79,13 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     UpdatePaintConstants();
 
     //Paint mines
-    PaintMines(*m_backgroundPainter);
+    //PaintMines(*m_backgroundPainter);
 
     QPixmap tmp(*m_backgroundPixmap);    
     QPainter painter(&tmp);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    PaintPoison(painter);
+    //PaintPoison(painter);
 
 
     //Paint sprites
@@ -255,6 +255,16 @@ int TankGameWidget::CalculateWrappingCoordinate(int val, int maxVal, int boardSi
 void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painter)
 {
 
+	qreal rotation = 0;
+    if(tank.moveDirection == Direction::None){
+    	rotation = DirectionToAngle(tank.oldMoveDirection);
+    }else{
+    	rotation = DirectionToAngle(tank.moveDirection);
+    	tank.oldMoveDirection = tank.moveDirection;
+    }
+
+
+
     if (tank.explosion==Destroyed)
     {
 
@@ -264,7 +274,8 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
         const int y=yoffset+(tank.paintPosition.y())*m_const.squarePixelSize;
         painter.save();
         painter.translate(x+m_tankWreck.width()/2, y+m_tankWreck.height()/2);
-        painter.rotate(DirectionToAngle(tank.moveDirection));
+        painter.rotate(rotation);
+
         painter.translate(m_tankWreck.width()/-2, m_tankWreck.height()/-2);
         painter.drawPixmap(0, 0, m_tankWreck);
         painter.restore();
@@ -280,7 +291,7 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
         const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
         painter.save();
         painter.translate(x+tankImage.width()/2, y+tankImage.height()/2);
-        painter.rotate(DirectionToAngle(tank.moveDirection));
+        painter.rotate(rotation);
         painter.translate(tankImage.width()/-2, tankImage.height()/-2);
         painter.drawPixmap(0, 0, tankImage);        
         painter.restore();
@@ -291,7 +302,7 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
             const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-tankImage.height(), m_const.boardPixelSizeInt.y());
             painter.save();
             painter.translate(wrapX+tankImage.width()/2, wrapY+tankImage.height()/2);
-            painter.rotate(DirectionToAngle(tank.moveDirection));
+            painter.rotate(rotation);
             painter.translate(tankImage.width()/-2, tankImage.height()/-2);
             painter.drawPixmap(0, 0, tankImage);
             painter.restore();

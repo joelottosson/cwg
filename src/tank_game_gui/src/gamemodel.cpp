@@ -7,6 +7,27 @@
 
 #include "gamemodel.h"
 
+
+
+Tank::Tank(QPointF pos, Direction direction)
+	:playerId(0)
+	,position(pos)
+	,moveDirection(direction)
+	,oldMoveDirection(direction)
+	,towerDirection(direction)
+	,oldTowerDirection(direction)
+	,fires(false)
+	,explosion(NotInFlames)
+	,deathCause(None)
+	,paintPosition(pos)
+	,paintTankAngle(DirectionToAngle(direction))
+	,paintTowerAngle(DirectionToAngle(direction))
+	,isWrapping(false)
+	//,accepts_updates(true)
+
+{
+}
+
 Dude::Dude(QPointF position, Direction direction):
 	position(position),
 	moveDirection(direction),
