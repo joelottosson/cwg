@@ -33,11 +33,17 @@ public:
 
 
 	/**
-	 * Creates a new passive group with no sound information
+	 * Creates a new passive group with no sound information.
+	 *
+	 * this is the worst constructor the world has ever laid eyes upon.
+	 *
+	 * it all should be fairly straight forward but the weird board function thing is a the function from the Board
+	 * class used to retrive the positions of the silly things.
 	 */
 	PassiveGroup(MatchState match_state, char const* image_name, int frames, int width, int height, int life_time, int repetitions, int layer,double delay, boost::function<const Board::PointVec& ( const Board&)> board_function);
 	PassiveGroup(MatchState match_state, char const* image_name, int frames, int width, int height, int life_time, int repetitions, int layer,double delay,char const* sound_file, bool sound_enabled,  boost::function<const Board::PointVec& ( const Board&)> board_function);
 	virtual ~PassiveGroup();
+
 
 	void setSillyFunction( boost::function<const Board::PointVec& ( const Board&)> silly);
 	void clear();
