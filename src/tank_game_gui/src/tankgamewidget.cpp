@@ -78,23 +78,10 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 {
     UpdatePaintConstants();
 
-    //Paint mines
-    //PaintMines(*m_backgroundPainter);
-
     QPixmap tmp(*m_backgroundPixmap);    
     QPainter painter(&tmp);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    //PaintPoison(painter);
-
-
-    //Paint sprites
-    for (auto& s : m_world.Sprites())
-    {
-
-        PaintSprite(s, painter);
-        //s.killToggle();
-    }
 
     std::priority_queue<PassiveGroup*>  passives = m_world.getPassiveGroups();
     std::priority_queue<PassiveGroup*> creepy_copy = passives;
@@ -128,6 +115,14 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     for (auto& vt : m_world.GetGameState().missiles)
     {
         PaintMissile(vt.second, painter);
+    }
+
+    //Paint sprites
+    for (auto& s : m_world.Sprites())
+    {
+
+        PaintSprite(s, painter);
+        //s.killToggle();
     }
 
     if (m_world.GetGameState().paintWinner)
@@ -268,6 +263,7 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
     if (tank.explosion==Destroyed)
     {
     	drawWithTranslationAndRotation(painter,m_tankWreck,tank.paintPosition,rotation);
+    	return;
 
     }
 
