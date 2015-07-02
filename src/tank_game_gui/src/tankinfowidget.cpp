@@ -117,12 +117,14 @@ void TankInfoWidget::SetLaserAmmo(int lasers){
 
 void TankInfoWidget::Update(const Joystick* js)
 {
-    ResetLeds();
 
     if (!js)
     {
         return;
     }
+
+    ResetLeds();
+
     if (js->fire)
     {
         SetLed(TankInfoWidget::Fire, true);
