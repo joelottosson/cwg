@@ -12,6 +12,18 @@ server: .FORCE
 	cd src/tank_match_server/src && cmake . && make install
 	@cd ../../..
 	
+clean_engine: .FORCE
+	cd src/tank_engine/src && cmake . && make clean
+	@cd ../../..
+	
+clean_gui: .FORCE
+	cd src/tank_game_gui/src && cmake . && make clean
+	@cd ../../..
+	
+clean_server: .FORCE
+	cd src/tank_match_server/src && cmake . && make clean
+	@cd ../../..
+	
 random_player: .FORCE
 	@cd src/tank_random_player/src && cmake . && make install
 	@cd ../../..
@@ -27,8 +39,30 @@ cool_players: .FORCE
 	@cd ../../..
 	cd src/players/tank_player_templates/tank_player_cpp/src && cmake . && make install
 	@cd ../../..
+	
+clean_cool_players: .FORCE
+	cd src/players/tank_random_player/src && cmake . && make clean
+	@cd ../../..
+	cd src/players/tank_player_dumb/src && cmake . && make clean
+	@cd ../../..
+	cd src/players/tank_player_manual/src && cmake . && make clean
+	@cd ../../..
+	cd src/players/tank_player_grandmother/src && cmake . && make clean
+	@cd ../../..
+	cd src/players/tank_player_templates/tank_player_cpp/src && cmake . && make clean
+	@cd ../../..
 
-backend: remove_cache engine gui server
+backend: engine gui server
+
+clean_backend: clean_engine clean_gui clean_server
+
+clean_all: clean_engine clean_gui clean_server clean_cool_players
+
+all: .FORCE engine gui server cool_players
+
+
+
+
 	
 dob: .FORCE
 	dobmake.py --no-ada --no-java --no-dotnet --batch
