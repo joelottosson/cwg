@@ -400,17 +400,27 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
 {
     int i=tank->TankId().GetVal();
     Tank& t=m_matchState.gameState.tanks[i];
-    UpdateTankWrapping(tank, t);
-    t.moveDirection=ToDirection(tank->MoveDirection());
     t.fires=tank->Fire().GetVal();
     t.towerDirection=ToDirection(tank->TowerDirection());
+    UpdateTankWrapping(tank, t);
+/*    if(tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true && t.explosion == NotInFlames){
+    	calculateColisionPosition(t,m_matchState.gameState.tanks[(tank->TankId() + 1) % 2] );
+    	t.explosion=SetInFlames;
+    	return;
+    }*/
+
+    t.oldMoveDirection = t.moveDirection;
+    t.moveDirection=ToDirection(tank->MoveDirection());
+
+
+
 
     if(!tank->FireLaser().IsNull() && tank->FireLaser() ){
     	//std::wcout << "is fiering laser" << std::endl;
     	DrawLaser(tank,board);
     }
 
-
+    //std::wcout << "tank position " << tank->PosX().GetVal() << "," << tank->PosY().GetVal()   << std::endl;
     if (tank->InFlames().GetVal()){
         switch (t.explosion)
         {
@@ -427,14 +437,23 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
 
 				bool hasSpecialEndPos=false;
 				qreal specialEndPos=0;
+
+				//calculateColisionPosition(t,m_matchState.gameState.tanks[(tank->TankId() + 1) % 2]);
+
 				if (tank->HitWall().IsNull()==false && tank->HitWall().GetVal()==true){
 					t.deathCause=Tank::HitWall;
 					specialEndPos=0.5;
 					hasSpecialEndPos=true;
-				}else if (tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true){
+/*				}else if (tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true){
 					t.deathCause=Tank::HitTank;
 					specialEndPos=0.25;
-					hasSpecialEndPos=true;
+					//hasSpecialEndPos=true;
+					std::wcout << "==============" << std::endl;
+					if(tank->TankId() % 2 == 1){
+						t.moveDirection = t.oldMoveDirection;
+					}
+					calculateColisionPosition(t,m_matchState.gameState.tanks[(tank->TankId() + 1) % 2] );
+					return;*/
 				}
 
 				//if tank hit wall or drove into other tank, we calculate a position half inside the
@@ -502,7 +521,7 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
  *
  * Gets called when the game state is updated (every second by default)
  *
- * Unfortunatley it might appear as if this function needs to match the behaviour of the function in Engine.cpp....whose name i have forgotten
+ * Unfortunately it might appear as if this function needs to match the behavior of the function in Engine.cpp....whose name i have forgotten
  *
  */
 void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
@@ -538,6 +557,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     	if(!dude.dying && dude_game->Dying()){
     		dude.just_died = true;
+    		dude.position = dude.position+directionToVector(dude.moveDirection)*0.5;
 
     	}
 
@@ -615,14 +635,35 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         }
     }
 
-    //Updates the tanks
-    for (int i=0; i<game->TanksArraySize(); ++i)
-    {
-        if (!game->Tanks()[i].IsNull())
-        {
-            const Consoden::TankGame::TankPtr& tank=game->Tanks()[i].GetPtr();
-            UpdateTank(tank, boardParser);
-        }
+    //todo: we need to do a realy sketchy special update for collisions.
+    if(	!game->Tanks()[0].IsNull() && !game->Tanks()[1].IsNull() ){
+
+		const Consoden::TankGame::TankPtr& tank0_ptr=game->Tanks()[0].GetPtr();
+		const Consoden::TankGame::TankPtr& tank1_ptr=game->Tanks()[1].GetPtr();
+		Tank& tank0 =m_matchState.gameState.tanks[0];
+		Tank& tank1 =m_matchState.gameState.tanks[1];
+		if(tank0.explosion == NotInFlames && tank1.explosion == NotInFlames &&
+				tank0_ptr->HitTank().IsNull() == false  && tank0_ptr->HitTank() == true &&
+				tank1_ptr->HitTank().IsNull() == false  && tank1_ptr->HitTank() == true
+				){
+			tank0.moveDirection = ToDirection(tank0_ptr->MoveDirection());
+			tank1.moveDirection = ToDirection(tank1_ptr->MoveDirection());
+			tank0.explosion = SetInFlames;
+			tank1.explosion = SetInFlames;
+			QPointF tank0_silly_pos = calculateColisionPosition(tank0,tank1);
+			QPointF tank1_silly_pos = calculateColisionPosition(tank1,tank0);
+			tank0.position = tank0_silly_pos;
+			tank1.position = tank1_silly_pos;
+			tank0.deathCause=Tank::HitTank;
+			tank1.deathCause=Tank::HitTank;
+
+		}else{
+
+			UpdateTank(tank0_ptr, boardParser);
+			UpdateTank(tank1_ptr, boardParser);
+
+		}
+
     }
 
     //Update if game is finished and if we have a winner
@@ -857,7 +898,7 @@ void GameWorld::Update()
     //update of our dude
     for (auto& dude : m_matchState.gameState.dudes){
         if(dude.just_died){
-        	UpdatePosition(timeToNextUpdate, .5*movement, dude,false);
+        	UpdatePositionNoOvershoot(timeToNextUpdate, movement, dude,false);
 
         }else if(!dude.dying){
         	UpdatePosition(timeToNextUpdate, 1*movement, dude);
@@ -1148,3 +1189,143 @@ int GameWorld::wrap(int pos, int size){
 		return pos;
 	}
 }
+
+/*void GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
+
+	qreal offs = 0.25;
+	//QPointF diff = own.position - enemy.position;
+
+
+
+	//QPoint diffint = (QPoint)diff;
+	//std::wcout << "testing "<< diff.x() << "," << diff.y() << std::endl;
+	std::wcout << " Own direction = " << directionToString(own.moveDirection) << std::endl;
+	std::wcout << " enemy direction = " << directionToString(enemy.moveDirection)<< std::endl << std::endl;
+	if(own.moveDirection == None){
+		return;
+	}
+
+	if(enemy.moveDirection == None){
+
+		switch (own.moveDirection)
+		{
+		case LeftHeading:
+			own.position.setX(own.position.x()+offs);
+			break;
+		case RightHeading:
+			own.position.setX(own.position.x()-offs);
+			break;
+		case UpHeading:
+			own.position.setY(own.position.y()+offs);
+			break;
+		case DownHeading:
+			own.position.setY(own.position.y()-offs);
+			break;
+		case None:
+			break;
+		}
+
+		return;
+	}else{
+		//We need to do stuff difrently if tanks are colliding diagonaly.
+		if((directionToVector(own.moveDirection).y() != 0 && directionToVector(enemy.moveDirection).y() == 0 ) ||
+				(directionToVector(own.moveDirection).x() != 0 && directionToVector(enemy.moveDirection).x() == 0 )){
+			own.position = (own.position - directionToVector(own.moveDirection)*(offs));
+		}else{
+			own.position = (own.position + directionToVector(own.moveDirection)*(offs));
+
+		}
+	}
+
+}*/
+
+QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
+
+	qreal offs = 0.25;
+
+	if(own.moveDirection == None){
+		std::wcout << "well.... apperntly im not mewing" << std::endl;
+		return own.position;
+	}
+
+	if(enemy.moveDirection == None){
+
+		std::wcout << "one was stationary" << std::endl;
+		return (own.position - directionToVector(own.moveDirection)*(offs));
+
+	}else{
+		//We need to do stuff difrently if tanks are colliding diagonaly.
+		if( (abs(directionToVector(own.moveDirection).y()) != abs(directionToVector(enemy.moveDirection).y())) ||
+				(abs(directionToVector(own.moveDirection).x()) != abs(directionToVector(enemy.moveDirection).x()))) {
+
+			//std::wcout << "Kollajded dajägonally" << std::endl;
+			return (own.position + directionToVector(own.moveDirection)*(0.75)); //Diagonally
+
+		}else{
+
+
+			QPointF diff = own.position - enemy.position;
+			qreal distance = abs(diff.x()) + abs(diff.y());
+			offs = distance > 1 ? 0.75 : 0.25;
+			return  (own.position + directionToVector(own.moveDirection)*(offs));
+
+		}
+	}
+
+}
+
+
+QPointF GameWorld::directionToVector(Direction dir){
+	switch(dir){
+		case UpHeading:
+			return QPointF(0,-1);
+		case DownHeading:
+			return QPointF(0,1);
+		case LeftHeading:
+			return QPointF(-1,0);
+
+		case RightHeading:
+			return QPointF(1,0);
+		default:
+			return QPointF(0,0);
+	}
+}
+
+const char* GameWorld::directionToString(Direction dir){
+	switch(dir){
+		case UpHeading:
+			return "Up";
+		case DownHeading:
+			return "Down";
+		case LeftHeading:
+			return "Left";
+
+		case RightHeading:
+			return "Right";
+		default:
+			return "None";
+	}
+}
+
+void GameWorld::collisionOverride(Tank& own, Tank& enemy){
+	QPointF diff = own.position - enemy.position;
+	int key = (int)(diff.y()*10) + (int)(diff.x());
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -75,6 +75,7 @@ struct Tank
     mutable Direction oldTowerDirection;
     mutable Direction oldMoveDirection;
     bool fires;
+
     ExplosionStatus explosion;
     Death deathCause;
 

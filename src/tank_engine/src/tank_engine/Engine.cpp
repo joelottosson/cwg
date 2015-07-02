@@ -426,7 +426,7 @@ namespace TankEngine
 
 
             /**
-             * TODO: COLLISION DETECTION AND SILLY MOVE DIrections happens here
+             * TODO: COLLISION DETECTION
              */
             for (Safir::Dob::Typesystem::ArrayIndex tank2_index = tank_index + 1;
                  (tank2_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank2_index].IsNull());
@@ -647,12 +647,9 @@ namespace TankEngine
             		Consoden::TankGame::TankPtr enemy_ptr =
             		                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[(tank_index+1) % 2].GetPtr());
 
-            		std::wcout << "We are doing crazy cool laser fajer... " << std::endl;
-            		if(fireTheLaser(tank_ptr, enemy_ptr,gm,game_ptr)){
 
-            		}else{
-            			std::wcout << "So...the laser didnt hit.... " << std::endl;
-            		}
+            		fireTheLaser(tank_ptr, enemy_ptr,gm,game_ptr);
+
 
             	}else{
             		tank_ptr->FireLaser() = false;
@@ -727,7 +724,6 @@ namespace TankEngine
                 // BOOM!
                 // Hit by missile awards two points to opponent
                 AddPoints(2, OpponentTankId(tank_ptr->TankId()), game_ptr);
-
                 tank_ptr->InFlames() = true;
                 tank_ptr->HitMissile() = true;
             }
@@ -892,24 +888,20 @@ namespace TankEngine
     		//lazer wrapper
     		x_pos = wrap(x_pos+dx,game_ptr->Width().GetVal());
     		y_pos = wrap(y_pos+dy,game_ptr->Height().GetVal());
-    		std::wcout << "x = "<< x_pos <<" y = "<< y_pos << std::endl;
-    		//y_pos += dy;
+
     		if(gm.WallSquare(x_pos,y_pos)){
-    			std::wcout << "lazer hti wall " << std::endl;
     			return false;
-    		//}else if(!gm.OnBoard(x_pos, y_pos)){
-    		//	std::wcout << "laser left board " << std::endl;
-    		//	return false;
+
     		}else if(x_pos == enemy_tank->PosX() && y_pos == enemy_tank->PosY()){
-    			std::wcout << "laser hit da tankinator" << std::endl;
+
     			enemy_tank->InFlames() = true;
-    			//todo: Add hit lazer thing for various awesomeness reasons and treasons
+
     			enemy_tank->HitMissile() = true;
     			return true;
     		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
-    			std::wcout << "stupid tank hit itself ^-^" << std::endl;
+
     			own_tank->InFlames() = true;
-    			//todo: Add hit lazer thing for various awesomeness reasons and treasons
+
     			own_tank->HitMissile() = true;
     			return true;
     		}

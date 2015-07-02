@@ -50,6 +50,8 @@ public:
     void Update(const Consoden::TankGame::GameStatePtr& game);
     void Update(const Consoden::TankGame::JoystickConstPtr& joystick);
 
+
+
     qint64 MatchId() const {return m_matchState.machId;}
     qint64 GameId() const {return m_matchState.gameState.gameId;}
     bool MatchFinished() const;
@@ -131,7 +133,12 @@ private:
     inline void UpdateDudes(const Board& board);
 
 
-
+    //QPointF calculateColisionPosition(Tank& own, Tank& enemy);
+    //void calculateColisionPosition(Tank& own, Tank& enemy);
+    QPointF calculateColisionPosition(Tank& own, Tank& enemy);
+    QPointF directionToVector(Direction dir);
+    const char* directionToString(Direction dir);
+    void collisionOverride(Tank& own, Tank& enemy);
 
     inline void UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal);
 
@@ -181,40 +188,24 @@ private:
             {
                 qreal prev=item.paintPosition.x();
                 item.paintPosition.setX(prev-movement);
-//                if (item.paintPosition.x()<item.position.x())
-//                {
-//                    item.paintPosition=item.position;
-//                }
             }
                 break;
             case RightHeading:
             {
                 qreal prev=item.paintPosition.x();
                 item.paintPosition.setX(prev+movement);
-//                if (item.paintPosition.x()>item.position.x())
-//                {
-//                    item.paintPosition=item.position;
-//                }
             }
                 break;
             case UpHeading:
             {
                 qreal prev=item.paintPosition.y();
                 item.paintPosition.setY(prev-movement);
-//                if (item.paintPosition.y()<item.position.y())
-//                {
-//                    item.paintPosition=item.position;
-//                }
             }
                 break;
             case DownHeading:
             {
                 qreal prev=item.paintPosition.y();
                 item.paintPosition.setY(prev+movement);
-//                if (item.paintPosition.y()>item.position.y())
-//                {
-//                    item.paintPosition=item.position;
-//                }
             }
                 break;
             case None:
@@ -299,6 +290,10 @@ private:
 
        }
 
+
+
 };
+
+
 
 #endif
