@@ -463,16 +463,16 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
 					switch (t.moveDirection)
 					{
 					case LeftHeading:
-						t.position.setX(t.position.x()+specialEndPos);
-						break;
-					case RightHeading:
 						t.position.setX(t.position.x()-specialEndPos);
 						break;
+					case RightHeading:
+						t.position.setX(t.position.x()+specialEndPos);
+						break;
 					case UpHeading:
-						t.position.setY(t.position.y()+specialEndPos);
+						t.position.setY(t.position.y()-specialEndPos);
 						break;
 					case DownHeading:
-						t.position.setY(t.position.y()-specialEndPos);
+						t.position.setY(t.position.y()+specialEndPos);
 						break;
 					case None:
 						break;
@@ -751,7 +751,7 @@ void GameWorld::Update()
 
 			if(tank.deathCause == tank.Death::HitWall){
 
-				UpdatePosition(timeToNextUpdate, movement*0.5, tank);
+				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank, false);
 			}else if(tank.deathCause == tank.Death::HitTank){
 				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank,false);
 			}else{
@@ -764,9 +764,9 @@ void GameWorld::Update()
         {
             //new explosion sprite
             m_sprites.push_back(Sprite(m_explosion, tank.position, now+timeToNextUpdate, 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+0.3f, tank.position.y()+0.3f), now+timeToNextUpdate+300, 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()-0.2f, tank.position.y()+0.2f), now+timeToNextUpdate+500, 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()-0.3f, tank.position.y()-0.3f), now+timeToNextUpdate+800, 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)), now + (rand() % 600), 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)), now + (rand() % 600), 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)), now + (rand() % 600), 1));
             tank.explosion=Burning;
             m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [&]
             {
@@ -1244,14 +1244,14 @@ QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
 	qreal offs = 0.25;
 
 	if(own.moveDirection == None){
-		std::wcout << "well.... apperntly im not mewing" << std::endl;
+
 		return own.position;
 	}
 
 	if(enemy.moveDirection == None){
 
-		std::wcout << "one was stationary" << std::endl;
-		return (own.position - directionToVector(own.moveDirection)*(offs));
+
+		return (own.position + directionToVector(own.moveDirection)*(.5));
 
 	}else{
 		//We need to do stuff difrently if tanks are colliding diagonaly.
@@ -1308,8 +1308,9 @@ const char* GameWorld::directionToString(Direction dir){
 }
 
 void GameWorld::collisionOverride(Tank& own, Tank& enemy){
-	QPointF diff = own.position - enemy.position;
-	int key = (int)(diff.y()*10) + (int)(diff.x());
+	return;
+	//QPointF diff = own.position - enemy.position;
+	//int key = (int)(diff.y()*10) + (int)(diff.x());
 
 }
 
