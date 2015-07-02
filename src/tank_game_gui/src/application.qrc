@@ -15,7 +15,6 @@
      <file>../images/poison.png</file>
      <file>../images/coin_sheet.png</file>
      <file>../images/tank_fire_sheet.png</file>
-     <file>../images/explosion_sheet.png</file>
      <file>../images/ball_grey.png</file>
      <file>../images/ball_red.png</file>
      <file>../images/ball_blue.png</file>
@@ -25,7 +24,8 @@
      <file>../images/active-green.png</file>
      <file>../images/laser-ammo.png</file>
      <file>../images/laser-start.png</file>
-     <file>../images/laser-middle.png</file>              
+     <file>../images/laser-middle.png</file>
+     <file>../images/awesome-explosion.png</file>                          
  </qresource>  
  </RCC>
 

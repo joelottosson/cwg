@@ -56,13 +56,21 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     }
 
     //load sprite images
-    m_explosion.image=QPixmap(":/images/explosion_sheet.png");
+    /*m_explosion.image=QPixmap(":/images/explosion_sheet.png");
     m_explosion.lifeTime=1000;
     for (int i=0; i<11; ++i)
     {
         m_explosion.fragments.push_back(QRectF(i*72, 0, 72, 72));
-    }
+    }*/
 
+    m_explosion.image=QPixmap(":/images/awesome-explosion.png");
+	m_explosion.lifeTime=2000;
+	for(int j = 0; j < 7 ;j ++){
+	for (int i=0; i<7; ++i)
+		{
+			m_explosion.fragments.push_back(QRectF(i*72, j*72, 72, 72));
+		}
+	}
     m_tankFire.image=QPixmap(":/images/tank_fire_sheet.png");
     m_tankFire.lifeTime=300;
     for (int i=0; i<5; ++i)
