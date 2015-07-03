@@ -70,7 +70,7 @@ struct Tank
     //bool accepts_updates;
     qint64 playerId;
     QPointF position;
-    mutable QPointF old_position;
+    //mutable QPointF old_position;
     Direction moveDirection;
     Direction towerDirection;
     mutable Direction oldTowerDirection;

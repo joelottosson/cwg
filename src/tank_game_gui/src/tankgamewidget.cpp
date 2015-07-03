@@ -321,7 +321,7 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
             const int xoffset=(m_const.squarePixelSize-m_tankWreck.width())/2;
             const int yoffset=(m_const.squarePixelSize-m_tankWreck.height())/2;
             const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
-            const int y=yoffset+tank.old_position.y()*m_const.squarePixelSize;
+            const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
             const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-m_tankWreck.width(), m_const.boardPixelSizeInt.x());
             const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-m_tankWreck.height(), m_const.boardPixelSizeInt.y());
             painter.save();
