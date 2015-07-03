@@ -129,7 +129,7 @@ struct Dude
    // bool accepts_updates = true;
     Direction moveDirection;
     bool visible;
-    bool dying;
+    bool is_dead;
     QPointF paintPosition;
     SpriteData walking_sprite;
     SpriteData dead_sprite;

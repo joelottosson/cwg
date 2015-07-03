@@ -11,10 +11,14 @@
 #include "sprite.h"
 #include "tankgamewidget.h"
 #include "gameworld.h"
+#include <time.h>
+
 
 namespace SDob = Safir::Dob::Typesystem;
 namespace CWG= Consoden::TankGame;
 
+int global_refresh_count = 0;
+float global_timer_averages[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
 TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     :QWidget(parent)
@@ -76,12 +80,24 @@ void TankGameWidget::UpdatePaintConstants()
 
 void TankGameWidget::paintEvent(QPaintEvent*)
 {
-    UpdatePaintConstants();
+	//std::wcout << "================================"<< std::endl;
+	clock_t start = clock();
+	clock_t total = clock();
 
+    UpdatePaintConstants();
+    global_timer_averages[0] += ((float)(clock() - start)/CLOCKS_PER_SEC);
+
+
+    start = clock();
     QPixmap tmp(*m_backgroundPixmap);    
     QPainter painter(&tmp);
-    painter.setRenderHint(QPainter::Antialiasing);
+    //painter.setRenderHint(QPainter::Antialiasing);
+    global_timer_averages[1] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
+
+
+
+    start = clock();
 
     std::priority_queue<PassiveGroup*>  passives = m_world.getPassiveGroups();
     std::priority_queue<PassiveGroup*> creepy_copy = passives;
@@ -95,8 +111,19 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 	        //s.killToggle();
 	    }
 	}
+    global_timer_averages[2] += ((float)(clock() - start)/CLOCKS_PER_SEC);
+    start = clock();
 
 
+
+    start = clock();
+    if(m_world.GetGameState().dudes.size() != 0 ){
+    	PaintDudes(m_world.GetGameState().dudes.front(), painter);
+    }
+    global_timer_averages[4] += ((float)(clock() - start)/CLOCKS_PER_SEC);
+
+
+    start = clock();
     //Paint tanks
     int blueTank=true;
     for (auto& tank : m_world.GetGameState().tanks)
@@ -104,19 +131,27 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         PaintTank(tank, blueTank, painter);
         blueTank=!blueTank;
     }
+    global_timer_averages[3] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
 
-
+    start = clock();
     if(m_world.GetGameState().dudes.size() != 0 ){
     	PaintDudes(m_world.GetGameState().dudes.front(), painter);
     }
+    global_timer_averages[4] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
+
+
+    start = clock();
     //Paint missiles
     for (auto& vt : m_world.GetGameState().missiles)
     {
         PaintMissile(vt.second, painter);
     }
+    global_timer_averages[5] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
+
+    start = clock();
     //Paint sprites
     for (auto& s : m_world.Sprites())
     {
@@ -124,6 +159,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         PaintSprite(s, painter);
         //s.killToggle();
     }
+    global_timer_averages[6] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
     if (m_world.GetGameState().paintWinner)
     {
@@ -135,9 +171,11 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         PaintText(t, painter);
     }
 
+    //std::wcout << "Settingup took " << 	((float)(clock() - start)/CLOCKS_PER_SEC) << " milli seconds " << std::endl;
+    start = clock();
     //Paint everything on screen
     QPainter p(this);
-    p.setRenderHint(QPainter::Antialiasing);
+    //p.setRenderHint(QPainter::Antialiasing);
     QStyleOption opt;
     opt.init(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
@@ -150,6 +188,26 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     {
         p.drawPixmap(m_const.upperLeft, tmp.scaledToWidth(static_cast<int>(tmp.width()*m_scale)));
     }
+    global_timer_averages[7] += ((float)(clock() - start)/CLOCKS_PER_SEC);
+        //start = 	QDateTime::currentMSecsSinceEpoch();
+
+    global_timer_averages[8] += ((float)(clock() - total)/CLOCKS_PER_SEC);
+    /*std::wcout << "current fraim rate = " << 1/(((float)(clock() - total)/CLOCKS_PER_SEC)) << std::endl;
+    global_refresh_count++;
+    std::wcout << "constraints = " << global_timer_averages[0]/global_refresh_count << std::endl;
+    std::wcout << "setup = " << global_timer_averages[1]/global_refresh_count << std::endl;
+    std::wcout << "passive = " << global_timer_averages[2]/global_refresh_count << std::endl;
+    std::wcout << "tanks = " << global_timer_averages[3]/global_refresh_count << std::endl;
+    std::wcout << "dude = " << global_timer_averages[4]/global_refresh_count << std::endl;
+    std::wcout << "missiels = " << global_timer_averages[5]/global_refresh_count << std::endl;
+    std::wcout << "sprites = " << global_timer_averages[6]/global_refresh_count << std::endl;
+    std::wcout << "throw = " << global_timer_averages[7]/global_refresh_count << std::endl;
+    std::wcout << "total = " << global_timer_averages[8]/global_refresh_count << std::endl;
+    std::wcout << "average frame rate = " << 1/(global_timer_averages[8]/global_refresh_count) << std::endl;*/
+
+
+
+
 }
 
 void TankGameWidget::PaintGrid(QPainter &painter)
@@ -208,7 +266,7 @@ void TankGameWidget::PaintPoison(QPainter& painter)
 void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 {
 
-	if(!dude.dying){
+	if(!dude.is_dead){
 
 		painter.save();
         dude.updateFramecounter(dude.walking_sprite);

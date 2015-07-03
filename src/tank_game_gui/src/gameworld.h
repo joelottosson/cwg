@@ -139,6 +139,9 @@ private:
     QPointF directionToVector(Direction dir);
     const char* directionToString(Direction dir);
     void collisionOverride(Tank& own, Tank& enemy);
+    qreal timeToEvent(QPointF a, QPointF b);
+    qreal manhattanDistanceOnTorus(QPointF a, QPointF b);
+    qreal simpleDistance(QPointF a, QPointF b);
 
     inline void UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal);
 
