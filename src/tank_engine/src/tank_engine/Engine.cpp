@@ -443,6 +443,10 @@ namespace TankEngine
                     tank_ptr->HitTank() = true;
                     tank2_ptr->InFlames() = true;
                     tank2_ptr->HitTank() = true;
+                    tank_ptr->Fire() = false;
+                    tank_ptr->FireLaser() = false;
+                    tank2_ptr->Fire() = false;
+                    tank2_ptr->FireLaser() = false;
                     tank_tank_collission = true;
                 }
 
@@ -627,8 +631,9 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
         
-            if (tank_ptr->InFlames()) {
+            if (tank_ptr->InFlames() || tank_ptr->HitTank()) {
                 // Dead tank, go to next
+            	tank_ptr->Fire() = false;
                 continue;
             }
 

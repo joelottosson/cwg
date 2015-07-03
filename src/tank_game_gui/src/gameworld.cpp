@@ -642,46 +642,69 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 		}
     }
 
-    //creates and updates missiles
-    for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
-    {
-        if (game->Missiles()[i].IsNull())
-        {
-            continue;
-        }
-
-        const Consoden::TankGame::MissileConstPtr& missile=game->Missiles()[i].GetPtr();
+		//creates and updates missiles
+		for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
+		{
+			if (game->Missiles()[i].IsNull())
+			{
+				continue;
+			}
 
 
-        auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
-        Missile& m=inserted.first->second;
-        if (inserted.second)
-        {
-            //new missile
-            m.tankId=missile->TankId();
-            m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-            m.paintPosition=m.position;
-            m.explosion=NotInFlames;
-            m.visible=false;
-            m.paintFire=true;
-        }
-        else
-        {
-            //update of existing missile
-            m.paintPosition=m.position;
-            m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-            m.visible=true;
-        }
 
-        m.moveDirection=ToDirection(missile->Direction());
 
-        if (missile->InFlames().GetVal()){
-            m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+			const Consoden::TankGame::MissileConstPtr& missile=game->Missiles()[i].GetPtr();
 
-        }else if (m.explosion!=NotInFlames){
-            m.explosion=Destroyed;
-        }
-    }
+			if(m_matchState.gameState.missiles.find(missile->MissileId().GetVal()) == m_matchState.gameState.missiles.end()){
+				if(m_matchState.gameState.tanks[0].explosion != NotInFlames && m_matchState.gameState.tanks[1].explosion != NotInFlames){
+					continue;
+				}else{
+					auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
+					Missile& m=inserted.first->second;
+					m.tankId=missile->TankId();
+					m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+					m.paintPosition=m.position;
+					m.explosion=NotInFlames;
+					m.visible=false;
+					m.paintFire=true;
+					continue;
+				}
+			}
+
+
+			auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
+			Missile& m=inserted.first->second;
+			//update of existing missile
+			m.paintPosition=m.position;
+			m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+			m.visible=true;
+/*			if (inserted.second && m_matchState.gameState.tanks[0].explosion == NotInFlames && m_matchState.gameState.tanks[1].explosion == NotInFlames)
+			{
+				//new missile
+				m.tankId=missile->TankId();
+				m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+				m.paintPosition=m.position;
+				m.explosion=NotInFlames;
+				m.visible=false;
+				m.paintFire=true;
+			}
+			else
+			{
+				//update of existing missile
+				m.paintPosition=m.position;
+				m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+				m.visible=true;
+			}*/
+
+			m.moveDirection=ToDirection(missile->Direction());
+
+			if (missile->InFlames().GetVal()){
+				m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+
+			}else if (m.explosion!=NotInFlames){
+				m.explosion=Destroyed;
+			}
+		}
 
 
 
@@ -787,7 +810,7 @@ void GameWorld::Update()
 				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank, false);
 			}else if(tank.deathCause == tank.Death::HitTank){
 				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank,false);
-			}else if(tank.deathCause == tank.Death::HitMissile){
+			}else if(tank.deathCause == tank.Death::HitMissile ){
 				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank,false);
 			}else{
 				UpdatePosition(timeToNextUpdate, movement, tank);
@@ -851,7 +874,7 @@ void GameWorld::Update()
     for (auto& vt : m_matchState.gameState.missiles)
     {
         Missile& missile=vt.second;
-        UpdatePosition(timeToNextUpdate, 2*movement, missile); //missiles have double speed
+        UpdatePositionNoOvershoot(timeToNextUpdate, 2*movement, missile,false); //missiles have double speed
 
         if (missile.paintFire)
         {
@@ -878,6 +901,7 @@ void GameWorld::Update()
             case None:
                 break;
             }
+
 
             m_sprites.push_back(Sprite(m_tankFire, firePos, QPointF(0,0), DirectionToAngle(missile.moveDirection), nextUpdate, 1));
             missile.paintFire=false;
