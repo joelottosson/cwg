@@ -437,6 +437,15 @@ namespace TankEngine
 
                 Consoden::TankGame::JoystickPtr joystick2_ptr = m_JoystickCacheMap[tank2_ptr->TankId().GetVal()];
 
+                if ((tank_ptr->PosX() == tank2_ptr->PosX()) && (tank_ptr->PosY() == tank2_ptr->PosY())) {
+                    // x and y coords match for these two tanks - collision!
+                    tank_ptr->InFlames() = true;
+                    tank_ptr->HitTank() = true;
+                    tank2_ptr->InFlames() = true;
+                    tank2_ptr->HitTank() = true;
+                    tank_tank_collission = true;
+                }
+
                 if (!tank_ptr->InFlames() && !tank2_ptr->InFlames()) {
                     int w = game_ptr->Width().GetVal();
                     int h = game_ptr->Height().GetVal();
