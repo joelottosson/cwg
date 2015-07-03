@@ -408,6 +408,9 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
 
 void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board& board)
 {
+
+
+
     int i=tank->TankId().GetVal();
 
     Tank& t=m_matchState.gameState.tanks[i];
@@ -456,16 +459,7 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
 					t.deathCause=Tank::HitWall;
 					specialEndPos=0.5;
 					hasSpecialEndPos=true;
-/*				}else if (tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true){
-					t.deathCause=Tank::HitTank;
-					specialEndPos=0.25;
-					//hasSpecialEndPos=true;
-					std::wcout << "==============" << std::endl;
-					if(tank->TankId() % 2 == 1){
-						t.moveDirection = t.oldMoveDirection;
-					}
-					calculateColisionPosition(t,m_matchState.gameState.tanks[(tank->TankId() + 1) % 2] );
-					return;*/
+
 				}
 
 				//if tank hit wall or drove into other tank, we calculate a position half inside the
@@ -510,20 +504,23 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
             t.deathCause=Tank::HitMine;
         }else if (!tank->HitMissile().IsNull() && tank->HitMissile()){
             t.deathCause=Tank::HitMissile;
+            //t.position = t.position + directionToVector(t.moveDirection)*.5;
+            //t.paintPosition = t.position;
         }else if (!tank->HitTank().IsNull() && tank->HitTank()){
             t.deathCause=Tank::HitTank;
         }else{
             t.deathCause=Tank::None;
         }
 
-    }else if (t.explosion!=NotInFlames){
-
-        t.explosion=Destroyed;
-
-    }else{
+    }else if (t.explosion==NotInFlames && t.deathCause == Tank::None){
 
         t.paintPosition=t.position;
         t.position=QPointF(tank->PosX().GetVal(), tank->PosY().GetVal());
+
+
+    }else{
+    	t.explosion=Destroyed;
+
     }
 }
 
@@ -605,45 +602,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
         }
     }
 
-    //creates and updates missiles
-    for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
-    {
-        if (game->Missiles()[i].IsNull())
-        {
-            continue;
-        }
 
-        const Consoden::TankGame::MissileConstPtr& missile=game->Missiles()[i].GetPtr();
-
-        auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
-        Missile& m=inserted.first->second;
-        if (inserted.second)
-        {
-            //new missile
-            m.tankId=missile->TankId();
-            m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-            m.paintPosition=m.position;
-            m.explosion=NotInFlames;
-            m.visible=false;
-            m.paintFire=true;
-        }
-        else
-        {
-            //update of existing missile
-            m.paintPosition=m.position;
-            m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-            m.visible=true;
-        }
-
-        m.moveDirection=ToDirection(missile->Direction());
-
-        if (missile->InFlames().GetVal()){
-            m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
-
-        }else if (m.explosion!=NotInFlames){
-            m.explosion=Destroyed;
-        }
-    }
 
     //We need to do a special check is the tanks are colliding with eachother.
     //If we don't do this the collision s will be completely wrong since the second tank may
@@ -681,10 +640,51 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 			UpdateTank(tank1_ptr, boardParser);
 
 		}
-
-
-
     }
+
+    //creates and updates missiles
+    for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
+    {
+        if (game->Missiles()[i].IsNull())
+        {
+            continue;
+        }
+
+        const Consoden::TankGame::MissileConstPtr& missile=game->Missiles()[i].GetPtr();
+
+
+        auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
+        Missile& m=inserted.first->second;
+        if (inserted.second)
+        {
+            //new missile
+            m.tankId=missile->TankId();
+            m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+            m.paintPosition=m.position;
+            m.explosion=NotInFlames;
+            m.visible=false;
+            m.paintFire=true;
+        }
+        else
+        {
+            //update of existing missile
+            m.paintPosition=m.position;
+            m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+            m.visible=true;
+        }
+
+        m.moveDirection=ToDirection(missile->Direction());
+
+        if (missile->InFlames().GetVal()){
+            m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+
+        }else if (m.explosion!=NotInFlames){
+            m.explosion=Destroyed;
+        }
+    }
+
+
+
 
     //Update if game is finished and if we have a winner
     if (game->Winner().IsNull() || game->Winner().GetVal()==Consoden::TankGame::Winner::Enumeration::Unknown)
@@ -787,6 +787,8 @@ void GameWorld::Update()
 				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank, false);
 			}else if(tank.deathCause == tank.Death::HitTank){
 				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank,false);
+			}else if(tank.deathCause == tank.Death::HitMissile){
+				UpdatePositionNoOvershoot(timeToNextUpdate, movement, tank,false);
 			}else{
 				UpdatePosition(timeToNextUpdate, movement, tank);
 			}
@@ -796,13 +798,24 @@ void GameWorld::Update()
         if (tank.explosion==SetInFlames)
         {
             //new explosion sprite
+        	qint64 time;
+        	if(tank.deathCause == tank.Death::HitTank){
+        		time = now + timeToEvent(tank.position,tank.paintPosition,m_moveSpeed);
+        	}else{
+        		time = now + timeToNextUpdate/2;
+        	}
         	srand(clock());
             m_sprites.push_back(Sprite(m_explosion, tank.position, now+timeToNextUpdate, 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)), now + (rand() % 600), 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)), now + (rand() % 600), 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)), now + (rand() % 600), 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)),
+            		time + (rand() % 300), 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)),
+            		time + (rand() % 300), 1));
+            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)),
+            		time + (rand() % 300), 1));
+
+
             tank.explosion=Burning;
-            m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [&]
+            m_eventQueue.insert(WorldEvents::value_type(time, [&]
             {
                 tank.explosion=Destroyed;
             }));
@@ -810,7 +823,7 @@ void GameWorld::Update()
             if (m_soundEnabled)
             {
                 auto tankPlayerId=tank.playerId;
-                m_eventQueue.insert(WorldEvents::value_type(now+timeToNextUpdate, [=]
+                m_eventQueue.insert(WorldEvents::value_type(time, [=]
                 {
                     auto p1=GetPlayerOne();
                     if (!p1)
@@ -1352,9 +1365,26 @@ qreal GameWorld::manhattanDistanceOnTorus(QPointF a, QPointF b){
 
 }
 
+qreal GameWorld::timeToEvent(QPointF a, QPointF b,qreal speed){
+	//qreal distance = manhattanDistanceOnTorus(a,b);
+	qreal distance = simpleDistance(a,b);
+
+	//std::wcout << "a is " << a.x() <<","<<a.y() << std::endl;
+	//std::wcout << "b is " << b.x() <<","<<b.y() << std::endl;
+
+	//std::wcout << "distance is " << distance << std::endl;
+	//std::wcout << "computed time is  " << distance/speed << std::endl << std::endl;
+	return distance/speed;
+
+}
+
+
 qreal GameWorld::simpleDistance(QPointF a, QPointF b){
 	QPointF tmp = (a-b);
-	return abs(tmp.x()) + abs(tmp.y());
+	//std::wcout << "tmp is " << tmp.x() <<","<<tmp.y() << std::endl;
+	//std::wcout << "abs of tmp is " << std::abs((double)tmp.x()) <<","<< std::abs((double)tmp.y()) << std::endl;
+
+	return std::abs((double)tmp.x()) + std::abs((double)tmp.y());
 }
 
 
