@@ -409,10 +409,12 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
 void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board& board)
 {
     int i=tank->TankId().GetVal();
+
     Tank& t=m_matchState.gameState.tanks[i];
+    //UpdateTankWrapping(tank	, t);
     t.fires=tank->Fire().GetVal();
     t.towerDirection=ToDirection(tank->TowerDirection());
-    UpdateTankWrapping(tank, t);
+
 /*    if(tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true && t.explosion == NotInFlames){
     	calculateColisionPosition(t,m_matchState.gameState.tanks[(tank->TankId() + 1) % 2] );
     	t.explosion=SetInFlames;
@@ -648,10 +650,16 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     //change its position and direction after the collision has been evaluated for the first tank
     if(	!game->Tanks()[0].IsNull() && !game->Tanks()[1].IsNull() ){
 
+
 		const Consoden::TankGame::TankPtr& tank0_ptr=game->Tanks()[0].GetPtr();
 		const Consoden::TankGame::TankPtr& tank1_ptr=game->Tanks()[1].GetPtr();
 		Tank& tank0 =m_matchState.gameState.tanks[0];
 		Tank& tank1 =m_matchState.gameState.tanks[1];
+
+		UpdateTankWrapping(tank0_ptr, tank0);
+		UpdateTankWrapping(tank1_ptr, tank1);
+
+
 		if(tank0.explosion == NotInFlames && tank1.explosion == NotInFlames &&
 				tank0_ptr->HitTank().IsNull() == false  && tank0_ptr->HitTank() == true &&
 				tank1_ptr->HitTank().IsNull() == false  && tank1_ptr->HitTank() == true
@@ -673,6 +681,8 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 			UpdateTank(tank1_ptr, boardParser);
 
 		}
+
+
 
     }
 
@@ -750,6 +760,19 @@ void GameWorld::Update()
     qreal angle=static_cast<qreal>(timeSinceLastAnimationUpdate)*m_towerSpeed;
 
     HandleEventQueue(now);
+
+    //TODO:
+    //update of our dude
+    for (auto& dude : m_matchState.gameState.dudes){
+        if(dude.just_died){
+        	UpdatePositionNoOvershoot(timeToNextUpdate, movement, dude,false);
+
+        }else if(!dude.is_dead){
+        	UpdatePosition(timeToNextUpdate, 1*movement, dude);
+        }
+
+    }
+
 
 
     //updates each tank.
@@ -905,17 +928,6 @@ void GameWorld::Update()
     }
 
 
-    //TODO:
-    //update of our dude
-    for (auto& dude : m_matchState.gameState.dudes){
-        if(dude.just_died){
-        	UpdatePositionNoOvershoot(timeToNextUpdate, movement, dude,false);
-
-        }else if(!dude.is_dead){
-        	UpdatePosition(timeToNextUpdate, 1*movement, dude);
-        }
-
-    }
 
 
 
