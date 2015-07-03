@@ -9,6 +9,8 @@
 #include "PassiveGroup.h"
 #include <boost/make_shared.hpp>
 #include <memory>
+#include <limits>
+
 
 namespace CWG = Consoden::TankGame;
 namespace
@@ -550,26 +552,26 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     if(!game->TheDude().IsNull()){
     	auto& dude_game = game->TheDude().GetPtr();
-    	auto& dude = m_matchState.gameState.dudes.front();
+    	Dude& dude = m_matchState.gameState.dudes.front();
 
-    	if(!dude.dying && dude_game->Dying().GetVal() && m_soundEnabled){
+    	if(!dude.is_dead && dude_game->Dying().GetVal() && m_soundEnabled){
     		m_dude_dies_MediaPlayer.play();
     	}else{
     		m_dude_dies_MediaPlayer.stop();
     	}
 
-    	if(dude.just_died && dude_game->Dying() && !dude.dying){
+    	if(dude.just_died && dude_game->Dying() && !dude.is_dead){
     		dude.just_died = false;
-    		dude.dying = true;
+    		dude.is_dead = true;
     	}
 
-    	if(!dude.dying && dude_game->Dying()){
+    	if(!dude.is_dead && dude_game->Dying()){
     		dude.just_died = true;
     		dude.position = dude.position+directionToVector(dude.moveDirection)*0.5;
 
     	}
 
-    	if(!dude.dying){
+    	if(!dude.is_dead){
     		dude.position.setX(dude_game->PosX());
     		dude.position.setY(dude_game->PosY());
     		dude.moveDirection = ToDirection(dude_game->Direction());
@@ -633,17 +635,17 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
         m.moveDirection=ToDirection(missile->Direction());
 
-        if (missile->InFlames().GetVal())
-        {
-            m.explosion = m.explosion == NotInFlames ? SetInFlames : Burning;
-        }
-        else if (m.explosion!=NotInFlames)
-        {
+        if (missile->InFlames().GetVal()){
+            m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+
+        }else if (m.explosion!=NotInFlames){
             m.explosion=Destroyed;
         }
     }
 
-    //todo: we need to do a realy sketchy special update for collisions.
+    //We need to do a special check is the tanks are colliding with eachother.
+    //If we don't do this the collision s will be completely wrong since the second tank may
+    //change its position and direction after the collision has been evaluated for the first tank
     if(	!game->Tanks()[0].IsNull() && !game->Tanks()[1].IsNull() ){
 
 		const Consoden::TankGame::TankPtr& tank0_ptr=game->Tanks()[0].GetPtr();
@@ -658,10 +660,10 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 			tank1.moveDirection = ToDirection(tank1_ptr->MoveDirection());
 			tank0.explosion = SetInFlames;
 			tank1.explosion = SetInFlames;
-			QPointF tank0_silly_pos = calculateColisionPosition(tank0,tank1);
-			QPointF tank1_silly_pos = calculateColisionPosition(tank1,tank0);
-			tank0.position = tank0_silly_pos;
-			tank1.position = tank1_silly_pos;
+			QPointF tank0_collison_position = calculateColisionPosition(tank0,tank1);
+			QPointF tank1_collison_position = calculateColisionPosition(tank1,tank0);
+			tank0.position = tank0_collison_position;
+			tank1.position = tank1_collison_position;
 			tank0.deathCause=Tank::HitTank;
 			tank1.deathCause=Tank::HitTank;
 
@@ -771,6 +773,7 @@ void GameWorld::Update()
         if (tank.explosion==SetInFlames)
         {
             //new explosion sprite
+        	srand(clock());
             m_sprites.push_back(Sprite(m_explosion, tank.position, now+timeToNextUpdate, 1));
             m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)), now + (rand() % 600), 1));
             m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)), now + (rand() % 600), 1));
@@ -840,7 +843,7 @@ void GameWorld::Update()
                 break;
             }
 
-            m_sprites.push_back(Sprite(m_tankFire, firePos, animationMoveSpeed, DirectionToAngle(missile.moveDirection), nextUpdate, 1));
+            m_sprites.push_back(Sprite(m_tankFire, firePos, QPointF(0,0), DirectionToAngle(missile.moveDirection), nextUpdate, 1));
             missile.paintFire=false;
 
             if (m_soundEnabled)
@@ -873,7 +876,7 @@ void GameWorld::Update()
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
-            m_sprites.push_back(Sprite(m_explosion, missile.position, nextUpdate, 1));
+            m_sprites.push_back(Sprite(m_explosion, missile.position, now+timeToNextUpdate/2, 1));
             missile.explosion=Burning;
 
             if (m_soundEnabled)
@@ -908,7 +911,7 @@ void GameWorld::Update()
         if(dude.just_died){
         	UpdatePositionNoOvershoot(timeToNextUpdate, movement, dude,false);
 
-        }else if(!dude.dying){
+        }else if(!dude.is_dead){
         	UpdatePosition(timeToNextUpdate, 1*movement, dude);
         }
 
@@ -1267,14 +1270,14 @@ QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
 				(abs(directionToVector(own.moveDirection).x()) != abs(directionToVector(enemy.moveDirection).x()))) {
 
 			//std::wcout << "Kollajded dajägonally" << std::endl;
-			return (own.position + directionToVector(own.moveDirection)*(0.75)); //Diagonally
+			return (own.position + directionToVector(own.moveDirection)*(0.5)); //Diagonally
 
 		}else{
 
-
 			QPointF diff = own.position - enemy.position;
-			qreal distance = abs(diff.x()) + abs(diff.y());
+			qreal distance = manhattanDistanceOnTorus(own.position,enemy.position);
 			offs = distance > 1 ? 0.75 : 0.25;
+
 			return  (own.position + directionToVector(own.moveDirection)*(offs));
 
 		}
@@ -1323,7 +1326,24 @@ void GameWorld::collisionOverride(Tank& own, Tank& enemy){
 }
 
 
+qreal GameWorld::manhattanDistanceOnTorus(QPointF a, QPointF b){
+	QPointF a_u = a - QPointF(0,m_matchState.gameState.size.y());
+	QPointF a_d = a + QPointF(0,m_matchState.gameState.size.y());
+	QPointF a_l = a - QPointF(m_matchState.gameState.size.x(),0);
+	QPointF a_r = a + QPointF(m_matchState.gameState.size.x(),0);
+	QPointF a_list[5] = {a_u,a_d,a_l,a_r,a};
+	qreal min_distance = std::numeric_limits<qreal>::max() ;
+	for(int i = 0; i < 5; i++){
+		min_distance = simpleDistance(b, a_list[i]) < min_distance ? simpleDistance(b, a_list[i]) : min_distance;
+	}
+	return min_distance;
 
+}
+
+qreal GameWorld::simpleDistance(QPointF a, QPointF b){
+	QPointF tmp = (a-b);
+	return abs(tmp.x()) + abs(tmp.y());
+}
 
 
 
