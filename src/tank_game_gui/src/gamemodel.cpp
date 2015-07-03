@@ -23,6 +23,7 @@ Tank::Tank(QPointF pos, Direction direction)
 	,paintTankAngle(DirectionToAngle(direction))
 	,paintTowerAngle(DirectionToAngle(direction))
 	,isWrapping(false)
+	//,old_position(position)
 
 	//,accepts_updates(true)
 

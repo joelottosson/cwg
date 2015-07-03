@@ -139,7 +139,7 @@ private:
     QPointF directionToVector(Direction dir);
     const char* directionToString(Direction dir);
     void collisionOverride(Tank& own, Tank& enemy);
-    qreal timeToEvent(QPointF a, QPointF b);
+    qreal timeToEvent(QPointF a, QPointF b,qreal speed);
     qreal manhattanDistanceOnTorus(QPointF a, QPointF b);
     qreal simpleDistance(QPointF a, QPointF b);
 
