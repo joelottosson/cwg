@@ -116,6 +116,11 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     start = clock();
 
 
+    start = clock();
+    if(m_world.GetGameState().dudes.size() != 0 ){
+    	PaintDudes(m_world.GetGameState().dudes.front(), painter);
+    }
+    global_timer_averages[4] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
 
     start = clock();
@@ -129,11 +134,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     global_timer_averages[3] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
 
-    start = clock();
-    if(m_world.GetGameState().dudes.size() != 0 ){
-    	PaintDudes(m_world.GetGameState().dudes.front(), painter);
-    }
-    global_timer_averages[4] += ((float)(clock() - start)/CLOCKS_PER_SEC);
+
 
 
     start = clock();
