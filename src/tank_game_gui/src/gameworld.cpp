@@ -73,12 +73,20 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 			m_explosion.fragments.push_back(QRectF(i*72, j*72, 72, 72));
 		}
 	}
-    m_tankFire.image=QPixmap(":/images/tank_fire_sheet.png");
+/*    m_tankFire.image=QPixmap(":/images/tank_fire_sheet.png");
     m_tankFire.lifeTime=300;
     for (int i=0; i<5; ++i)
     {
         m_tankFire.fragments.push_back(QRectF(i*72, 0, 72, 72));
-    }
+    }*/
+    m_tankFire.image=QPixmap(":/images/cool_flame.png");
+    m_tankFire.lifeTime=500;
+	for(int j = 0; j <5 ;j ++){
+	for (int i=0; i<5; ++i)
+		{
+			m_tankFire.fragments.push_back(QRectF(i*72, j*72, 72, 72));
+		}
+	}
 
 	m_laser_middle.image=QPixmap(":/images/laser-middle.png");
 	m_laser_middle.lifeTime=1000;
@@ -755,7 +763,8 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             break;
         }
 
-        auto paintGameEndTime=m_matchState.gameState.lastUpdate+2*m_matchState.gameState.pace;
+        //TODO: Reset  to +2 before release.
+        auto paintGameEndTime=m_matchState.gameState.lastUpdate+0*m_matchState.gameState.pace;
         m_eventQueue.insert(WorldEvents::value_type(paintGameEndTime, [&]
         {
             //set paint winner, and then set a new event to remove text after 3 sec
@@ -892,8 +901,9 @@ void GameWorld::Update()
     {
         Missile& missile=vt.second;
         UpdatePositionNoOvershoot(timeToNextUpdate, 2*movement, missile,false); //missiles have double speed
-
-        if (missile.paintFire)
+        Tank tank=m_matchState.gameState.tanks[missile.tankId];
+        //std::wcout << "And the missile direction is " << directionToString(missile.moveDirection) << std::endl;
+        if (missile.paintFire && missile.moveDirection != None)
         {
             QPointF firePos=missile.position;
             QPointF animationMoveSpeed(0,0);
@@ -916,11 +926,13 @@ void GameWorld::Update()
                 firePos.setY(firePos.y()-1);
                 break;
             case None:
+            	//std::wcout << "LOL FAIL " << std::endl;
                 break;
             }
 
 
-            m_sprites.push_back(Sprite(m_tankFire, firePos, QPointF(0,0), DirectionToAngle(missile.moveDirection), nextUpdate, 1));
+            QPointF flame_pos  = tank.position+directionToVector(tank.towerDirection);
+            m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(missile.moveDirection)*m_moveSpeed*2, DirectionToAngle(missile.moveDirection)+90, now +timeToNextUpdate, 1));
             missile.paintFire=false;
 
             if (m_soundEnabled)
@@ -953,7 +965,7 @@ void GameWorld::Update()
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
-            m_sprites.push_back(Sprite(m_explosion, missile.position, now+timeToNextUpdate/2, 1));
+            m_sprites.push_back(Sprite(m_explosion, missile.position, now+timeToNextUpdate, 1));
             missile.explosion=Burning;
 
             if (m_soundEnabled)
