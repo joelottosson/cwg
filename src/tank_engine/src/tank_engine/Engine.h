@@ -66,10 +66,15 @@ namespace TankEngine
         void UpdateState();
         void Evaluate();
         void ScheduleMissileCleanup();
-        bool CollisionPredicter(CWG::DudePtr& dude, CWG::TankPtr& tank);
+        bool collisonDetector(CWG::DudePtr& dude, CWG::TankPtr& tank);
+
 
         void dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr);
         bool fireTheLaser(CWG::TankPtr& own_tank, CWG::TankPtr& enemy_tank , GameMap gm,CWG::GameStatePtr game_ptr);
+
+        std::pair<int,int> directionToVector(CWG::Direction::Enumeration dir);
+        std::pair<int,int> addPair(std::pair<int,int> a, std::pair<int,int> b);
+
 
         int wrap(int pos, int size);
 
