@@ -91,7 +91,8 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     start = clock();
     QPixmap tmp(*m_backgroundPixmap);    
     QPainter painter(&tmp);
-    //painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::Antialiasing);
+
     global_timer_averages[1] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
 
@@ -164,7 +165,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         PaintText(t, painter);
     }
 
-    //std::wcout << "Settingup took " << 	((float)(clock() - start)/CLOCKS_PER_SEC) << " milli seconds " << std::endl;
+
     start = clock();
     //Paint everything on screen
     QPainter p(this);
@@ -288,15 +289,18 @@ void TankGameWidget::PaintMines(QPainter& painter)
     }
 }
 
-int TankGameWidget::CalculateWrappingCoordinate(int val, int maxVal, int boardSize)
+int TankGameWidget::CalculateWrappingCoordinate(int val, int maxVal, int boardSize, int padd)
 {
-    if (val<0)
+    if (val < -padd){
         return val+boardSize;
-    else if (val>maxVal)
+    }else if (val>=maxVal+padd){
         return val-boardSize;
-    else
+    }else{
         return val;
+    }
 }
+
+
 
 void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painter)
 {
@@ -322,8 +326,8 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
             const int yoffset=(m_const.squarePixelSize-m_tankWreck.height())/2;
             const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
             const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
-            const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-m_tankWreck.width(), m_const.boardPixelSizeInt.x());
-            const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-m_tankWreck.height(), m_const.boardPixelSizeInt.y());
+            const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-m_tankWreck.width(), m_const.boardPixelSizeInt.x(),0);
+            const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-m_tankWreck.height(), m_const.boardPixelSizeInt.y(),0);
             painter.save();
             painter.translate(wrapX+m_tankWreck.width()/2, wrapY+m_tankWreck.height()/2);
             painter.rotate(rotation);
@@ -346,8 +350,8 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 		const int yoffset=(m_const.squarePixelSize-tankImage.height())/2;
 		const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
 		const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
-		const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-tankImage.width(), m_const.boardPixelSizeInt.x());
-		const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-tankImage.height(), m_const.boardPixelSizeInt.y());
+		const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-tankImage.width(), m_const.boardPixelSizeInt.x(),0);
+		const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-tankImage.height(), m_const.boardPixelSizeInt.y(),0);
 		painter.save();
 		painter.translate(wrapX+tankImage.width()/2, wrapY+tankImage.height()/2);
 		painter.rotate(rotation);
@@ -363,12 +367,13 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 	drawWithTranslationAndRotation(painter,m_tankTower,tank.paintPosition,tank.paintTowerAngle);
 
 	if (tank.isWrapping){
+
 		const int xoffset=(m_const.squarePixelSize-m_tankTower.width())/2;
 		const int yoffset=(m_const.squarePixelSize-m_tankTower.height())/2;
 		const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
 		const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
-		const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-m_tankTower.width(), m_const.boardPixelSizeInt.x());
-		const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-m_tankTower.height(), m_const.boardPixelSizeInt.y());
+		const int wrapX=CalculateWrappingCoordinate(x, m_const.boardPixelSizeInt.x()-m_tankTower.width(), m_const.boardPixelSizeInt.x(),10);
+		const int wrapY=CalculateWrappingCoordinate(y, m_const.boardPixelSizeInt.y()-m_tankTower.height(), m_const.boardPixelSizeInt.y(),10);
 		painter.save();
 		painter.translate(wrapX+m_tankTower.width()/2, wrapY+m_tankTower.height()/2);
 		painter.rotate(tank.paintTowerAngle);
