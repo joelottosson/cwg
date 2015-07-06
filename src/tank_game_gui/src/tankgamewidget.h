@@ -62,7 +62,7 @@ private:
         return QPointF(p.x()*m_const.squarePixelSize+xOffset, p.y()*m_const.squarePixelSize+yOffset);
     }
 
-    int CalculateWrappingCoordinate(int val, int maxVal, int boardSize);
+    int CalculateWrappingCoordinate(int val, int maxVal, int boardSize, int padd);
 
     void drawWithTranslationAndRotation(QPainter& painter, QPixmap image, QPointF position, qreal rotation);
 
