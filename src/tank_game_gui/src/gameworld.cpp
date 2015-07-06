@@ -667,43 +667,60 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 					m.explosion=NotInFlames;
 					m.visible=false;
 					m.paintFire=true;
-					continue;
+
+
+					m.moveDirection=ToDirection(missile->Direction());
+
+					if (missile->InFlames().GetVal()){
+						m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+
+					}else if (m.explosion!=NotInFlames){
+						m.explosion=Destroyed;
+					}
+
+					//continue;
 				}
-			}
+			}else{
 
-
-			auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
-			Missile& m=inserted.first->second;
-			//update of existing missile
-			m.paintPosition=m.position;
-			m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-			m.visible=true;
-/*			if (inserted.second && m_matchState.gameState.tanks[0].explosion == NotInFlames && m_matchState.gameState.tanks[1].explosion == NotInFlames)
-			{
-				//new missile
-				m.tankId=missile->TankId();
-				m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-				m.paintPosition=m.position;
-				m.explosion=NotInFlames;
-				m.visible=false;
-				m.paintFire=true;
-			}
-			else
-			{
+				auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
+				Missile& m=inserted.first->second;
 				//update of existing missile
 				m.paintPosition=m.position;
 				m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
 				m.visible=true;
-			}*/
 
-			m.moveDirection=ToDirection(missile->Direction());
 
-			if (missile->InFlames().GetVal()){
-				m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
 
-			}else if (m.explosion!=NotInFlames){
-				m.explosion=Destroyed;
+				m.moveDirection=ToDirection(missile->Direction());
+
+				if (missile->InFlames().GetVal()){
+					m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+
+				}else if (m.explosion!=NotInFlames){
+					m.explosion=Destroyed;
+				}
+
+
+	/*			if (inserted.second && m_matchState.gameState.tanks[0].explosion == NotInFlames && m_matchState.gameState.tanks[1].explosion == NotInFlames)
+				{
+					//new missile
+					m.tankId=missile->TankId();
+					m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+					m.paintPosition=m.position;
+					m.explosion=NotInFlames;
+					m.visible=false;
+					m.paintFire=true;
+				}
+				else
+				{
+					//update of existing missile
+					m.paintPosition=m.position;
+					m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+					m.visible=true;
+				}*/
 			}
+
+
 		}
 
 
