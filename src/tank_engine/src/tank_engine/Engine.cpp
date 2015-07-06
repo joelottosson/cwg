@@ -413,7 +413,7 @@ namespace TankEngine
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
             //We might need to have this before any movement for the detector to work
-            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || CollisionPredicter(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
+            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || collisonDetector(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
             	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
                 dude_ptr->Dying().SetVal(true);
                 AddPoints(-5, tank_ptr->TankId(), game_ptr);
@@ -640,6 +640,7 @@ namespace TankEngine
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
             if (!joystick_ptr->TowerDirection().IsNull()) {
+            	//TODO: Some od things happen here. Apparently we dont care much for neutral tower directions...
             	if(joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
             		tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
             	}
@@ -965,36 +966,17 @@ namespace TankEngine
 
 
 
-    bool Engine::CollisionPredicter(CWG::DudePtr& dude,CWG::TankPtr& tank){
-    	std::pair<int,int> own_pos(dude->PosX(),dude->PosY());
-    	std::pair<int,int> others_pos(tank->PosX(),tank->PosY());
-    	CWG::Direction::Enumeration own_direction = dude->Direction();
-    	CWG::Direction::Enumeration other_direction = tank->MoveDirection();
+    bool Engine::collisonDetector(CWG::DudePtr& dude,CWG::TankPtr& tank){
+    	std::pair<int,int> dude_pos(dude->PosX(),dude->PosY());
+    	std::pair<int,int> tank_pos(tank->PosX(),tank->PosY());
+    	CWG::Direction::Enumeration dude_direction = dude->Direction();
+    	CWG::Direction::Enumeration tank_direction = tank->MoveDirection();
 
-    	if(own_pos.first == (others_pos.first - 1) && own_pos.second == others_pos.second
-    			&& own_direction == CWG::Direction::Right && other_direction == CWG::Direction::Left){
-    		//dude is to the left of the tank
-    		std::wcout << "dude got hit by tank coming from the right" << std::endl;
+    	if(		addPair(dude_pos,directionToVector(dude_direction)) == addPair(tank_pos,directionToVector(tank_direction)) ||
+    			(addPair(dude_pos,directionToVector(dude_direction)) == tank_pos && addPair(tank_pos,directionToVector(tank_direction)) == dude_pos) ||
+    			dude_pos == tank_pos){
     		return true;
-
-    	}else if(own_pos.first == (others_pos.first + 1) && own_pos.second == others_pos.second
-    				&& own_direction == CWG::Direction::Left && other_direction == CWG::Direction::Right){
-    		//dude is to the right of the tank
-    		std::wcout << "dude got hit by tank coming from the left" << std::endl;
-    		return true;
-
-    	}else if(own_pos.second == (others_pos.second + 1) && own_pos.first == others_pos.first
-				&& own_direction == CWG::Direction::Up && other_direction == CWG::Direction::Down){
-		//dude is below the tank
-    		std::wcout << "dude got hit by tank coming from above" << std::endl;
-    		return true;
-
-    	}else if(own_pos.second == (others_pos.second - 1) && own_pos.first== others_pos.first
-				&& own_direction == CWG::Direction::Down && other_direction == CWG::Direction::Up){
-    		std::wcout << "dude got hit by tank coming from be low" << std::endl;
-		//dude is above the tank
-    		return true;
-	}
+    	}
 
     	return false;
     }
@@ -1123,6 +1105,27 @@ namespace TankEngine
     	}else{
     		return pos;
     	}
+    }
+
+    std::pair<int,int> Engine::directionToVector(CWG::Direction::Enumeration dir){
+    	switch(dir){
+    		case(CWG::Direction::Neutral):
+    			return std::pair<int,int>(0,0);
+    		case(CWG::Direction::Up):
+				return std::pair<int,int>(0,-1);
+    		case(CWG::Direction::Down):
+				return std::pair<int,int>(0,1);
+    		case(CWG::Direction::Left):
+				return std::pair<int,int>(-1,0);
+    		case(CWG::Direction::Right):
+				return std::pair<int,int>(1,0);
+    		default:
+    			return std::pair<int,int>(-1000000,-100000);
+    	}
+    }
+
+    std::pair<int,int> Engine::addPair(std::pair<int,int> a, std::pair<int,int> b){
+    	return std::pair<int,int>(a.first + b.first , a.second+b.second);
     }
 
 
