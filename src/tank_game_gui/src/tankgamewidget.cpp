@@ -29,6 +29,7 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     ,m_tankRed(":/images/panzerIV_red.png")
     ,m_tankTower(":/images/panzerIV_tower.png")
     ,m_obstacle(":/images/obstacle.jpg")
+
     ,m_missile(":/images/missile.png")
     ,m_tankWreck(":/images/panzerIV_wreck.png")
     ,m_mine(":/images/mine.png")
@@ -100,11 +101,8 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
     start = clock();
 
-    std::priority_queue<PassiveGroup*>  passives = m_world.getPassiveGroups();
-    std::priority_queue<PassiveGroup*> creepy_copy = passives;
-    while(!creepy_copy.empty()){
-    	PassiveGroup* a = creepy_copy.top();
-    	creepy_copy.pop();
+    std::vector<PassiveGroup*>  passives = m_world.getPassiveGroups();
+    for(auto a : passives){
 	    for (auto& s : a->m_sprites)
 	    {
 
