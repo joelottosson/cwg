@@ -30,6 +30,7 @@
 namespace TankEngine
 {
     Engine::Engine(boost::asio::io_service& io) :
+    	m_config("rules.cfg"),
         mGamePrepare(true),
         mGameRunning(false),
         mMissileCleanupRunning(false),
@@ -45,6 +46,7 @@ namespace TankEngine
         m_JoystickHandler(this),
         m_cyclicTimeout(JOYSTICK_TIMEOUT)
     {
+
     }
 
     void Engine::Init(
@@ -143,8 +145,8 @@ namespace TankEngine
                 GameMap gm(game_ptr);
 
                 // Draw game, both players get one point
-                AddPoints(1, mPlayerOneTankId, game_ptr);
-                AddPoints(1, mPlayerTwoTankId, game_ptr);
+                AddPoints(m_config.m_draw_points, mPlayerOneTankId, game_ptr);
+                AddPoints(m_config.m_draw_points, mPlayerTwoTankId, game_ptr);
 
                 std::cout << "Both tanks survived, game timeout." << std::endl;
                 Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Both tanks survived, game timeout.");
@@ -355,7 +357,7 @@ namespace TankEngine
                         boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
                     // Walk over, 5 point to opponent
                     int loser_tank_id = (*it).first;
-                    AddPoints(5, OpponentTankId(loser_tank_id), game_ptr);
+                    AddPoints(m_config.m_walkover_penalty, OpponentTankId(loser_tank_id), game_ptr);
                     game_ptr->Survivor().SetVal(TankIdToWinner(OpponentTankId(loser_tank_id)));
                     SetWinner(game_ptr);
                     m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
@@ -415,7 +417,7 @@ namespace TankEngine
             //We might need to have this before any movement for the detector to work
             if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || collisonDetector(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
             	dude_ptr->Dying().SetVal(true);
-                AddPoints(-5, tank_ptr->TankId(), game_ptr);
+                AddPoints(m_config.m_dude_penalty, tank_ptr->TankId(), game_ptr);
             }
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
@@ -735,7 +737,7 @@ namespace TankEngine
             if (gm.IsTankHit(tank_ptr->PosX(), tank_ptr->PosY())) {
                 // BOOM!
                 // Hit by missile awards two points to opponent
-                AddPoints(2, OpponentTankId(tank_ptr->TankId()), game_ptr);
+                AddPoints(m_config.m_hit_points, OpponentTankId(tank_ptr->TankId()), game_ptr);
                 tank_ptr->InFlames() = true;
                 tank_ptr->HitMissile() = true;
             }
@@ -763,7 +765,7 @@ namespace TankEngine
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //take the coin
 
                     // One point for taking a coin
-                    AddPoints(1, tank_ptr->TankId(), game_ptr);
+                    AddPoints(m_config.m_coin_value, tank_ptr->TankId(), game_ptr);
                     tank_ptr->TookCoin() = true;
 
                 }else if (gm.LaserAmmo(tank_ptr->PosX(), tank_ptr->PosY())) {
@@ -774,7 +776,7 @@ namespace TankEngine
                 }else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
                     // Give one point to the opponent for driving into poison gas. 
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
-                    AddPoints(1, OpponentTankId(tank_ptr->TankId()), game_ptr);
+                    AddPoints(m_config.m_gas_penalty, OpponentTankId(tank_ptr->TankId()), game_ptr);
                     tank_ptr->HitPoisonGas() = true;
 
                 } else {
@@ -807,8 +809,8 @@ namespace TankEngine
 
         if (player_one_in_flames && player_two_in_flames) {
             // Draw game, both players get one point
-            AddPoints(1, mPlayerOneTankId, game_ptr);
-            AddPoints(1, mPlayerTwoTankId, game_ptr);
+            AddPoints(m_config.m_draw_points, mPlayerOneTankId, game_ptr);
+            AddPoints(m_config.m_draw_points, mPlayerTwoTankId, game_ptr);
 
             std::cout << "Both players died." << std::endl;
             Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Both players died.");
@@ -824,7 +826,7 @@ namespace TankEngine
 
         } else if (player_one_in_flames) {
             // One player survives, three points
-            AddPoints(3, mPlayerTwoTankId, game_ptr);
+            AddPoints(m_config.m_survival_points, mPlayerTwoTankId, game_ptr);
 
             std::cout << "Player Two (" << mPlayerTwoName << ") survives!" << std::endl;
             Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Player two survives!");
@@ -840,7 +842,7 @@ namespace TankEngine
 
         } else if (player_two_in_flames) {
             // One player survives, three points
-            AddPoints(3, mPlayerOneTankId, game_ptr);
+            AddPoints(m_config.m_survival_points, mPlayerOneTankId, game_ptr);
 
             std::cout << "Player One (" << mPlayerOneName << ") survives!" << std::endl;
             Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Player one survives!.");
