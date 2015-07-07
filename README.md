@@ -17,9 +17,9 @@ dos2unix build/build.py /src/dots/src/dots/dots_v.ss/data/dobmake.py
 ## Dependencies
 To be able to build the tank game one is reqiered to do some things.
 
-First one needs to get the propper QT 5 dependencies. On ubuntu this can be done by running:
+First one needs to get the propper QT 5 dependencies and the libconfuse. On ubuntu this can be done by running:
 ```
-sudo apt-get install qtmultimedia-dev libqt5multimedia5-plugins
+sudo apt-get install qtmultimedia-dev libqt5multimedia5-plugins libconfuse-dev
 ```
 
 one also needs to copy the `.dou` files in `dou/` to `<path to safir>/sdk/dots/dots_generated/` 
