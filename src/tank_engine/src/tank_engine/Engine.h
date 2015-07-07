@@ -15,6 +15,7 @@
 
 #include "JoystickEntityHandler.h"
 #include "JoystickEngineIF.h"
+#include "Config.h"
 
 
 #include "GameMap.h"
@@ -104,6 +105,7 @@ namespace TankEngine
         Consoden::TankGame::Winner::Enumeration TankIdToWinner(int tank_id) { if (tank_id == mPlayerOneTankId) { return Consoden::TankGame::Winner::PlayerOne; } else { return Consoden::TankGame::Winner::PlayerTwo; } }
         int  OpponentTankId(int tank_id) { if (tank_id == mPlayerOneTankId) { return mPlayerTwoTankId; } else { return mPlayerOneTankId; } }
 
+        Config m_config;
 
         bool mGamePrepare;
         bool mGameRunning;
