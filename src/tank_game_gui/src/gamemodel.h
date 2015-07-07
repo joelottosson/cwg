@@ -17,6 +17,7 @@
 #include <boost/cstdint.hpp>
 #include "sprite.h"
 
+
 typedef std::vector<QPointF> PointVec;
 enum Direction {LeftHeading, RightHeading, UpHeading, DownHeading, None};
 enum ExplosionStatus {NotInFlames, SetInFlames, Burning, Destroyed};
@@ -66,12 +67,16 @@ typedef std::map<int, Joystick> JoystickMap;
 struct Tank
 {
     enum Death {None, HitMissile, HitMine, HitTank, HitWall};
-
+    //bool accepts_updates;
     qint64 playerId;
     QPointF position;
+    //mutable QPointF old_position;
     Direction moveDirection;
     Direction towerDirection;
+    mutable Direction oldTowerDirection;
+    mutable Direction oldMoveDirection;
     bool fires;
+
     ExplosionStatus explosion;
     Death deathCause;
 
@@ -82,20 +87,8 @@ struct Tank
     qreal paintTowerAngle;
     bool isWrapping;
 
-    Tank(QPointF pos, Direction direction)
-        :playerId(0)
-        ,position(pos)        
-        ,moveDirection(direction)
-        ,towerDirection(direction)
-        ,fires(false)
-        ,explosion(NotInFlames)
-        ,deathCause(None)
-        ,paintPosition(pos)
-        ,paintTankAngle(DirectionToAngle(direction))
-        ,paintTowerAngle(DirectionToAngle(direction))
-        ,isWrapping(false)
-    {
-    }
+    Tank(QPointF pos, Direction direction);
+
 };
 typedef std::vector<Tank> TankVec;
 
@@ -104,6 +97,8 @@ typedef std::vector<Tank> TankVec;
 //************************************
 struct Missile
 {
+
+	//bool accepts_updates = true;
     int tankId;
     QPointF position; //front position, might be outside board bounds
     Direction moveDirection;
@@ -132,9 +127,10 @@ struct Dude
 {
 
     QPointF position; //position of the dude
+   // bool accepts_updates = true;
     Direction moveDirection;
     bool visible;
-    bool dying;
+    bool is_dead;
     QPointF paintPosition;
     SpriteData walking_sprite;
     SpriteData dead_sprite;

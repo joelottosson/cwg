@@ -7,11 +7,34 @@
 
 #include "gamemodel.h"
 
+
+
+Tank::Tank(QPointF pos, Direction direction)
+	:playerId(0)
+	,position(pos)
+	,moveDirection(direction)
+	,oldMoveDirection(direction)
+	,towerDirection(direction)
+	,oldTowerDirection(direction)
+	,fires(false)
+	,explosion(NotInFlames)
+	,deathCause(None)
+	,paintPosition(pos)
+	,paintTankAngle(DirectionToAngle(direction))
+	,paintTowerAngle(DirectionToAngle(direction))
+	,isWrapping(false)
+	//,old_position(position)
+
+	//,accepts_updates(true)
+
+{
+}
+
 Dude::Dude(QPointF position, Direction direction):
 	position(position),
 	moveDirection(direction),
 	visible(true),
-	dying(false),
+	is_dead(false),
 	paintPosition(position)
 {
 	walking_sprite.image=QPixmap(":/images/tux-anim.png");

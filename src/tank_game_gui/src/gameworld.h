@@ -17,16 +17,27 @@
 #include <Consoden/TankGame/Match.h>
 #include <Consoden/TankGame/GameState.h>
 #include <Consoden/TankGame/Joystick.h>
+#include <memory>
+#include <queue>
+#include <boost/make_shared.hpp>
+
 
 #include "gamemodel.h"
 #include "sprite.h"
 #include "boardparser.h"
 #include "screentext.h"
+#include "PassiveGroup.h"
 
 class GameWorld
 {
 public:
     GameWorld(int updateInterval, bool soundEnabled);
+
+
+
+    std::vector<Sprite> getPassiveSprites() const;
+    std::vector<PassiveGroup*>  getPassiveGroups() const;
+
 
     void Clear();
     void ClearGameState();
@@ -38,6 +49,8 @@ public:
     void Update(const Consoden::TankGame::MatchPtr& match);
     void Update(const Consoden::TankGame::GameStatePtr& game);
     void Update(const Consoden::TankGame::JoystickConstPtr& joystick);
+
+
 
     qint64 MatchId() const {return m_matchState.machId;}
     qint64 GameId() const {return m_matchState.gameState.gameId;}
@@ -61,10 +74,12 @@ public:
     const GameState& GetGameState() const {return m_matchState.gameState;}
 
     const std::vector<Sprite>& Sprites() const {return m_sprites;}
-    const std::vector<Sprite>& DudeSprites() const {return m_sprites_dude;}
 
     void SetTextBig(const QStringList& lines);
     const std::vector<ScreenText>& ScreenTexts() const {return m_screenText;}
+
+
+
 
 private:
     MatchState m_matchState;
@@ -75,18 +90,17 @@ private:
     qreal m_towerSpeed;
     qint64 m_lastAnimationUpdate;
     std::vector<Sprite> m_sprites;
-    std::vector<Sprite> m_sprites_dude;
     SpriteData m_explosion;
     SpriteData m_tankFire;
-    SpriteData m_coin;
-    SpriteData m_laser_ammo;
     SpriteData m_laser_middle;
     SpriteData m_laser_start;
     SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
 
-    //TODO: This is horrible. There must be a better way.
-    bool m_first;
+    std::vector<PassiveGroup*> m_passive_objects;
+
+
+
 
     typedef std::multimap<qint64, boost::function<void()> > WorldEvents;
     WorldEvents m_eventQueue;
@@ -99,14 +113,12 @@ private:
     QMediaPlayer m_explosionMediaPlayer1;
     QMediaPlayer m_fireMediaPlayer2;
     QMediaPlayer m_explosionMediaPlayer2;
-    QMediaPlayer m_tookCoinMediaPlayer;
-    QMediaPlayer m_wilhelmScreamMediaPlayer;
     QMediaPlayer m_dude_dies_MediaPlayer;
-    QMediaPlayer m_laser_pickup_MediaPlayer;
 	QMediaPlayer m_laser_fire_MediaPlayer;
 
     void SetTextSmall(const QStringList& lines);
     void SetTextPlayer(int playerNumber, const QStringList& lines);
+    void clearPassiveObjects();
 
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
     inline void UpdateCoins(const Board& board);
@@ -120,6 +132,16 @@ private:
 
     inline void UpdateDudes(const Board& board);
 
+
+    //QPointF calculateColisionPosition(Tank& own, Tank& enemy);
+    //void calculateColisionPosition(Tank& own, Tank& enemy);
+    QPointF calculateColisionPosition(Tank& own, Tank& enemy);
+    QPointF directionToVector(Direction dir);
+    const char* directionToString(Direction dir);
+    void collisionOverride(Tank& own, Tank& enemy);
+    qreal timeToEvent(QPointF a, QPointF b,qreal speed);
+    qreal manhattanDistanceOnTorus(QPointF a, QPointF b);
+    qreal simpleDistance(QPointF a, QPointF b);
 
     inline void UpdateTankWrapping(const Consoden::TankGame::TankPtr& tank, Tank& lastVal);
 
@@ -169,40 +191,24 @@ private:
             {
                 qreal prev=item.paintPosition.x();
                 item.paintPosition.setX(prev-movement);
-//                if (item.paintPosition.x()<item.position.x())
-//                {
-//                    item.paintPosition=item.position;
-//                }
             }
                 break;
             case RightHeading:
             {
                 qreal prev=item.paintPosition.x();
                 item.paintPosition.setX(prev+movement);
-//                if (item.paintPosition.x()>item.position.x())
-//                {
-//                    item.paintPosition=item.position;
-//                }
             }
                 break;
             case UpHeading:
             {
                 qreal prev=item.paintPosition.y();
                 item.paintPosition.setY(prev-movement);
-//                if (item.paintPosition.y()<item.position.y())
-//                {
-//                    item.paintPosition=item.position;
-//                }
             }
                 break;
             case DownHeading:
             {
                 qreal prev=item.paintPosition.y();
                 item.paintPosition.setY(prev+movement);
-//                if (item.paintPosition.y()>item.position.y())
-//                {
-//                    item.paintPosition=item.position;
-//                }
             }
                 break;
             case None:
@@ -212,6 +218,85 @@ private:
         }
     }
 
+    /**
+        * This function updates the paint position of the item according to its movement and speed.
+        *
+        * timeToNextUpdate: The time to the next game update update (irrelevant if force_set is true)
+        * movement: The distance (in board squares) that the item will move within this state udpdate.
+        * item: The thing to be moved
+        * force_set: if true the paint position will be set to the actual position of the item even
+        * if the movement is not finished
+        *
+        */
+       template <class T>
+       inline void UpdatePositionNoOvershoot(qint64 timeToNextUpdate, qreal movement, T& item,bool force_set){
+    	    {
+    	        if (item.position==item.paintPosition)
+    	        {
+    	            return;
+    	        }
+
+    	        if (timeToNextUpdate<=m_animationUpdateInterval && force_set)
+    	        {
+    	            item.paintPosition=item.position;
+    	        }
+    	        else
+    	        {
+    	            switch (item.moveDirection)
+    	            {
+    	            case LeftHeading:
+    	            {
+    	                qreal prev=item.paintPosition.x();
+    	                item.paintPosition.setX(prev-movement);
+    	                if (item.paintPosition.x()<item.position.x())
+    	                {
+    	                    item.paintPosition=item.position;
+    	                }
+    	            }
+    	                break;
+    	            case RightHeading:
+    	            {
+    	                qreal prev=item.paintPosition.x();
+    	                item.paintPosition.setX(prev+movement);
+    	                if (item.paintPosition.x()>item.position.x())
+    	                {
+    	                    item.paintPosition=item.position;
+    	                }
+    	            }
+    	                break;
+    	            case UpHeading:
+    	            {
+    	                qreal prev=item.paintPosition.y();
+    	                item.paintPosition.setY(prev-movement);
+    	                if (item.paintPosition.y()<item.position.y())
+    	                {
+    	                    item.paintPosition=item.position;
+    	                }
+    	            }
+    	                break;
+    	            case DownHeading:
+    	            {
+    	                qreal prev=item.paintPosition.y();
+    	                item.paintPosition.setY(prev+movement);
+    	                if (item.paintPosition.y()>item.position.y())
+    	                {
+    	                    item.paintPosition=item.position;
+    	                }
+    	            }
+    	                break;
+    	            case None:
+    	            	item.paintPosition=item.position;
+    	                break;
+    	            }
+    	        }
+    	    }
+
+       }
+
+
+
 };
+
+
 
 #endif

@@ -400,7 +400,7 @@ namespace TankEngine
         bool tank_tank_collission = false;
 
 
-        //TODO: lets try to move the dudeinator
+
         CWG::DudePtr dude_ptr = game_ptr->TheDude().GetPtr();
         dudeUpdater(dude_ptr,gm,game_ptr);
 
@@ -413,16 +413,16 @@ namespace TankEngine
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
             //We might need to have this before any movement for the detector to work
-            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || CollisionPredicter(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
-            	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
-                dude_ptr->Dying().SetVal(true);
+            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || collisonDetector(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
+            	dude_ptr->Dying().SetVal(true);
                 AddPoints(-5, tank_ptr->TankId(), game_ptr);
-
             }
-
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
+            /**
+             * TODO: COLLISION DETECTION
+             */
             for (Safir::Dob::Typesystem::ArrayIndex tank2_index = tank_index + 1;
                  (tank2_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank2_index].IsNull());
                  tank2_index++) {
@@ -431,6 +431,19 @@ namespace TankEngine
                     boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank2_index].GetPtr());
 
                 Consoden::TankGame::JoystickPtr joystick2_ptr = m_JoystickCacheMap[tank2_ptr->TankId().GetVal()];
+
+                if ((tank_ptr->PosX() == tank2_ptr->PosX()) && (tank_ptr->PosY() == tank2_ptr->PosY())) {
+                    // x and y coords match for these two tanks - collision!
+                    tank_ptr->InFlames() = true;
+                    tank_ptr->HitTank() = true;
+                    tank2_ptr->InFlames() = true;
+                    tank2_ptr->HitTank() = true;
+                    tank_ptr->Fire() = false;
+                    tank_ptr->FireLaser() = false;
+                    tank2_ptr->Fire() = false;
+                    tank2_ptr->FireLaser() = false;
+                    tank_tank_collission = true;
+                }
 
                 if (!tank_ptr->InFlames() && !tank2_ptr->InFlames()) {
                     int w = game_ptr->Width().GetVal();
@@ -485,6 +498,8 @@ namespace TankEngine
         }
 
 
+
+
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
              (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
              tank_index++) {
@@ -512,7 +527,7 @@ namespace TankEngine
                                             L"Player one didn't make a move in time!");
                     // Treat as neutral move
                     joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
-                    joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Left);
+                    joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Neutral);
                     joystick_ptr->Fire().SetVal(false);
                     joystick_ptr->FireLaser() = false;
                     joystick_ptr->MineDrop().SetVal(false);
@@ -528,7 +543,7 @@ namespace TankEngine
                                             L"Player two didn't make a move in time!");
                     // Treat as neutral move
                     joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
-                    joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Left);
+                    joystick_ptr->TowerDirection().SetVal(Consoden::TankGame::Direction::Neutral);
                     joystick_ptr->Fire().SetVal(false);
                     joystick_ptr->FireLaser() = false;
                     joystick_ptr->MineDrop().SetVal(false);
@@ -544,8 +559,9 @@ namespace TankEngine
                 joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
             }
 
-            if (joystick_ptr->MoveDirection() != Consoden::TankGame::Direction::Neutral) 
-            {
+            if (joystick_ptr->MoveDirection() == Consoden::TankGame::Direction::Neutral){
+            	tank_ptr->MoveDirection() = joystick_ptr->MoveDirection(); //We still need to set the move direction even though we don't move!
+            }else{
                 // move tank unless it is moving into a missile
                 tank_ptr->MoveDirection() = joystick_ptr->MoveDirection();
                 if (!(gm.TankMoveAgainstMissile(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal(), joystick_ptr->MoveDirection()))) 
@@ -612,23 +628,30 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
         
-            if (tank_ptr->InFlames()) {
+            if (tank_ptr->InFlames() || tank_ptr->HitTank()) {
                 // Dead tank, go to next
+            	tank_ptr->Fire() = false;
                 continue;
             }
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
             if (!joystick_ptr->TowerDirection().IsNull()) {
-                tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
+            	//TODO: Some od things happen here. Apparently we dont care much for neutral tower directions...
+            	if(joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
+            		tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
+            	}
             } else {
                 tank_ptr->TowerDirection().SetNull();
             }
 
             if(!joystick_ptr->Fire().IsNull() && !joystick_ptr->FireLaser().IsNull() &&
             		joystick_ptr->Fire() && !joystick_ptr->TowerDirection().IsNull() &&
-					joystick_ptr->FireLaser() && !joystick_ptr->FireLaser().IsNull() && !tank_ptr->FireLaser().IsNull()){
+					joystick_ptr->FireLaser() && !joystick_ptr->FireLaser().IsNull() &&
+					joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
+
             	if(tank_ptr->Lasers() > 0){
+
             		tank_ptr->Lasers() = tank_ptr->Lasers() - 1;
             		tank_ptr->FireLaser() = true;
             		tank_ptr->Fire() = true;
@@ -636,15 +659,9 @@ namespace TankEngine
             		Consoden::TankGame::TankPtr enemy_ptr =
             		                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[(tank_index+1) % 2].GetPtr());
 
-            		std::wcout << "We are doing crazy cool laser fajer... " << std::endl;
-            		if(fireTheLaser(tank_ptr, enemy_ptr,gm,game_ptr)){
-            			std::wcout << "We may or may not have hit the tankozarus with the layzer blazer " << std::endl;
-            			//enemy_ptr->InFlames() = true;
-            			//enemy_ptr->HitMissile() = true;
-            			//AddPoints(2, tank_ptr->TankId(), game_ptr);
-            		}else{
-            			std::wcout << "So...the laser didnt hit.... " << std::endl;
-            		}
+
+            		fireTheLaser(tank_ptr, enemy_ptr,gm,game_ptr);
+
 
             	}else{
             		tank_ptr->FireLaser() = false;
@@ -713,21 +730,12 @@ namespace TankEngine
                 tank_ptr->HitMine() = true;
             }
 
-            //TODO: dude detection
-            // Killed the dude :'(
-/*            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || CollisionPredicter(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
-            	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
-                dude_ptr->Dying().SetVal(true);
-                AddPoints(-5, tank_ptr->TankId(), game_ptr);
-
-            }*/
 
             // Hit by missile?
             if (gm.IsTankHit(tank_ptr->PosX(), tank_ptr->PosY())) {
                 // BOOM!
                 // Hit by missile awards two points to opponent
                 AddPoints(2, OpponentTankId(tank_ptr->TankId()), game_ptr);
-
                 tank_ptr->InFlames() = true;
                 tank_ptr->HitMissile() = true;
             }
@@ -760,10 +768,6 @@ namespace TankEngine
 
                 }else if (gm.LaserAmmo(tank_ptr->PosX(), tank_ptr->PosY())) {
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //take the coin
-
-
-                    //TODO: remove me
-                    std::wcout << "Picked up some lazorz" << std::endl;
 
                     tank_ptr->Lasers() = tank_ptr->Lasers().GetVal() + 1;
 
@@ -896,24 +900,20 @@ namespace TankEngine
     		//lazer wrapper
     		x_pos = wrap(x_pos+dx,game_ptr->Width().GetVal());
     		y_pos = wrap(y_pos+dy,game_ptr->Height().GetVal());
-    		std::wcout << "x = "<< x_pos <<" y = "<< y_pos << std::endl;
-    		//y_pos += dy;
+
     		if(gm.WallSquare(x_pos,y_pos)){
-    			std::wcout << "lazer hti wall " << std::endl;
     			return false;
-    		//}else if(!gm.OnBoard(x_pos, y_pos)){
-    		//	std::wcout << "laser left board " << std::endl;
-    		//	return false;
+
     		}else if(x_pos == enemy_tank->PosX() && y_pos == enemy_tank->PosY()){
-    			std::wcout << "laser hit da tankinator" << std::endl;
+
     			enemy_tank->InFlames() = true;
-    			//todo: Add hit lazer thing for various awesomeness reasons and treasons
+
     			enemy_tank->HitMissile() = true;
     			return true;
     		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
-    			std::wcout << "stupid tank hit itself ^-^" << std::endl;
+
     			own_tank->InFlames() = true;
-    			//todo: Add hit lazer thing for various awesomeness reasons and treasons
+
     			own_tank->HitMissile() = true;
     			return true;
     		}
@@ -963,36 +963,27 @@ namespace TankEngine
 
 
 
-    bool Engine::CollisionPredicter(CWG::DudePtr& dude,CWG::TankPtr& tank){
-    	std::pair<int,int> own_pos(dude->PosX(),dude->PosY());
-    	std::pair<int,int> others_pos(tank->PosX(),tank->PosY());
-    	CWG::Direction::Enumeration own_direction = dude->Direction();
-    	CWG::Direction::Enumeration other_direction = tank->MoveDirection();
+    /*
+     * We need to take into account that the dude already has been moved but not the tank.
+     *
+     */
+    bool Engine::collisonDetector(CWG::DudePtr& dude,CWG::TankPtr& tank){
+    	std::pair<int,int> dude_pos(dude->PosX(),dude->PosY());
+    	std::pair<int,int> dude_old_pos(dude->OldY(),dude->OldX());
+    	std::pair<int,int> tank_pos(tank->PosX(),tank->PosY());
 
-    	if(own_pos.first == (others_pos.first - 1) && own_pos.second == others_pos.second
-    			&& own_direction == CWG::Direction::Right && other_direction == CWG::Direction::Left){
-    		//dude is to the left of the tank
-    		std::wcout << "dude got hit by tank coming from the right" << std::endl;
-    		return true;
+    	CWG::Direction::Enumeration dude_direction = dude->Direction();
+    	CWG::Direction::Enumeration tank_direction = tank->MoveDirection();
 
-    	}else if(own_pos.first == (others_pos.first + 1) && own_pos.second == others_pos.second
-    				&& own_direction == CWG::Direction::Left && other_direction == CWG::Direction::Right){
-    		//dude is to the right of the tank
-    		std::wcout << "dude got hit by tank coming from the left" << std::endl;
-    		return true;
+    	//std::pair<int,int> tank_old_pos = subPair(tank_pos,directionToVector(tank_direction));
 
-    	}else if(own_pos.second == (others_pos.second + 1) && own_pos.first == others_pos.first
-				&& own_direction == CWG::Direction::Up && other_direction == CWG::Direction::Down){
-		//dude is below the tank
-    		std::wcout << "dude got hit by tank coming from above" << std::endl;
-    		return true;
 
-    	}else if(own_pos.second == (others_pos.second - 1) && own_pos.first== others_pos.first
-				&& own_direction == CWG::Direction::Down && other_direction == CWG::Direction::Up){
-    		std::wcout << "dude got hit by tank coming from be low" << std::endl;
-		//dude is above the tank
+    	if(		dude_pos == addPair(tank_pos,directionToVector(tank_direction)) ||// check all normal collisions
+    			(dude_old_pos == addPair(tank_pos,directionToVector(tank_direction)) && tank_pos == dude_pos) //check for passing trough
+    			){
+    		std::wcout << "predictor predicted collision" << std::endl;
     		return true;
-	}
+    	}
 
     	return false;
     }
@@ -1110,6 +1101,7 @@ namespace TankEngine
 			dude_ptr->Seed() = std::rand();
         }
         std::srand(old_seed);
+
     }
 
     int Engine::wrap(int pos, int size){
@@ -1121,6 +1113,31 @@ namespace TankEngine
     	}else{
     		return pos;
     	}
+    }
+
+    std::pair<int,int> Engine::directionToVector(CWG::Direction::Enumeration dir){
+    	switch(dir){
+    		case(CWG::Direction::Neutral):
+    			return std::pair<int,int>(0,0);
+    		case(CWG::Direction::Up):
+				return std::pair<int,int>(0,-1);
+    		case(CWG::Direction::Down):
+				return std::pair<int,int>(0,1);
+    		case(CWG::Direction::Left):
+				return std::pair<int,int>(-1,0);
+    		case(CWG::Direction::Right):
+				return std::pair<int,int>(1,0);
+    		default:
+				return std::pair<int,int>(0,0); // just to shutup the compiler
+    	}
+    }
+
+    std::pair<int,int> Engine::addPair(std::pair<int,int> a, std::pair<int,int> b){
+    	return std::pair<int,int>(a.first + b.first , a.second+b.second);
+    }
+
+    std::pair<int,int> Engine::subPair(std::pair<int,int> a, std::pair<int,int> b){
+    	return std::pair<int,int>(a.first - b.first , a.second - b.second);
     }
 
 
