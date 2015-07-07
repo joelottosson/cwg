@@ -69,11 +69,18 @@ namespace TankEngine
         bool collisonDetector(CWG::DudePtr& dude, CWG::TankPtr& tank);
 
 
+        /*
+         * Makes the dude choose a new direction based on random movement. alltough the dude will not return to its previous position
+         * if there exists any other possible direction.
+         *
+
+         */
         void dudeUpdater(CWG::DudePtr& dude_ptr, GameMap gm,CWG::GameStatePtr game_ptr);
         bool fireTheLaser(CWG::TankPtr& own_tank, CWG::TankPtr& enemy_tank , GameMap gm,CWG::GameStatePtr game_ptr);
 
         std::pair<int,int> directionToVector(CWG::Direction::Enumeration dir);
         std::pair<int,int> addPair(std::pair<int,int> a, std::pair<int,int> b);
+        std::pair<int,int> subPair(std::pair<int,int> a, std::pair<int,int> b);
 
 
         int wrap(int pos, int size);

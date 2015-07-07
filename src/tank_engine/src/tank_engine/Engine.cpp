@@ -400,7 +400,7 @@ namespace TankEngine
         bool tank_tank_collission = false;
 
 
-        //TODO: lets try to move the dudeinator
+
         CWG::DudePtr dude_ptr = game_ptr->TheDude().GetPtr();
         dudeUpdater(dude_ptr,gm,game_ptr);
 
@@ -414,16 +414,11 @@ namespace TankEngine
 
             //We might need to have this before any movement for the detector to work
             if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || collisonDetector(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
-            	std::wcout << "DUDE WAS IT BY TANK!!!!" << std::endl;
-                dude_ptr->Dying().SetVal(true);
+            	dude_ptr->Dying().SetVal(true);
                 AddPoints(-5, tank_ptr->TankId(), game_ptr);
-
             }
 
-
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
-
-
 
             /**
              * TODO: COLLISION DETECTION
@@ -501,6 +496,8 @@ namespace TankEngine
                 }
             }
         }
+
+
 
 
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
@@ -966,15 +963,25 @@ namespace TankEngine
 
 
 
+    /*
+     * We need to take into account that the dude already has been moved but not the tank.
+     *
+     */
     bool Engine::collisonDetector(CWG::DudePtr& dude,CWG::TankPtr& tank){
     	std::pair<int,int> dude_pos(dude->PosX(),dude->PosY());
+    	std::pair<int,int> dude_old_pos(dude->OldY(),dude->OldX());
     	std::pair<int,int> tank_pos(tank->PosX(),tank->PosY());
+
     	CWG::Direction::Enumeration dude_direction = dude->Direction();
     	CWG::Direction::Enumeration tank_direction = tank->MoveDirection();
 
-    	if(		addPair(dude_pos,directionToVector(dude_direction)) == addPair(tank_pos,directionToVector(tank_direction)) ||
-    			(addPair(dude_pos,directionToVector(dude_direction)) == tank_pos && addPair(tank_pos,directionToVector(tank_direction)) == dude_pos) ||
-    			dude_pos == tank_pos){
+    	//std::pair<int,int> tank_old_pos = subPair(tank_pos,directionToVector(tank_direction));
+
+
+    	if(		dude_pos == addPair(tank_pos,directionToVector(tank_direction)) ||// check all normal collisions
+    			(dude_old_pos == addPair(tank_pos,directionToVector(tank_direction)) && tank_pos == dude_pos) //check for passing trough
+    			){
+    		std::wcout << "predictor predicted collision" << std::endl;
     		return true;
     	}
 
@@ -1094,6 +1101,7 @@ namespace TankEngine
 			dude_ptr->Seed() = std::rand();
         }
         std::srand(old_seed);
+
     }
 
     int Engine::wrap(int pos, int size){
@@ -1120,12 +1128,16 @@ namespace TankEngine
     		case(CWG::Direction::Right):
 				return std::pair<int,int>(1,0);
     		default:
-    			return std::pair<int,int>(-1000000,-100000);
+				return std::pair<int,int>(0,0); // just to shutup the compiler
     	}
     }
 
     std::pair<int,int> Engine::addPair(std::pair<int,int> a, std::pair<int,int> b){
     	return std::pair<int,int>(a.first + b.first , a.second+b.second);
+    }
+
+    std::pair<int,int> Engine::subPair(std::pair<int,int> a, std::pair<int,int> b){
+    	return std::pair<int,int>(a.first - b.first , a.second - b.second);
     }
 
 
