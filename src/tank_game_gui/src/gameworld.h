@@ -36,7 +36,7 @@ public:
 
 
     std::vector<Sprite> getPassiveSprites() const;
-    std::priority_queue<PassiveGroup*>  getPassiveGroups() const;
+    std::vector<PassiveGroup*>  getPassiveGroups() const;
 
 
     void Clear();
@@ -97,7 +97,7 @@ private:
     SpriteData m_dude;
     std::vector<ScreenText> m_screenText;
 
-    std::priority_queue<PassiveGroup*> m_passive_objects;
+    std::vector<PassiveGroup*> m_passive_objects;
 
 
 

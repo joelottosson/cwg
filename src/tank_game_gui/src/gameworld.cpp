@@ -102,30 +102,27 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 	//m_passive_objects.push(new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,"coin.mp3",soundEnabled));
 	PassiveGroup* glenn = new PassiveGroup(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo);
 	glenn->setSoundPlayer("laser-pickup.mp3",soundEnabled);
-	m_passive_objects.push(glenn);
+	m_passive_objects.push_back(glenn);
 
 	glenn = new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,0.75, &Board::Coins);
 	glenn->setSoundPlayer("coin.mp3",soundEnabled);
-	m_passive_objects.push(glenn);
+	m_passive_objects.push_back(glenn);
 
 	glenn = new PassiveGroup(m_matchState,":/images/poison.png", 1, 72, 72,1000,0,0,0.75, &Board::Poison);
 	glenn->setSoundPlayer("wilhelm_scream.mp3",soundEnabled);
-	m_passive_objects.push(glenn);
+	m_passive_objects.push_back(glenn);
 
-	m_passive_objects.push(new PassiveGroup(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
+	m_passive_objects.push_back(new PassiveGroup(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
 
 
 }
 
-std::priority_queue<PassiveGroup*>  GameWorld::getPassiveGroups() const{
+std::vector<PassiveGroup*>  GameWorld::getPassiveGroups() const{
 	return m_passive_objects;
 }
 
 void GameWorld::clearPassiveObjects(){
-    std::priority_queue<PassiveGroup*> creepy_copy = m_passive_objects;
-    while(!creepy_copy.empty()){
-    	PassiveGroup* a = creepy_copy.top();
-    	creepy_copy.pop();
+    for(auto a : m_passive_objects){
     	 a->clear();
     }
 }
@@ -432,8 +429,14 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     	return;
     }*/
 
+    if(ToDirection(tank->MoveDirection()) == None){
+    	t.moveDirection = t.oldMoveDirection;
+    }else{
+    	t.moveDirection=ToDirection(tank->MoveDirection());
+    }
     t.oldMoveDirection = t.moveDirection;
-    t.moveDirection=ToDirection(tank->MoveDirection());
+
+
 
 
 
@@ -550,10 +553,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
 
     //TODO fix so that no copying is required
-    std::priority_queue<PassiveGroup*> creepy_copy = m_passive_objects;
-    while(!creepy_copy.empty()){
-    	PassiveGroup* a = creepy_copy.top();
-    	creepy_copy.pop();
+    for(auto a : m_passive_objects){
     	a->updateGroupOnChange(boardParser ,m_matchState.gameState, m_eventQueue);
     }
 
@@ -574,7 +574,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     	if(!dude.is_dead && dude_game->Dying()){
     		dude.just_died = true;
-    		dude.position = dude.position+directionToVector(dude.moveDirection)*0.5;
+    		dude.position = dude.position-directionToVector(dude.moveDirection)*5;
 
     	}
 
@@ -810,8 +810,6 @@ void GameWorld::Update()
 
     HandleEventQueue(now);
 
-    //TODO:
-    //update of our dude
     for (auto& dude : m_matchState.gameState.dudes){
         if(dude.just_died){
         	UpdatePositionNoOvershoot(timeToNextUpdate, movement, dude,false);
@@ -999,10 +997,8 @@ void GameWorld::Update()
 
 
 
-    std::priority_queue<PassiveGroup*> creepy_copy = m_passive_objects;
-    while(!creepy_copy.empty()){
-    	PassiveGroup* a = creepy_copy.top();
-    	creepy_copy.pop();
+
+    for(auto a : m_passive_objects){
     	a->updateSprites();
     }
 

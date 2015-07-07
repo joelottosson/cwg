@@ -139,7 +139,7 @@ void TankInfoWidget::Update(const Joystick* js)
 
     }
 
-    if (js->moveDirection!=None){
+    if (js->moveDirection != None){
         TankInfoWidget::Led led=static_cast<TankInfoWidget::Led>(js->moveDirection);
         SetLed(led, true);
     }else{
