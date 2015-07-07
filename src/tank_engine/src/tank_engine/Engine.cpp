@@ -560,7 +560,7 @@ namespace TankEngine
             }
 
             if (joystick_ptr->MoveDirection() == Consoden::TankGame::Direction::Neutral){
-            	tank_ptr->MoveDirection() = joystick_ptr->MoveDirection(); //We still need to set the move direction!
+            	tank_ptr->MoveDirection() = joystick_ptr->MoveDirection(); //We still need to set the move direction even though we don't move!
             }else{
                 // move tank unless it is moving into a missile
                 tank_ptr->MoveDirection() = joystick_ptr->MoveDirection();
