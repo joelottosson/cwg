@@ -389,7 +389,7 @@ namespace TankEngine
 
 
     /*
-     * I think this actually is the game "logic"
+     * I think this actually is the game "logic"...and we use logic in the most liberal sense of the word.
      */
     void Engine::Evaluate()
     {
@@ -414,11 +414,7 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
-            //We might need to have this before any movement for the detector to work
-            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || collisonDetector(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
-            	dude_ptr->Dying().SetVal(true);
-                AddPoints(m_config.m_dude_penalty, tank_ptr->TankId(), game_ptr);
-            }
+
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
@@ -726,6 +722,13 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
+            //We might need to have this before any movement for the detector to work
+            if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || collisonDetector(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
+            	dude_ptr->Dying().SetVal(true);
+                AddPoints(m_config.m_dude_penalty, tank_ptr->TankId(), game_ptr);
+            }
+
+
             // Stepped on mine
             if (gm.MineSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal())) {
                 tank_ptr->InFlames() = true;
@@ -971,18 +974,27 @@ namespace TankEngine
      */
     bool Engine::collisonDetector(CWG::DudePtr& dude,CWG::TankPtr& tank){
     	std::pair<int,int> dude_pos(dude->PosX(),dude->PosY());
-    	std::pair<int,int> dude_old_pos(dude->OldY(),dude->OldX());
+    	std::pair<int,int> dude_old_pos(dude->OldX(),dude->OldY());
     	std::pair<int,int> tank_pos(tank->PosX(),tank->PosY());
 
     	CWG::Direction::Enumeration dude_direction = dude->Direction();
     	CWG::Direction::Enumeration tank_direction = tank->MoveDirection();
 
-    	//std::pair<int,int> tank_old_pos = subPair(tank_pos,directionToVector(tank_direction));
 
 
-    	if(		dude_pos == addPair(tank_pos,directionToVector(tank_direction)) ||// check all normal collisions
-    			(dude_old_pos == addPair(tank_pos,directionToVector(tank_direction)) && tank_pos == dude_pos) //check for passing trough
-    			){
+    	std::pair<int,int> tank_old_pos = subPair(tank_pos,directionToVector(tank_direction));
+
+    	std::wcout << "====" << std::endl;
+    	std::wcout << "dude pos " << dude_pos.first << "," << dude_pos.second << std::endl;
+    	std::wcout << "dude old pos " << dude_old_pos.first << "," << dude_old_pos.second << std::endl;
+    	std::wcout << "tank pos " << tank_pos.first << "," << tank_pos.second << std::endl;
+    	std::wcout << "tank pos " << tank_old_pos.first << "," << tank_old_pos.second << std::endl;
+
+    	if(
+    			tank_pos == dude_pos ||
+				(tank_old_pos == dude_pos && dude_old_pos == tank_pos)
+
+    	){
     		std::wcout << "predictor predicted collision" << std::endl;
     		return true;
     	}
