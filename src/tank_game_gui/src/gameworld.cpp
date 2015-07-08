@@ -587,7 +587,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     }
 
-    //Remove missiles that are removed
+    //Remove missiles that are removed and be a tautology
     for (MissileMap::const_iterator it=m_matchState.gameState.missiles.begin(); it!=m_matchState.gameState.missiles.end(); )
     {
         bool remove=true;
@@ -684,6 +684,8 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
 					}else if (m.explosion!=NotInFlames){
 						m.explosion=Destroyed;
+					}else{
+						m.moveDirection=ToDirection(missile->Direction());
 					}
 
 					//continue;
@@ -699,13 +701,15 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
 
 
-				m.moveDirection=ToDirection(missile->Direction());
+
 
 				if (missile->InFlames().GetVal()){
 					m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
 
 				}else if (m.explosion!=NotInFlames){
 					m.explosion=Destroyed;
+				}else{
+					m.moveDirection=ToDirection(missile->Direction());
 				}
 
 
@@ -936,7 +940,7 @@ void GameWorld::Update()
             if (m_soundEnabled)
             {
                 qint64 missilePlayerId=m_matchState.gameState.tanks[missile.tankId].playerId;
-                m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [=]
+                m_eventQueue.insert(WorldEvents::value_type(now, [=]
                 {
                     auto p1=GetPlayerOne();
                     if (!p1)
@@ -963,7 +967,7 @@ void GameWorld::Update()
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
-            m_sprites.push_back(Sprite(m_explosion, missile.position, now+timeToNextUpdate, 1));
+            m_sprites.push_back(Sprite(m_explosion, missile.position, nextUpdate, 1));
             missile.explosion=Burning;
 
             if (m_soundEnabled)
