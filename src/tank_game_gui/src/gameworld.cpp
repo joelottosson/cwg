@@ -934,7 +934,17 @@ void GameWorld::Update()
 
 
             QPointF flame_pos  = tank.position+directionToVector(tank.towerDirection);
-            m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(missile.moveDirection)*m_moveSpeed*2, DirectionToAngle(missile.moveDirection)+90, now +timeToNextUpdate, 1));
+            bool into_wall = false;
+            for(auto p : m_matchState.gameState.walls){
+            	if(p == flame_pos){
+            		into_wall = true;
+            		break;
+            	}
+            }
+
+            if(!into_wall){
+            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(missile.moveDirection)*m_moveSpeed*2, DirectionToAngle(missile.moveDirection)+270, now +timeToNextUpdate, 1));
+            }
             missile.paintFire=false;
 
             if (m_soundEnabled)
