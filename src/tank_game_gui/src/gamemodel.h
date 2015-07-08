@@ -174,6 +174,8 @@ struct GameState
     qint64 winnerPlayerId; //0=draw
 
     qint64 lastUpdate; //timestamp in millisec
+
+
 };
 
 struct MatchState
