@@ -24,7 +24,7 @@ PassiveGroup::PassiveGroup(MatchState match_state, char const* image_name, int f
 
 
 	if(m_image.isNull()){
-		std::wcout << "DID_NOT_LOAD_IMAGE!!!!" << std::endl;
+		std::wcout << "Could not load image " << image_name << "!!" << std::endl;
 		abort();
 	}
 	if(m_image.width() == 0 || m_image.height() == 0){

@@ -385,7 +385,7 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 
 void TankGameWidget::PaintMissile(const Missile& missile, QPainter& painter)
 {
-    if (!missile.visible)
+    if (!missile.visible || missile.explosion == SetInFlames)
     {
         return;
     }

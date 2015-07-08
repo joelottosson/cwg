@@ -681,6 +681,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
 					if (missile->InFlames().GetVal()){
 						m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+						m.visible = false;
 
 					}else if (m.explosion!=NotInFlames){
 						m.explosion=Destroyed;
