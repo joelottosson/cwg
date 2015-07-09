@@ -144,7 +144,7 @@ namespace tank_player_cs
 
 		private void UpdateJoystick (Consoden.TankGame.Direction.Enumeration moveDirection,
 		                            Consoden.TankGame.Direction.Enumeration towerDirection,
-		                            bool fire, bool dropMine)
+		                            bool fire, bool dropMine, bool fireLaser)
 		{
 			if (myJoystickId == null) {
 				return; //we are not active in a game
@@ -158,6 +158,7 @@ namespace tank_player_cs
 			joystick.MoveDirection.Val = moveDirection;
 			joystick.TowerDirection.Val = towerDirection;
 			joystick.Fire.Val = fire;
+			joystick.FireLaser.Val = fireLaser;
 			joystick.MineDrop.Val = dropMine;
 			connection.SetAll (joystick, myJoystickId, myHandlerId);
 		}

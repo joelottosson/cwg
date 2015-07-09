@@ -20,6 +20,7 @@ class GameMap {
 	private byte wall=(byte)'x';
 	private byte coin=(byte)'$';
 	private byte poison=(byte)'p';
+	private byte laser_ammo=(byte)'l';
 	
 	//Constructor, creates a new GameMap from a GameState.
 	public GameMap(int tankId, consoden.tankgame.GameState gameState) {		
@@ -49,12 +50,24 @@ class GameMap {
 		return new Position(gameState.tanks().get(tankId).getObj().posX().getVal(),
 				gameState.tanks().get(tankId).getObj().posY().getVal());
 	}
+	
+	//How many lasers do we have?
+	public int getLaserCount() {
+		return gameState.tanks().get(tankId).getObj().lasers().getVal();
+
+	}
 
 	//Enemy tank position.
 	public Position getEnemyPosition() {
 		int id=(tankId+1)%2;
 		return new Position(gameState.tanks().get(id).getObj().posX().getVal(),
 				gameState.tanks().get(id).getObj().posY().getVal());
+	}
+	
+	//Returns the position of the penguin.
+	public Position getPenguinPosition() {
+		return new Position(gameState.theDude().getObj().posX().getVal(),
+				gameState.theDude().getObj().posX().getVal());
 	}
 	
 	//Check if square is a wall.
@@ -77,10 +90,12 @@ class GameMap {
 		return gameState.board().getVal()[toIndex(pos)]==poison;
 	}
 	
+
+	
+	
 	//Returns the position of the penguin.
-	public boolean getPenguinPosition() {
-		return new Position(gameState.theDude().getObj().posX(),
-				gameState.theDude().getObj().posX());
+	public boolean isLaserAmmo(final Position pos) {
+		return gameState.board().getVal()[toIndex(pos)]==laser_ammo;
 	}
 
 	//Is there a missile in this square

@@ -33,6 +33,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
     	//set up our unique id's
         myHandlerId=new HandlerId(playerName+"Handler");
         myPlayerId= new InstanceId(playerName+"Instance");
+
         
         //open DOB connection. Register player and joystick. Subscribe for gameStates.
         dobConnection = new com.saabgroup.safir.dob.Connection();
@@ -45,6 +46,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
         consoden.tankgame.Player player=new consoden.tankgame.Player();
         player.name().setVal(playerName);
         dobConnection.setAll(player, myPlayerId, myHandlerId);
+        
 
         //run the game player
         run();
@@ -179,7 +181,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
     }
     
 	@Override
-	public void setJoystick(Direction moveDirection, Direction towerDirection, boolean fire, boolean dropMine) {
+	public void setJoystick(Direction moveDirection, Direction towerDirection, boolean fire, boolean dropMine, boolean fireLaser) {
 
 	    if (myJoystickId==null) {
 	        return; //we are not active in a game
@@ -198,6 +200,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
 		joystick.moveDirection().setVal(moveDirection);
 		joystick.towerDirection().setVal(towerDirection);
 		joystick.fire().setVal(fire);
+		joystick.fireLaser().setVal(fireLaser);
 		joystick.mineDrop().setVal(dropMine);
 		dobConnection.setAll(joystick, myJoystickId, myHandlerId);
 	}

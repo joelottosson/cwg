@@ -52,6 +52,13 @@ namespace tank_player_cs
 			}
 		}
 
+		//Returns how many lasers the player has
+		public int getLaserCount {
+			get {
+				return gameState.Tanks [tankId].Obj.Lasers.Val;
+			}
+		}
+
 		//Penguin position
 		public Position PenguinPosition {
 			get {
@@ -82,6 +89,12 @@ namespace tank_player_cs
 		public bool IsPoisonGas (Position p)
 		{
 			return RawVal (p.X, p.Y) == 'p';
+		}
+
+	        //Check if there is poison gas in this square.
+		public bool IsLaserAmmo (Position p)
+		{
+			return RawVal (p.X, p.Y) == 'l';
 		}
 
 		//Is there a missile in this square
