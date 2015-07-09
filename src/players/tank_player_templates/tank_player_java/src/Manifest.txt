@@ -1,2 +1,2 @@
 Class-Path: dose_java.jar
-Main-Class: cwg14.Player
+Main-Class: cwg.Player

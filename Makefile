@@ -82,6 +82,10 @@ copy_and_rebuid_dob: .FORCE
 	 cp -uv tank_dou/*.dou $(SAFIR_SDK)/dots/dots_generated/tank/
 	 dobmake.py --no-java --no-ada --no-dotnet --batch
 	 
+copy_and_rebuid_dob_all: .FORCE
+	 cp -uv tank_dou/*.dou $(SAFIR_SDK)/dots/dots_generated/tank/
+	 dobmake.py --no-ada  --batch
+	 
 
 #Fix this later
 .FORCE: 

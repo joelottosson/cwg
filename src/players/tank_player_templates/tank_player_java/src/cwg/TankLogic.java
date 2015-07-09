@@ -15,7 +15,7 @@ class TankLogic {
 	public interface JoystickHandler {
 		public void setJoystick(consoden.tankgame.Direction moveDirection,
 								consoden.tankgame.Direction towerDirection,
-								boolean fire, boolean dropMine);
+								boolean fire, boolean dropMine,boolean fireLaser);
 	}
 		
 	private int tankId;
@@ -74,8 +74,14 @@ class TankLogic {
 		//Sometimes we also drop a mine
 	    boolean dropMine=((gameState.elapsedTime().getVal().intValue()) % 3)==0;
 	    
+	    boolean fireLaser = false;
+	    //if we can we fire lasers!!!
+	    if(gm.getLaserCount() > 0){
+	    	fireLaser = true;
+	    }
+	    
 		//Move our joystick.
-		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine);
+		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine,fireLaser);
 	}
 	
 	
