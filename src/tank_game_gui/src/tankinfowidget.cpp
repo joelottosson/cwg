@@ -32,6 +32,7 @@ TankInfoWidget::TankInfoWidget(int playerNumber, QWidget *parent) :
     m_buttons[6]=ui->towerUp;
     m_buttons[7]=ui->towerDown;
     m_buttons[8]=ui->fireButton;
+
     ResetLeds();
 
     if (m_playerNumber==0)
@@ -115,8 +116,19 @@ void TankInfoWidget::SetLaserAmmo(int lasers){
 	ui->laserLcdNumber->display(lasers);
 }
 
-void TankInfoWidget::Update(const Joystick* js)
-{
+void TankInfoWidget::updateSmoke(bool has_smoke, int smoke_left){
+    if(has_smoke){
+    	ui->smokeAvailiable->setPixmap(m_green_on);
+    }else{
+    	ui->smokeAvailiable->setPixmap(m_green_off);
+    }
+    ui->smokeLcd->display(smoke_left);
+}
+
+
+void TankInfoWidget::Update(const Joystick* js){
+
+
 
     if (!js)
     {
