@@ -634,6 +634,24 @@ namespace TankEngine
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
+            if(!tank_ptr->SmokeLeft().IsNull()){
+				if(tank_ptr->SmokeLeft() <= 0){
+					tank_ptr->SmokeLeft() = 0;
+				}else{
+					tank_ptr->SmokeLeft() = tank_ptr->SmokeLeft() - 1;
+					std::wcout << "WE ARE DEPLOYING SMOKES :D" << std::endl;
+				}
+            }
+
+            //TODO: Lets just always deploy smoke for testing. Will be added to the stick of joy later.
+
+            //joystick_ptr->DeploySmoke() = true;
+            if(!joystick_ptr->DeploySmoke().IsNull() && joystick_ptr->DeploySmoke() && !tank_ptr->HasSmoke().IsNull() && tank_ptr->HasSmoke()){
+            	tank_ptr->HasSmoke() = false;
+            	tank_ptr->SmokeLeft() = tank_ptr->SmokeLeft() + m_config.m_smoke_timer;
+            	std::wcout << "Deployed some sweet smoke!" << std::endl;
+            }
+
             if (!joystick_ptr->TowerDirection().IsNull()) {
             	//TODO: Some od things happen here. Apparently we dont care much for neutral tower directions...
             	if(joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
@@ -781,6 +799,15 @@ namespace TankEngine
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
                     AddPoints(m_config.m_gas_penalty, OpponentTankId(tank_ptr->TankId()), game_ptr);
                     tank_ptr->HitPoisonGas() = true;
+
+                } else if (gm.SmokeGrenadeSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
+                    // Only pickup smoke if we don't already have smoke
+                    if(!tank_ptr->HasSmoke().IsNull() && !tank_ptr->HasSmoke()){
+                    	gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY());
+                    	tank_ptr->HasSmoke() = true;
+                    }
+
+
 
                 } else {
                     // Clear took coin and gas
@@ -977,28 +1004,14 @@ namespace TankEngine
     	std::pair<int,int> dude_old_pos(dude->OldX(),dude->OldY());
     	std::pair<int,int> tank_pos(tank->PosX(),tank->PosY());
 
-    	CWG::Direction::Enumeration dude_direction = dude->Direction();
-    	CWG::Direction::Enumeration tank_direction = tank->MoveDirection();
+    	std::pair<int,int> tank_old_pos = subPair(tank_pos,directionToVector(tank->MoveDirection()));
 
 
-
-    	std::pair<int,int> tank_old_pos = subPair(tank_pos,directionToVector(tank_direction));
-
-    	std::wcout << "====" << std::endl;
-    	std::wcout << "dude pos " << dude_pos.first << "," << dude_pos.second << std::endl;
-    	std::wcout << "dude old pos " << dude_old_pos.first << "," << dude_old_pos.second << std::endl;
-    	std::wcout << "tank pos " << tank_pos.first << "," << tank_pos.second << std::endl;
-    	std::wcout << "tank pos " << tank_old_pos.first << "," << tank_old_pos.second << std::endl;
-
-    	if(
-    			tank_pos == dude_pos ||
+    	if(		tank_pos == dude_pos ||
 				(tank_old_pos == dude_pos && dude_old_pos == tank_pos)
-
     	){
-    		std::wcout << "predictor predicted collision" << std::endl;
     		return true;
     	}
-
     	return false;
     }
 

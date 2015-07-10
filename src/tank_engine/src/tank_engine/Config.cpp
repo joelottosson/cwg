@@ -19,6 +19,7 @@ Config::Config(const char *file_path){
 		CFG_SIMPLE_INT("dude_penalty", &m_dude_penalty),
 		CFG_SIMPLE_INT("draw_points", &m_draw_points),
 		CFG_SIMPLE_INT("walkover_penalty", &m_walkover_penalty),
+		CFG_SIMPLE_INT("smoke_timer", &m_smoke_timer),
 
 
         CFG_END()
@@ -56,5 +57,6 @@ void Config::printConfig(){
 	std::wcout << "dude penalty = " << m_dude_penalty << std::endl;
 	std::wcout << "draw points = " << m_draw_points << std::endl;
 	std::wcout << "walkover penalty = " << m_walkover_penalty << std::endl;
+	std::wcout << "m smoke timer = " << m_smoke_timer << std::endl;
 
 }

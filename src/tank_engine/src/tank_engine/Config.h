@@ -15,6 +15,7 @@ public:
 	int m_dude_penalty;
 	int m_draw_points;
 	int m_walkover_penalty;
+	int m_smoke_timer;
 
 	Config(const char *file_path);
 

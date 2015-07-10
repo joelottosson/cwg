@@ -49,6 +49,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_explosionMediaPlayer1()
     ,m_fireMediaPlayer2()
     ,m_explosionMediaPlayer2()
+	,m_pixels_per_square(72) //Pretty much a magic number. Although maybe its defined somewhere....deep in the dark corners of the code....
 
 {
 
@@ -57,13 +58,8 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
         InitMediaPlayers();
     }
 
-    //load sprite images
-    /*m_explosion.image=QPixmap(":/images/explosion_sheet.png");
-    m_explosion.lifeTime=1000;
-    for (int i=0; i<11; ++i)
-    {
-        m_explosion.fragments.push_back(QRectF(i*72, 0, 72, 72));
-    }*/
+
+
 
     m_explosion.image=QPixmap(":/images/awesome-explosion.png");
 	m_explosion.lifeTime=2000;
@@ -73,12 +69,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 			m_explosion.fragments.push_back(QRectF(i*72, j*72, 72, 72));
 		}
 	}
-/*    m_tankFire.image=QPixmap(":/images/tank_fire_sheet.png");
-    m_tankFire.lifeTime=300;
-    for (int i=0; i<5; ++i)
-    {
-        m_tankFire.fragments.push_back(QRectF(i*72, 0, 72, 72));
-    }*/
+
     m_tankFire.image=QPixmap(":/images/cool_flame.png");
     m_tankFire.lifeTime=500;
 	for(int j = 0; j <5 ;j ++){
@@ -95,6 +86,13 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     m_laser_start.image=QPixmap(":/images/laser-start.png");
 	m_laser_start.lifeTime=1000;
 	m_laser_start.fragments.push_back(QRectF(0, 0, 72, 72));
+
+    m_smoke.image=QPixmap(":/images/big-smoke.png");
+	m_smoke.lifeTime=1500;
+	for(int i = 0; i <22; i++){
+		m_smoke.fragments.push_back(QRectF(200*i, 0, 200, 200));
+	}
+
 
 	//m_matchState.gameState.
 
@@ -113,6 +111,8 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 	m_passive_objects.push_back(glenn);
 
 	m_passive_objects.push_back(new PassiveGroup(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
+
+	m_passive_objects.push_back(new PassiveGroup(m_matchState,":/images/smoke_grenade.png", 1, 72, 72,1000,0,0,0.75, &Board::Smoke));
 
 
 }
@@ -441,7 +441,18 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
 
 
 
-    if(!tank->FireLaser().IsNull() && tank->FireLaser() ){
+    if(!tank->SmokeLeft().IsNull() && tank->SmokeLeft() > 0){
+
+    	int smoke_puffs = 7;
+        qint64 time_per_puff=(m_matchState.gameState.pace)/smoke_puffs;
+    	for(int i = 0; i <smoke_puffs; i++){
+    		QPointF random_start = t.position + QPointF(((qreal)(rand()%200-100))/100,((qreal)(rand()%200-100))/100)/2 /*- QPointF(m_smoke.fragments.front().width(),m_smoke.fragments.front().height())/(m_pixels_per_square*2)*/;
+    		QPointF random_direction = QPointF(((float)((rand()%200)-100))/100,((float)((rand()%200)-100))/100)*m_moveSpeed*0.25;
+        	m_sprites.push_back(Sprite(m_smoke, random_start, random_direction , rand()%360, QDateTime::currentMSecsSinceEpoch()+time_per_puff*i, 1));
+    	}
+    }
+
+    if(!tank->FireLaser().IsNull() && tank->FireLaser() && t.explosion == NotInFlames ){
     	//std::wcout << "is fiering laser" << std::endl;
     	DrawLaser(tank,board);
     }

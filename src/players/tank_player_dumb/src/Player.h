@@ -10,8 +10,7 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
-
-#include "../../tank_player_dumb/src/TankLogic.h"
+#include "TankLogic.h"
 
 /**
  * The Player class handles all communication with the game engine.
@@ -53,9 +52,12 @@ private:
     void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId);
 
     //Update joystick
+    /*void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
+                     Consoden::TankGame::Direction::Enumeration towerDirection,
+                     bool fire, bool dropMine);*/
     void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                      Consoden::TankGame::Direction::Enumeration towerDirection,
-                     bool fire, bool dropMine);
+                     bool fire, bool dropMine,bool fireLaser,bool deploySmoke);
 };
 
 #endif

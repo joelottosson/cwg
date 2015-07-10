@@ -25,8 +25,10 @@
      <file>../images/laser-ammo.png</file>
      <file>../images/laser-start.png</file>
      <file>../images/laser-middle.png</file>
-     <file>../images/awesome-explosion.png</file>        
+     <file>../images/awesome-explosion.png</file>         
      <file>../images/cool_flame.png</file>
+     <file>../images/smoke_grenade.png</file>
+     <file>../images/big-smoke.png</file>          
      
                        
  </qresource>  

@@ -52,12 +52,12 @@ private:
     void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId);
 
     //Update joystick
+    /*void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
+                     Consoden::TankGame::Direction::Enumeration towerDirection,
+                     bool fire, bool dropMine);*/
     void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                      Consoden::TankGame::Direction::Enumeration towerDirection,
-                     bool fire, bool dropMine);
-    void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
-                     Consoden::TankGame::Direction::Enumeration towerDirection,
-                     bool fire, bool dropMine,bool fireLaser);
+                     bool fire, bool dropMine,bool fireLaser,bool deploySmoke);
 };
 
 #endif

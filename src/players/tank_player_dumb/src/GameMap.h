@@ -34,14 +34,24 @@ public:
     int SizeY() const {return m_sizeY;}
 
     /**
+     * Returns the amount of lasers the tank has
+     */
+    int LaserAmmoCount() const;
+
+    /**
      * Location of the players tank.
      */
-    std::pair<int, int> OwnPosition() const {return m_ownPos;}
+    std::pair<int, int> OwnPosition() const;
 
     /**
      * Location of the enemys tank.
      */
-    std::pair<int, int> EnemyPosition() const {return m_enemyPos;}
+    std::pair<int, int> EnemyPosition() const;
+
+    /**
+     * checks if you have a smoke grenade
+     */
+    bool HasSmoke() const;
 
     /**
      * Check if square is a wall.
@@ -53,6 +63,18 @@ public:
      */
     bool IsMine(const std::pair<int, int>& pos) const;
 
+
+    /**
+     * Check if there is laser ammo in this square.
+     */
+    bool IsLaserAmmo(const std::pair<int, int>& pos) const;
+
+
+    /**
+     * Check if there is a smoke_grenade
+     */
+    bool IsSmokeGrenade(const std::pair<int, int>& pos) const;
+
     /**
      * Check if there is a coin in this square.
      */
@@ -62,6 +84,12 @@ public:
      * Check if there is poison gas in this square.
      */
     bool IsPoisonGas(const std::pair<int, int>& pos) const;
+
+    /**
+	 * Check if there is a penguin.
+	 */
+	bool IsPenguin(const std::pair<int, int>& pos) const;
+
 
     /**
      * Is there a missile in this position right now?

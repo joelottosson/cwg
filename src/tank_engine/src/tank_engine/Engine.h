@@ -30,6 +30,8 @@ namespace TankEngine
     {
     public:
 
+    	Config m_config;
+
         Engine(boost::asio::io_service& io);
 
         /** 
@@ -105,7 +107,7 @@ namespace TankEngine
         Consoden::TankGame::Winner::Enumeration TankIdToWinner(int tank_id) { if (tank_id == mPlayerOneTankId) { return Consoden::TankGame::Winner::PlayerOne; } else { return Consoden::TankGame::Winner::PlayerTwo; } }
         int  OpponentTankId(int tank_id) { if (tank_id == mPlayerOneTankId) { return mPlayerTwoTankId; } else { return mPlayerOneTankId; } }
 
-        Config m_config;
+
 
         bool mGamePrepare;
         bool mGameRunning;

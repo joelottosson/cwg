@@ -48,6 +48,48 @@ GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr)
     }
 }
 
+/**
+  * Location of the players tank.
+  */
+ std::pair<int, int> GameMap::OwnPosition() const {
+	 return m_ownPos;
+ }
+
+ /**
+  * Location of the enemys tank.
+  */
+ std::pair<int, int> GameMap::EnemyPosition() const {
+	   Safir::Dob::Typesystem::ArrayIndex tankIndex;
+	   for (tankIndex = 0;
+	         tankIndex < m_gamePtr->TanksArraySize();
+	         tankIndex++) {
+
+	        if (m_gamePtr->Tanks()[tankIndex].IsNull()) {
+	            // empty tank slot, found last tank
+	            break;
+	        }
+
+	        Consoden::TankGame::TankPtr tankPtr =
+	                boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_gamePtr->Tanks()[tankIndex].GetPtr());
+
+	        //std::pair<int, int> pos = std::make_pair(tankPtr->PosX().GetVal(), tankPtr->PosY().GetVal());
+
+	        if (tankPtr->TankId().GetVal() == m_TankId) {
+	        	continue;
+	        } else {
+	            // The enemy
+	            if(!tankPtr->SmokeLeft().IsNull() && tankPtr->SmokeLeft().GetVal() > 0){
+	            	return  std::make_pair(rand()%m_sizeX, rand()%m_sizeY);
+	            }else{
+	            	return  std::make_pair(tankPtr->PosX().GetVal(), tankPtr->PosY().GetVal());
+	            }
+	        }
+	    }
+	   return std::make_pair(-1, -1);
+ }
+
+
+
 int GameMap::LaserAmmoCount() const{
 	Safir::Dob::Typesystem::ArrayIndex tankIndex;
     for (tankIndex = 0;
@@ -62,8 +104,6 @@ int GameMap::LaserAmmoCount() const{
         Consoden::TankGame::TankPtr tankPtr =
                 boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_gamePtr->Tanks()[tankIndex].GetPtr());
 
-        //std::pair<int, int> pos = std::make_pair(tankPtr->PosX().GetVal(), tankPtr->PosY().GetVal());
-
         if (tankPtr->TankId().GetVal() == m_TankId) {
             // This is our tank!
             return tankPtr->Lasers().GetVal();
@@ -73,6 +113,31 @@ int GameMap::LaserAmmoCount() const{
         }
     }
     return -1;
+}
+
+bool GameMap::HasSmoke() const{
+	Safir::Dob::Typesystem::ArrayIndex tankIndex;
+    for (tankIndex = 0;
+         tankIndex < m_gamePtr->TanksArraySize();
+         tankIndex++) {
+
+        if (m_gamePtr->Tanks()[tankIndex].IsNull()) {
+            // empty tank slot, found last tank
+            break;
+        }
+
+        Consoden::TankGame::TankPtr tankPtr =
+                boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_gamePtr->Tanks()[tankIndex].GetPtr());
+
+        if (tankPtr->TankId().GetVal() == m_TankId) {
+            // This is our tank!
+            return tankPtr->HasSmoke().GetVal();
+
+        } else {
+            continue;
+        }
+    }
+    return false;
 }
 
 bool GameMap::IsWall(const std::pair<int, int>& pos) const
@@ -93,6 +158,10 @@ bool GameMap::IsLaserAmmo(const std::pair<int, int>& pos) const
 bool GameMap::IsCoin(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='$';
+}
+
+bool GameMap::IsSmokeGrenade(const std::pair<int, int>& pos) const{
+	return m_gamePtr->Board().GetVal()[Index(pos)]=='s';
 }
 
 bool GameMap::IsPoisonGas(const std::pair<int, int>& pos) const
