@@ -116,10 +116,12 @@ private:
 
     QMediaPlayer m_fireMediaPlayer1;
     QMediaPlayer m_explosionMediaPlayer1;
+    QMediaPlayer m_smokeMediaPlayer;
     QMediaPlayer m_fireMediaPlayer2;
     QMediaPlayer m_explosionMediaPlayer2;
     QMediaPlayer m_dude_dies_MediaPlayer;
 	QMediaPlayer m_laser_fire_MediaPlayer;
+
 
     void SetTextSmall(const QStringList& lines);
     void SetTextPlayer(int playerNumber, const QStringList& lines);

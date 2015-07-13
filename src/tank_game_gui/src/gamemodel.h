@@ -86,6 +86,7 @@ struct Tank
     qreal paintTankAngle;
     qreal paintTowerAngle;
     bool isWrapping;
+    bool deploying_smoke;
 
     Tank(QPointF pos, Direction direction);
 

@@ -57,7 +57,7 @@ void PassiveGroup::setSillyFunction( boost::function<const Board::PointVec& ( co
 
 PassiveGroup::PassiveGroup(MatchState match_state, char const* image_name, int frames, int width, int height, int life_time, int repetitions, int layer,double delay,char const* sound_file, bool sound_enabled,  boost::function<const Board::PointVec& ( const Board&)> board_function){
 	PassiveGroup(match_state, image_name, frames, width, height ,life_time, repetitions, layer,delay, board_function);
-	setSoundPlayer(sound_file,  sound_enabled);
+	setSoundPlayer(sound_file,  sound_enabled,100);
 
 
 }
@@ -65,7 +65,7 @@ PassiveGroup::PassiveGroup(MatchState match_state, char const* image_name, int f
 /**
  * Initializes the media player. Has no effect if sound_enabled is false.
  */
-void PassiveGroup::setSoundPlayer(char const* sound_file, bool sound_enabled){
+void PassiveGroup::setSoundPlayer(char const* sound_file, bool sound_enabled,int volume){
 	if(!sound_enabled){return;}
 
 	const char* runtime=getenv("SAFIR_RUNTIME");

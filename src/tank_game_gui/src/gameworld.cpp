@@ -47,6 +47,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 	,m_passive_objects()
     ,m_fireMediaPlayer1()
     ,m_explosionMediaPlayer1()
+	,m_smokeMediaPlayer()
     ,m_fireMediaPlayer2()
     ,m_explosionMediaPlayer2()
 	,m_pixels_per_square(72) //Pretty much a magic number. Although maybe its defined somewhere....deep in the dark corners of the code....
@@ -99,15 +100,15 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 
 	//m_passive_objects.push(new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,"coin.mp3",soundEnabled));
 	PassiveGroup* glenn = new PassiveGroup(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo);
-	glenn->setSoundPlayer("laser-pickup.mp3",soundEnabled);
+	glenn->setSoundPlayer("laser-pickup.mp3",soundEnabled,90);
 	m_passive_objects.push_back(glenn);
 
 	glenn = new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,0.75, &Board::Coins);
-	glenn->setSoundPlayer("coin.mp3",soundEnabled);
+	glenn->setSoundPlayer("coin.mp3",soundEnabled,80);
 	m_passive_objects.push_back(glenn);
 
 	glenn = new PassiveGroup(m_matchState,":/images/poison.png", 1, 72, 72,1000,0,0,0.75, &Board::Poison);
-	glenn->setSoundPlayer("wilhelm_scream.mp3",soundEnabled);
+	glenn->setSoundPlayer("wilhelm_scream.mp3",soundEnabled,60);
 	m_passive_objects.push_back(glenn);
 
 	m_passive_objects.push_back(new PassiveGroup(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
@@ -450,6 +451,13 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     		QPointF random_direction = QPointF(((float)((rand()%200)-100))/100,((float)((rand()%200)-100))/100)*m_moveSpeed*0.25;
         	m_sprites.push_back(Sprite(m_smoke, random_start, random_direction , rand()%360, QDateTime::currentMSecsSinceEpoch()+time_per_puff*i, 1));
     	}
+    	if(!t.deploying_smoke && m_soundEnabled){
+    		m_smokeMediaPlayer.stop();
+    		m_smokeMediaPlayer.play();
+    		t.deploying_smoke = true;
+    	}
+    }else{
+    	t.deploying_smoke = false;
     }
 
     if(!tank->FireLaser().IsNull() && tank->FireLaser() && t.explosion == NotInFlames ){
@@ -1122,6 +1130,7 @@ void GameWorld::InitMediaPlayers()
     m_explosionMediaPlayer1.setVolume(80);
     m_fireMediaPlayer2.setVolume(35);
     m_explosionMediaPlayer2.setVolume(80);
+    m_smokeMediaPlayer.setVolume(75);
 
     const char* runtime=getenv("SAFIR_RUNTIME");
     QString path=QDir::cleanPath(QString(runtime)+QDir::separator()+"data"+QDir::separator()+"tank_game"+QDir::separator()+"sounds");
@@ -1131,6 +1140,7 @@ void GameWorld::InitMediaPlayers()
     QString bigBombPath=QDir::cleanPath(path+QDir::separator()+"big_bomb.mp3");
     QString death_of_dude=QDir::cleanPath(path+QDir::separator()+"dude-dies.mp3");
     QString laser_fire=QDir::cleanPath(path+QDir::separator()+"laser-fire.mp3");
+    QString smoke=QDir::cleanPath(path+QDir::separator()+"smoke_deployed.mp3");
 
     m_fireMediaPlayer1.setMedia(QUrl::fromLocalFile(firePath));
     m_explosionMediaPlayer1.setMedia(QUrl::fromLocalFile(explostionPath));
@@ -1138,6 +1148,8 @@ void GameWorld::InitMediaPlayers()
     m_explosionMediaPlayer2.setMedia(QUrl::fromLocalFile(bigBombPath));
     m_dude_dies_MediaPlayer.setMedia(QUrl::fromLocalFile(death_of_dude));
     m_laser_fire_MediaPlayer.setMedia(QUrl::fromLocalFile(laser_fire));
+    m_smokeMediaPlayer.setMedia(QUrl::fromLocalFile(smoke));
+
 }
 
 void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank)
