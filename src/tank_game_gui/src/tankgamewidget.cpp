@@ -101,8 +101,8 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
     start = clock();
 
-    std::vector<PassiveGroup*>  passives = m_world.getPassiveGroups();
-    for(auto a : passives){
+    //std::vector<PassiveGroup*>  passives = ;
+    for(auto a : m_world.getPassiveGroups()){
 	    for (auto& s : a->m_sprites)
 	    {
 
