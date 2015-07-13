@@ -181,7 +181,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
     }
     
 	@Override
-	public void setJoystick(Direction moveDirection, Direction towerDirection, boolean fire, boolean dropMine, boolean fireLaser) {
+	public void setJoystick(Direction moveDirection, Direction towerDirection, boolean fire, boolean dropMine, boolean fireLaser, boolean deploySmoke) {
 
 	    if (myJoystickId==null) {
 	        return; //we are not active in a game
@@ -202,6 +202,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
 		joystick.fire().setVal(fire);
 		joystick.fireLaser().setVal(fireLaser);
 		joystick.mineDrop().setVal(dropMine);
+		joystick.deploySmoke().setVal(deploySmoke);
 		dobConnection.setAll(joystick, myJoystickId, myHandlerId);
 	}
 	
