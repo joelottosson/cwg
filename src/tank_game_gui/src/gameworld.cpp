@@ -391,11 +391,11 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     		break;
     	}else if(enemy_position == QPointF(x_pos,y_pos)){
     		//Hit enemy tank. just chill
-    		m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*laser_delay, 1));
+    		m_sprites.push_back(Sprite(m_laser_start, QPointF(x_pos,y_pos),QPointF(0,0),rot+180, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*laser_delay, 1));
     		break;
     	}else if(t.position == QPointF(x_pos,y_pos)){
 			//Hit our own tank tank. just chill
-    		m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*laser_delay, 1));
+    		m_sprites.push_back(Sprite(m_laser_start, QPointF(x_pos,y_pos),QPointF(0,0),rot+180, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*laser_delay, 1));
 			break;
     	}
     	m_sprites.push_back(Sprite(m_laser_middle, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*laser_delay, 1));
