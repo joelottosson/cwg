@@ -971,7 +971,7 @@ void GameWorld::Update()
             if (m_soundEnabled)
             {
                 qint64 missilePlayerId=m_matchState.gameState.tanks[missile.tankId].playerId;
-                m_eventQueue.insert(WorldEvents::value_type(now, [=]
+                m_eventQueue.insert(WorldEvents::value_type(timeToNextUpdate+now, [=]
                 {
                     auto p1=GetPlayerOne();
                     if (!p1)
