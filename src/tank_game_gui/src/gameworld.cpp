@@ -9,6 +9,7 @@
 #include "PassiveGroup.h"
 #include <boost/make_shared.hpp>
 #include <memory>
+
 #include <limits>
 
 
@@ -40,6 +41,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
     ,m_soundEnabled(soundEnabled)
     ,m_moveSpeed(0)
     ,m_towerSpeed(0)
+	,m_pixels_per_square(72) //Pretty much a magic number. Although maybe its defined somewhere....deep in the dark corners of the code....
     ,m_lastAnimationUpdate(0)
     ,m_sprites()
     ,m_explosion()
@@ -50,7 +52,6 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 	,m_smokeMediaPlayer()
     ,m_fireMediaPlayer2()
     ,m_explosionMediaPlayer2()
-	,m_pixels_per_square(72) //Pretty much a magic number. Although maybe its defined somewhere....deep in the dark corners of the code....
 
 {
 
@@ -99,26 +100,26 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 
 
 	//m_passive_objects.push(new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,"coin.mp3",soundEnabled));
-	PassiveGroup* glenn = new PassiveGroup(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo);
+	boost::shared_ptr<PassiveGroup> glenn = boost::make_shared<PassiveGroup>(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo);
 	glenn->setSoundPlayer("laser-pickup.mp3",soundEnabled,90);
 	m_passive_objects.push_back(glenn);
 
-	glenn = new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,0.75, &Board::Coins);
+	glenn = boost::make_shared<PassiveGroup>(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,0.75, &Board::Coins);
 	glenn->setSoundPlayer("coin.mp3",soundEnabled,80);
 	m_passive_objects.push_back(glenn);
 
-	glenn = new PassiveGroup(m_matchState,":/images/poison.png", 1, 72, 72,1000,0,0,0.75, &Board::Poison);
+	glenn = boost::make_shared<PassiveGroup>(m_matchState,":/images/poison.png", 1, 72, 72,1000,0,0,0.75, &Board::Poison);
 	glenn->setSoundPlayer("wilhelm_scream.mp3",soundEnabled,60);
 	m_passive_objects.push_back(glenn);
 
-	m_passive_objects.push_back(new PassiveGroup(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
+	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
 
-	m_passive_objects.push_back(new PassiveGroup(m_matchState,":/images/smoke_grenade.png", 1, 72, 72,1000,0,0,0.75, &Board::Smoke));
+	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/smoke_grenade.png", 1, 72, 72,1000,0,0,0.75, &Board::Smoke));
 
 
 }
 
-std::vector<PassiveGroup*>  GameWorld::getPassiveGroups() const{
+std::vector<boost::shared_ptr<PassiveGroup>>  GameWorld::getPassiveGroups() const{
 	return m_passive_objects;
 }
 
@@ -1386,7 +1387,6 @@ QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
 
 		}else{
 
-			QPointF diff = own.position - enemy.position;
 			qreal distance = manhattanDistanceOnTorus(own.position,enemy.position);
 			offs = distance > 1 ? 0.75 : 0.25;
 

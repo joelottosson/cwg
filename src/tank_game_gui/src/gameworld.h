@@ -17,7 +17,7 @@
 #include <Consoden/TankGame/Match.h>
 #include <Consoden/TankGame/GameState.h>
 #include <Consoden/TankGame/Joystick.h>
-#include <memory>
+//#include <memory>
 #include <queue>
 #include <boost/make_shared.hpp>
 
@@ -36,7 +36,7 @@ public:
 
 
     std::vector<Sprite> getPassiveSprites() const;
-    std::vector<PassiveGroup*>  getPassiveGroups() const;
+    std::vector<boost::shared_ptr<PassiveGroup>>  getPassiveGroups() const;
 
 
     void Clear();
@@ -102,7 +102,7 @@ private:
     SpriteData m_smoke;
     std::vector<ScreenText> m_screenText;
 
-    std::vector<PassiveGroup*> m_passive_objects;
+    std::vector<boost::shared_ptr<PassiveGroup>> m_passive_objects;
 
 
 
