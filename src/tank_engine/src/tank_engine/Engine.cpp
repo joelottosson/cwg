@@ -555,10 +555,6 @@ namespace TankEngine
             int request_pos_x = tank_ptr->PosX();
             int request_pos_y = tank_ptr->PosY();
 
-            if (joystick_ptr->MoveDirection().IsNull()) {
-                joystick_ptr->MoveDirection().SetVal(Consoden::TankGame::Direction::Neutral);
-            }
-
             if (joystick_ptr->MoveDirection() == Consoden::TankGame::Direction::Neutral){
             	tank_ptr->MoveDirection() = joystick_ptr->MoveDirection(); //We still need to set the move direction even though we don't move!
             }else{
@@ -636,37 +632,26 @@ namespace TankEngine
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
-            if(!tank_ptr->SmokeLeft().IsNull()){
-				if(tank_ptr->SmokeLeft() <= 0){
-					tank_ptr->SmokeLeft() = 0;
-				}else{
-					tank_ptr->SmokeLeft() = tank_ptr->SmokeLeft() - 1;
-					std::wcout << "WE ARE DEPLOYING SMOKES :D" << std::endl;
-				}
-            }
 
-            //TODO: Lets just always deploy smoke for testing. Will be added to the stick of joy later.
+			if(tank_ptr->SmokeLeft() <= 0){
+				tank_ptr->SmokeLeft() = 0;
+			}else{
+				tank_ptr->SmokeLeft() = tank_ptr->SmokeLeft() - 1;
+			}
 
-            //joystick_ptr->DeploySmoke() = true;
-            if(!joystick_ptr->DeploySmoke().IsNull() && joystick_ptr->DeploySmoke() && !tank_ptr->HasSmoke().IsNull() && tank_ptr->HasSmoke()){
+            if(joystick_ptr->DeploySmoke() && tank_ptr->HasSmoke()){
             	tank_ptr->HasSmoke() = false;
             	tank_ptr->SmokeLeft() = tank_ptr->SmokeLeft() + m_config.m_smoke_timer;
-            	std::wcout << "Deployed some sweet smoke!" << std::endl;
             }
 
-            if (!joystick_ptr->TowerDirection().IsNull()) {
-            	//TODO: Some od things happen here. Apparently we dont care much for neutral tower directions...
-            	if(joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
-            		tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
-            	}
-            } else {
-                tank_ptr->TowerDirection().SetNull();
-            }
 
-            if(!joystick_ptr->Fire().IsNull() && !joystick_ptr->FireLaser().IsNull() &&
-            		joystick_ptr->Fire() && !joystick_ptr->TowerDirection().IsNull() &&
-					joystick_ptr->FireLaser() && !joystick_ptr->FireLaser().IsNull() &&
-					joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
+			//TODO: Some od things happen here. Apparently we dont care much for neutral tower directions...
+			if(joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
+				tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
+			}
+
+
+            if(joystick_ptr->Fire() &&	joystick_ptr->FireLaser() && joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
 
             	if(tank_ptr->Lasers() > 0){
 
@@ -688,7 +673,7 @@ namespace TankEngine
             }
 
 
-            if (!joystick_ptr->Fire().IsNull() && !joystick_ptr->FireLaser().IsNull() && joystick_ptr->Fire() && !joystick_ptr->TowerDirection().IsNull() && !joystick_ptr->FireLaser()) {
+            if (joystick_ptr->Fire() && !joystick_ptr->FireLaser()) {
                 int pos_head_x = -1;
                 int pos_head_y = -1;
                 int pos_tail_x = -1;
