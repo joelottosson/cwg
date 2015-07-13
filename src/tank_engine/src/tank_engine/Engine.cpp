@@ -398,6 +398,8 @@ namespace TankEngine
 
         GameMap gm(game_ptr);
 
+        nullCheckEverything(game_ptr);
+
         gm.MoveMissiles();
         bool tank_tank_collission = false;
 
@@ -1167,5 +1169,125 @@ namespace TankEngine
     	return std::pair<int,int>(a.first - b.first , a.second - b.second);
     }
 
+    void Engine::nullCheckEverything(Consoden::TankGame::GameStatePtr game_ptr){
+        for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0;
+             (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull());
+             tank_index++) {
+
+            Consoden::TankGame::TankPtr tank_ptr =
+                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
+
+
+
+            Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
+
+
+
+            //Nullceck tank fields:
+            if(tank_ptr->PlayerId().IsNull()){
+            	std::wcout << "Player Id is null... No other option but to abort everything and silently sit and cry" << std::endl;
+            	abort();
+            }
+
+            if(tank_ptr->PosX().IsNull() || tank_ptr->PosY().IsNull()){
+            	std::wcout << "Player position is null... No other option but to abort everything and silently sit and cry" << std::endl;
+            	abort();
+            }
+
+            if(tank_ptr->MoveDirection().IsNull()){
+				std::wcout << "Move Direction is null. Setting to neutral" << std::endl;
+				tank_ptr->MoveDirection()  = CWG::Direction::Neutral;
+			}
+
+            if(tank_ptr->TowerDirection().IsNull()){
+				std::wcout << "Tower Direction is null. Setting to neutral" << std::endl;
+				tank_ptr->TowerDirection()  = CWG::Direction::Neutral;
+			}
+            if(tank_ptr->Fire().IsNull()){
+				std::wcout << "Fire is null. Setting to false" << std::endl;
+				tank_ptr->Fire()  = false;
+			}
+            if(tank_ptr->FireLaser().IsNull()){
+				std::wcout << "Fire Laser is null. Setting to false" << std::endl;
+				tank_ptr->FireLaser()  = false;
+			}
+            if(tank_ptr->Lasers().IsNull()){
+            	std::wcout << "Laser count is null. Setting to 0" << std::endl;
+				tank_ptr->Lasers()  = 0;
+            }
+            if(tank_ptr->InFlames().IsNull()){
+				std::wcout << "InFlames is null. Setting to false" << std::endl;
+				tank_ptr->InFlames()  = false;
+			}
+            if(tank_ptr->HitMine().IsNull()){
+				std::wcout << "HitMine is null. Setting to false" << std::endl;
+				tank_ptr->HitMine()  = false;
+			}
+            if(tank_ptr->HitMissile().IsNull()){
+				std::wcout << "HitMissile is null. Setting to false" << std::endl;
+				tank_ptr->HitMissile()  = false;
+			}
+            if(tank_ptr->HitTank().IsNull()){
+				std::wcout << "HitTank is null. Setting to false" << std::endl;
+				tank_ptr->HitTank()  = false;
+			}
+            if(tank_ptr->HitPoisonGas().IsNull()){
+				std::wcout << "HitPoison is null. Setting to false" << std::endl;
+				tank_ptr->HitPoisonGas()  = false;
+			}
+            if(tank_ptr->HasSmoke().IsNull()){
+				std::wcout << "HasSmoke is null. Setting to false" << std::endl;
+				tank_ptr->HasSmoke()  = false;
+			}
+            if(tank_ptr->TookCoin().IsNull()){
+				std::wcout << "TookCoin is null. Setting to false" << std::endl;
+				tank_ptr->TookCoin()  = false;
+			}
+            if(tank_ptr->SmokeLeft().IsNull()){
+				std::wcout << "SmokeLeft is null. Setting to 0" << std::endl;
+				tank_ptr->SmokeLeft()  = 0;
+			}
+
+            //Nullchecks for joystic
+            if(joystick_ptr->GameId().IsNull()){
+            	std::wcout << "Joystick Game Id is null. Can't be bothered to continue" << std::endl;
+            	abort();
+            }
+
+            if(joystick_ptr->PlayerId().IsNull()){
+				std::wcout << "Joystick Player Id is null. Can't be bothered to continue" << std::endl;
+				abort();
+			}
+            if(joystick_ptr->TankId().IsNull()){
+				std::wcout << "Joystick Tank Id is null. Can't be bothered to continue" << std::endl;
+				abort();
+			}
+            if(joystick_ptr->MoveDirection().IsNull()){
+				std::wcout << "Joystick Move Direction is null. Setting to neutral" << std::endl;
+				joystick_ptr->MoveDirection() = CWG::Direction::Neutral;
+			}
+            if(joystick_ptr->TowerDirection().IsNull()){
+				std::wcout << "Joystick Tower Direction is null. Setting to neutral" << std::endl;
+				joystick_ptr->TowerDirection() = CWG::Direction::Neutral;
+			}
+            if(joystick_ptr->Fire().IsNull()){
+				std::wcout << "Joystick Fire is null. Setting to false" << std::endl;
+				joystick_ptr->Fire() = false;
+			}
+            if(joystick_ptr->FireLaser().IsNull()){
+				std::wcout << "Joystick FireLaser is null. Setting to false" << std::endl;
+				joystick_ptr->FireLaser() = false;
+			}
+            if(joystick_ptr->MineDrop().IsNull()){
+				std::wcout << "Joystick MineDrop is null. Setting to false" << std::endl;
+				joystick_ptr->MineDrop() = false;
+			}
+            if(joystick_ptr->DeploySmoke().IsNull()){
+				std::wcout << "Joystick DeploySmoke is null. Setting to false" << std::endl;
+				joystick_ptr->DeploySmoke() = false;
+			}
+
+        }
+    }
 
  };

@@ -73,6 +73,17 @@ namespace TankEngine
 
 
         /*
+         * Nullchecks everything and sets null fields to default values.*
+         *
+         * this might seem redundant but it keeps us from having to manually nullcheck everything 50000000 times in the evaluate loop
+         * and get flippin nullpointer exceptions in the DOB wich exits the engine and leavs you without a stack to trace.
+         * This makes debuggingn about as enjoyable as slowly driving a rusty angle grinder trough your knee whilst having to listen
+         * to someone who thinks Ayn Rand had valid ideas talking about their political philosphy.
+         */
+        void nullCheckEverything(Consoden::TankGame::GameStatePtr game_ptr);
+
+
+        /*
          * Makes the dude choose a new direction based on random movement. alltough the dude will not return to its previous position
          * if there exists any other possible direction.
          *
