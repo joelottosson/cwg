@@ -88,6 +88,10 @@ private:
     const bool m_soundEnabled;
     qreal m_moveSpeed; //game speed, 1 square per second
     qreal m_towerSpeed;
+
+    //Essentially the number of pixels per ingame unit of distance. Does not take the scaling of the screen into account.
+    const qreal m_pixels_per_square;
+
     qint64 m_lastAnimationUpdate;
     std::vector<Sprite> m_sprites;
     SpriteData m_explosion;
@@ -95,6 +99,7 @@ private:
     SpriteData m_laser_middle;
     SpriteData m_laser_start;
     SpriteData m_dude;
+    SpriteData m_smoke;
     std::vector<ScreenText> m_screenText;
 
     std::vector<PassiveGroup*> m_passive_objects;
@@ -111,10 +116,12 @@ private:
 
     QMediaPlayer m_fireMediaPlayer1;
     QMediaPlayer m_explosionMediaPlayer1;
+    QMediaPlayer m_smokeMediaPlayer;
     QMediaPlayer m_fireMediaPlayer2;
     QMediaPlayer m_explosionMediaPlayer2;
     QMediaPlayer m_dude_dies_MediaPlayer;
 	QMediaPlayer m_laser_fire_MediaPlayer;
+
 
     void SetTextSmall(const QStringList& lines);
     void SetTextPlayer(int playerNumber, const QStringList& lines);

@@ -37,8 +37,9 @@ namespace TankEngine
 
         void ClearSquare(int pos_x, int pos_y);
 
-        //TODO: Crap added by me
         bool DudeSquare(int pos_x, int pos_y);
+
+        bool SmokeGrenadeSquare(int pos_x, int pos_y);
 
         bool IsTankHit(int pos_x, int pos_y);
 

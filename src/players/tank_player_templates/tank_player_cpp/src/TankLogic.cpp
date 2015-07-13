@@ -70,5 +70,5 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 
 
     //Move our joystick.
-    SetJoystick(moveDirection, towerDirection, fire, dropMine, fire_laser);
+    SetJoystick(moveDirection, towerDirection, fire, dropMine, fire_laser,false);
 }

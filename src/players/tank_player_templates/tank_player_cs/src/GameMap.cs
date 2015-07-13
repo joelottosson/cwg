@@ -48,7 +48,15 @@ namespace tank_player_cs
 		public Position EnemyPosition {
 			get {
 				int i = (tankId + 1) % 2;
-				return new Position (gameState.Tanks [i].Obj.PosX.Val, gameState.Tanks [i].Obj.PosY.Val);
+				
+				if(gameState.Tanks [i].Obj.SmokeLeft.Val > 0){
+					Random rnd = new Random();
+					return new Position (rnd.Next(0,gameState.Width.Val - 1), rnd.Next(0,gameState.Height.Val -1));
+
+					
+				}else{
+					return new Position (gameState.Tanks [i].Obj.PosX.Val, gameState.Tanks [i].Obj.PosY.Val);
+				}
 			}
 		}
 
@@ -67,10 +75,24 @@ namespace tank_player_cs
 			}
 		}
 
+		//Cheks if you have some smoke avaliable
+		public bool HasSmoke   {
+			get {
+				
+				return gameState.Tanks [tankId].Obj.HasSmoke.Val;
+			}
+		}
+
 		//Check if square is a wall.
 		public bool IsWall (Position p)
 		{
 			return RawVal (p.X, p.Y) == 'x';
+		}
+
+		//Check if square has a smoke grenade.
+		public bool IsSmokeGrenade (Position p)
+		{
+			return RawVal (p.X, p.Y) == 's';
 		}
 
 		//Check if there is a mine in this square.

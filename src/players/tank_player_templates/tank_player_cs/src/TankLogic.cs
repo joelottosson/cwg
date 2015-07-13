@@ -11,7 +11,7 @@ namespace tank_player_cs
 {
 	delegate void SetJoystick (	Consoden.TankGame.Direction.Enumeration moveDirection,
 	                            Consoden.TankGame.Direction.Enumeration towerDirection,
-	                           	bool fire, bool dropMine, bool fireLaser);
+	                           	bool fire, bool dropMine, bool fireLaser,bool deployLaser);
 
 	//This class implements the tank logic.
 	class TankLogic
@@ -76,8 +76,14 @@ namespace tank_player_cs
 				fireLaser = true;
 			}
 
+			bool deploySmoke = false;
+			if(gm.HasSmoke){
+				deploySmoke = true;
+			}
+
+
 			//Move our joystick.
-			setJoystick (moveDirection, towerDirection, fire, dropMine,fireLaser);
+			setJoystick (moveDirection, towerDirection, fire,dropMine,fireLaser,deploySmoke );
 		}
 	}
 }

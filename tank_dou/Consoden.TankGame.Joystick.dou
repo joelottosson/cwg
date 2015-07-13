@@ -36,6 +36,10 @@
             <type>Boolean</type>
         </member>
         <member>
+        		<name>DeploySmoke</name>
+        		<type>Boolean</type>
+        </member>
+        <member>
             <name>Counter</name>
             <type>Int32</type>
         </member>

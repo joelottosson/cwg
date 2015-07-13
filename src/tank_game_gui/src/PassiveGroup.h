@@ -51,7 +51,7 @@ public:
 	/**
 	 * Initializes the media player. Has no effect if sound_enabled is false.
 	 */
-	void setSoundPlayer(char const* sound_file, bool sound_enabled);
+	void setSoundPlayer(char const* sound_file, bool sound_enabled,int volume);
 
 	void trollUpdate(Board board,GameState game_state, std::multimap<qint64, boost::function<void()>>&  events_queue);
 

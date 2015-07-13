@@ -9,6 +9,7 @@ package cwg;
 
 import java.util.Calendar;
 
+
 //Contains helper methods for reading a GameState and moving around in the game.
 class GameMap {
 	
@@ -21,6 +22,7 @@ class GameMap {
 	private byte coin=(byte)'$';
 	private byte poison=(byte)'p';
 	private byte laser_ammo=(byte)'l';
+	private byte smoke_grenade=(byte)'s';
 	
 	//Constructor, creates a new GameMap from a GameState.
 	public GameMap(int tankId, consoden.tankgame.GameState gameState) {		
@@ -60,8 +62,18 @@ class GameMap {
 	//Enemy tank position.
 	public Position getEnemyPosition() {
 		int id=(tankId+1)%2;
-		return new Position(gameState.tanks().get(id).getObj().posX().getVal(),
+		if(gameState.tanks().get(id).getObj().smokeLeft().getVal() >0){
+			return new Position((int)(Math.random() * gameState.width().getVal() + 1),
+					(int)(Math.random() * gameState.height().getVal() + 1));
+		}else{
+			return new Position(gameState.tanks().get(id).getObj().posX().getVal(),
 				gameState.tanks().get(id).getObj().posY().getVal());
+		}
+	}
+	
+	//Do we have a smoke grenade ??
+	public boolean hasSmoke(){
+		return gameState.tanks().get(tankId).getObj().hasSmoke().getVal();
 	}
 	
 	//Returns the position of the penguin.
@@ -78,6 +90,11 @@ class GameMap {
 	//Check if there is a mine in this square.
 	public boolean isMine(final Position pos) {
 		return gameState.board().getVal()[toIndex(pos)]==mine;
+	}
+	
+	//Check if there is a mine in this square.
+	public boolean isSmokeGrenade(final Position pos) {
+		return gameState.board().getVal()[toIndex(pos)]==smoke_grenade;
 	}
 	
 	//Check if there is a coin in this square.

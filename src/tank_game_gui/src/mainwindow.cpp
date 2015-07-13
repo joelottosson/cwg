@@ -116,6 +116,9 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
         m_world.AddPlayer(player, entityProxy.GetInstanceId().GetRawValue());
         return;
     }
+    Consoden::TankGame::GameStatePtr game=boost::dynamic_pointer_cast<Consoden::TankGame::GameState>(entityProxy.GetEntity());
+
+
 
     Consoden::TankGame::MatchPtr match=boost::dynamic_pointer_cast<Consoden::TankGame::Match>(entityProxy.GetEntity());
     if (match)
@@ -126,16 +129,18 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
         auto player2=m_world.GetPlayerTwo();
         if (player1 && player2)
         {
+
             m_tankInfoWidget[0]->SetName(player1->name);
             m_tankInfoWidget[0]->Update(m_world.GetJoystickOne());
             m_tankInfoWidget[1]->SetName(player2->name);
             m_tankInfoWidget[1]->Update(m_world.GetJoystickTwo());
+
             UpdatePoints();
         }
         return;
     }
 
-    Consoden::TankGame::GameStatePtr game=boost::dynamic_pointer_cast<Consoden::TankGame::GameState>(entityProxy.GetEntity());
+
     if (game)
     {
         if (m_world.GameId()!=0 && !m_world.MatchFinished())
@@ -169,22 +174,24 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     {
         m_world.Update(game);
         UpdateStatusGameTime();
-        //TODO: REMOVE_ME
-
 
         m_tankInfoWidget[0]->SetLaserAmmo(game->Tanks()[0]->Lasers());
         m_tankInfoWidget[1]->SetLaserAmmo(game->Tanks()[1]->Lasers());
+        m_tankInfoWidget[0]->updateSmoke(game->Tanks()[0]->HasSmoke(),game->Tanks()[0]->SmokeLeft());
+		m_tankInfoWidget[1]->updateSmoke(game->Tanks()[1]->HasSmoke(),game->Tanks()[1]->SmokeLeft());
 
 
         return;
     }
 
     Consoden::TankGame::JoystickConstPtr joystick=boost::dynamic_pointer_cast<Consoden::TankGame::Joystick>(entityProxy.GetEntity());
-    if (joystick)
+    if (joystick  )
     {
+
         m_world.Update(joystick);
         m_tankInfoWidget[0]->Update(m_world.GetJoystickOne());
         m_tankInfoWidget[1]->Update(m_world.GetJoystickTwo());
+
         return;
     }
 

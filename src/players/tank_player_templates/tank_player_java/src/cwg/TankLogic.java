@@ -15,7 +15,7 @@ class TankLogic {
 	public interface JoystickHandler {
 		public void setJoystick(consoden.tankgame.Direction moveDirection,
 								consoden.tankgame.Direction towerDirection,
-								boolean fire, boolean dropMine,boolean fireLaser);
+								boolean fire, boolean dropMine,boolean fireLaser, boolean deploySmoke);
 	}
 		
 	private int tankId;
@@ -80,8 +80,14 @@ class TankLogic {
 	    	fireLaser = true;
 	    }
 	    
+	    //if we can we will deploy the smokes!!
+	    boolean deploySmoke = false;
+	    if(gm.hasSmoke()){ 
+	    	deploySmoke = true;
+	    }
+	    
 		//Move our joystick.
-		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine,fireLaser);
+		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine,fireLaser,deploySmoke);
 	}
 	
 	

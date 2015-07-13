@@ -5,14 +5,13 @@
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************/
-#include "../../tank_player_dumb/src/Player.h"
-
 #include <boost/bind.hpp>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Consoden/TankGame/GameState.h>
 #include <Consoden/TankGame/Player.h>
 #include <Consoden/TankGame/Joystick.h>
+#include "Player.h"
 #include <iostream>
 
 Player::Player(const std::wstring &playerName, boost::asio::io_service& ioService)
@@ -63,7 +62,7 @@ void Player::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
                 joystick->TankId()=m_currentTankId;
                 joystick->Counter()=0;
                 m_connection.SetAll(joystick, m_myJoystickId, m_myHandlerId);
-                m_logic.reset(new TankLogic(m_currentTankId, boost::bind(&Player::SetJoystick, this, _1, _2, _3, _4)));
+                m_logic.reset(new TankLogic(m_currentTankId, boost::bind(&Player::SetJoystick, this, _1, _2, _3, _4,_5,_6)));
                 break;
             }
         }
@@ -131,8 +130,11 @@ void Player::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, 
     }
 }
 
-void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine)
-{
+//void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine){
+	//SetJoystick(moveDirection, towerDirection,  fire,  dropMine,false);
+//}
+
+void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine,bool laser,bool deploySmoke){
     static int counter=0;
 
     if (m_myJoystickId.GetRawValue()==-1)
@@ -148,6 +150,8 @@ void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirectio
     joystick->MoveDirection()=moveDirection;
     joystick->TowerDirection()=towerDirection;
     joystick->Fire()=fire;
+    joystick->FireLaser() = laser;
     joystick->MineDrop()=dropMine;
+    joystick->DeploySmoke() = deploySmoke;
     m_connection.SetAll(joystick, m_myJoystickId, m_myHandlerId);
 }

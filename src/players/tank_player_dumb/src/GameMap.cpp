@@ -6,7 +6,7 @@
 *
 *******************************************************************************/
 
-#include "../../tank_player_dumb/src/GameMap.h"
+#include "GameMap.h"
 
 #include <iostream>
 #include <utility>
@@ -48,6 +48,98 @@ GameMap::GameMap(int tankId, const Consoden::TankGame::GameStatePtr& gamePtr)
     }
 }
 
+/**
+  * Location of the players tank.
+  */
+ std::pair<int, int> GameMap::OwnPosition() const {
+	 return m_ownPos;
+ }
+
+ /**
+  * Location of the enemys tank.
+  */
+ std::pair<int, int> GameMap::EnemyPosition() const {
+	   Safir::Dob::Typesystem::ArrayIndex tankIndex;
+	   for (tankIndex = 0;
+	         tankIndex < m_gamePtr->TanksArraySize();
+	         tankIndex++) {
+
+	        if (m_gamePtr->Tanks()[tankIndex].IsNull()) {
+	            // empty tank slot, found last tank
+	            break;
+	        }
+
+	        Consoden::TankGame::TankPtr tankPtr =
+	                boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_gamePtr->Tanks()[tankIndex].GetPtr());
+
+	        //std::pair<int, int> pos = std::make_pair(tankPtr->PosX().GetVal(), tankPtr->PosY().GetVal());
+
+	        if (tankPtr->TankId().GetVal() == m_TankId) {
+	        	continue;
+	        } else {
+	            // The enemy
+	            if(!tankPtr->SmokeLeft().IsNull() && tankPtr->SmokeLeft().GetVal() > 0){
+	            	return  std::make_pair(rand()%m_sizeX, rand()%m_sizeY);
+	            }else{
+	            	return  std::make_pair(tankPtr->PosX().GetVal(), tankPtr->PosY().GetVal());
+	            }
+	        }
+	    }
+	   return std::make_pair(-1, -1);
+ }
+
+
+
+int GameMap::LaserAmmoCount() const{
+	Safir::Dob::Typesystem::ArrayIndex tankIndex;
+    for (tankIndex = 0;
+         tankIndex < m_gamePtr->TanksArraySize();
+         tankIndex++) {
+
+        if (m_gamePtr->Tanks()[tankIndex].IsNull()) {
+            // empty tank slot, found last tank
+            break;
+        }
+
+        Consoden::TankGame::TankPtr tankPtr =
+                boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_gamePtr->Tanks()[tankIndex].GetPtr());
+
+        if (tankPtr->TankId().GetVal() == m_TankId) {
+            // This is our tank!
+            return tankPtr->Lasers().GetVal();
+
+        } else {
+            continue;
+        }
+    }
+    return -1;
+}
+
+bool GameMap::HasSmoke() const{
+	Safir::Dob::Typesystem::ArrayIndex tankIndex;
+    for (tankIndex = 0;
+         tankIndex < m_gamePtr->TanksArraySize();
+         tankIndex++) {
+
+        if (m_gamePtr->Tanks()[tankIndex].IsNull()) {
+            // empty tank slot, found last tank
+            break;
+        }
+
+        Consoden::TankGame::TankPtr tankPtr =
+                boost::dynamic_pointer_cast<Consoden::TankGame::Tank>(m_gamePtr->Tanks()[tankIndex].GetPtr());
+
+        if (tankPtr->TankId().GetVal() == m_TankId) {
+            // This is our tank!
+            return tankPtr->HasSmoke().GetVal();
+
+        } else {
+            continue;
+        }
+    }
+    return false;
+}
+
 bool GameMap::IsWall(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='x';
@@ -58,14 +150,29 @@ bool GameMap::IsMine(const std::pair<int, int>& pos) const
     return m_gamePtr->Board().GetVal()[Index(pos)]=='o';
 }
 
+bool GameMap::IsLaserAmmo(const std::pair<int, int>& pos) const
+{
+    return m_gamePtr->Board().GetVal()[Index(pos)]=='l';
+}
+
 bool GameMap::IsCoin(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='$';
 }
 
+bool GameMap::IsSmokeGrenade(const std::pair<int, int>& pos) const{
+	return m_gamePtr->Board().GetVal()[Index(pos)]=='s';
+}
+
 bool GameMap::IsPoisonGas(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='p';
+	//return true;
+}
+
+bool GameMap::IsPenguin(const std::pair<int, int>& pos) const
+{
+   return pos.first == m_gamePtr->TheDude().GetPtr()->PosX() && pos.second == m_gamePtr->TheDude().GetPtr()->PosY();
 }
 
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const
@@ -122,7 +229,7 @@ std::pair<int, int> GameMap::Move(const std::pair<int, int>& pos,
 int GameMap::TimeToNextMove() const
 {
     // Get current time from the clock, using microseconds resolution
-    const boost::posix_time::ptime now = 
+    const boost::posix_time::ptime now =
         boost::posix_time::microsec_clock::local_time();
 
     // Get the time offset in current day
@@ -132,7 +239,7 @@ int GameMap::TimeToNextMove() const
 
     // We ignore midnight to keep it simple
     return m_gamePtr->NextMove().GetVal() - total_milliseconds;
-}    
+}
 
 void GameMap::PrintMap() const
 {

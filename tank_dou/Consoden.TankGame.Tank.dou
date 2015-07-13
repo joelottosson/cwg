@@ -67,6 +67,14 @@
             <name>TookCoin</name>
             <type>Boolean</type>
         </member>
+        <member>
+            <name>HasSmoke</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <name>SmokeLeft</name>
+            <type>Int32</type>
+        </member>
     </members>
 </class>
 
