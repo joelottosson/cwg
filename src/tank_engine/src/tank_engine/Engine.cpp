@@ -400,8 +400,26 @@ namespace TankEngine
 
         nullCheckEverything(game_ptr);
 
+
+
         gm.MoveMissiles();
+        gm.MoveRedeemers();
         bool tank_tank_collission = false;
+
+        for (Safir::Dob::Typesystem::ArrayIndex redeemer_index = 0;
+             (redeemer_index < game_ptr->RedeemersArraySize());
+             redeemer_index++) {
+
+        	if(!game_ptr->Redeemers()[redeemer_index].IsNull()){
+        		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 0){
+        			detonateRedeemer(game_ptr, game_ptr->Redeemers()[redeemer_index].GetPtr(), &gm, 1);
+        			game_ptr->Redeemers()[redeemer_index].GetPtr()->InFlames() = true;
+        		}else{
+        			game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() -= 1;
+        		}
+        	}
+
+        }
 
 
 
@@ -673,46 +691,12 @@ namespace TankEngine
             }
 
 
+            //crazy cool missile fire
             if (joystick_ptr->Fire() && !joystick_ptr->FireLaser()) {
-                int pos_head_x = -1;
-                int pos_head_y = -1;
-                int pos_tail_x = -1;
-                int pos_tail_y = -1;
 
-                switch (joystick_ptr->TowerDirection()) {
-                    case Consoden::TankGame::Direction::Left:
-                        pos_head_x = tank_ptr->PosX() - 2;
-                        pos_head_y = tank_ptr->PosY();
-                        pos_tail_x = tank_ptr->PosX() - 1;
-                        pos_tail_y = tank_ptr->PosY();
-                        break;
+                bool fired = gm.FireRedeemer(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(),3, tank_ptr->TankId().GetVal());
+            	//bool fired = gm.FireMissile(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(), tank_ptr->TankId().GetVal());
 
-                    case Consoden::TankGame::Direction::Right:
-                        pos_head_x = tank_ptr->PosX() + 2;
-                        pos_head_y = tank_ptr->PosY();
-                        pos_tail_x = tank_ptr->PosX() + 1;
-                        pos_tail_y = tank_ptr->PosY();
-                        break;
-
-                    case Consoden::TankGame::Direction::Up:
-                        pos_head_x = tank_ptr->PosX();
-                        pos_head_y = tank_ptr->PosY() - 2;
-                        pos_tail_x = tank_ptr->PosX();
-                        pos_tail_y = tank_ptr->PosY() - 1;
-                        break;
-
-                    case Consoden::TankGame::Direction::Down:
-                        pos_head_x = tank_ptr->PosX();
-                        pos_head_y = tank_ptr->PosY() + 2;
-                        pos_tail_x = tank_ptr->PosX();
-                        pos_tail_y = tank_ptr->PosY() + 1;
-                        break;
-
-                    default:
-                        break;
-                }
-
-                bool fired = gm.FireMissile(pos_head_x, pos_head_y, pos_tail_x, pos_tail_y, joystick_ptr->TowerDirection(), tank_ptr->TankId().GetVal());                
                 tank_ptr->Fire() = fired; // Only indicate fire if firing was successful
             } else {
                 tank_ptr->Fire() = false;
@@ -1128,6 +1112,43 @@ namespace TankEngine
     		return pos;
     	}
     }
+
+    void Engine::detonateRedeemer(Consoden::TankGame::GameStatePtr game_ptr, Consoden::TankGame::RedeemerPtr redeemer_ptr, GameMap* gm, int radius){
+    	int center_x = redeemer_ptr->PosX();
+    	int center_y = redeemer_ptr->PosY();
+    	CWG::TankPtr tank_0= game_ptr->Tanks()[0].GetPtr();
+    	CWG::TankPtr tank_1= game_ptr->Tanks()[1].GetPtr();
+    	int tank_0_x = tank_0->PosX();
+    	int tank_0_y = tank_0->PosY();
+    	int tank_1_x = tank_1->PosX();
+    	int tank_1_y = tank_1->PosY();
+
+    	for(int y_pos = center_y - radius; y_pos <= center_y + radius; y_pos++){
+        	for(int x_pos = center_x - radius; x_pos <= center_x + radius; x_pos++){
+
+        		if(x_pos == tank_0_x && y_pos == tank_0_y && !tank_0->InFlames()){
+        			tank_0->InFlames() = true;
+        			if(tank_0->TankId() != redeemer_ptr->TankId()){
+        				AddPoints(m_config.m_hit_points,redeemer_ptr->TankId(), game_ptr);
+        			}
+        		}
+
+        		if(x_pos == tank_1_x && y_pos == tank_1_y && !tank_1->InFlames()){
+					tank_1->InFlames() = true;
+					if(tank_1->TankId() != redeemer_ptr->TankId()){
+						AddPoints(m_config.m_hit_points,redeemer_ptr->TankId(), game_ptr);
+					}
+				}
+
+        		if(gm->WallSquare(x_pos,y_pos) || gm->MineSquare(x_pos,y_pos) ){
+        			gm->ClearSquare(x_pos,y_pos);
+
+        		}
+        	}
+    	}
+
+    }
+
 
     std::pair<int,int> Engine::directionToVector(CWG::Direction::Enumeration dir){
     	switch(dir){

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Consoden.TankGame.Redeemer</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <name>RedeemerId</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>The tank that shot the missile</summary>
+            <name>TankId</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>PosX</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>PosY</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>Direction</name>
+            <type>Consoden.TankGame.Direction</type>
+        </member>
+        <member>
+            <name>InFlames</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+        		<name>TimeToExplosion</name>
+        		<type>Int32</type>
+        </member>
+    </members>
+</class>
+

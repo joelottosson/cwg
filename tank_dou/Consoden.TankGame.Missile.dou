@@ -17,7 +17,7 @@
             <type>Int32</type>
         </member>
         <member>
-            <name>HeadPosY</name>
+            <name>HeadPosY</name>    
             <type>Int32</type>
         </member>
         <member>

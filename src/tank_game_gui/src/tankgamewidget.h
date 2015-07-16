@@ -41,6 +41,7 @@ private:
     QPixmap m_dudes;
     QPixmap m_dead_dude;
     QPixmap m_poison;
+    QPixmap m_redeemer;
     SpriteData m_dude_anim;
 
 
@@ -65,6 +66,7 @@ private:
     int CalculateWrappingCoordinate(int val, int maxVal, int boardSize, int padd);
 
     void drawWithTranslationAndRotation(QPainter& painter, QPixmap image, QPointF position, qreal rotation);
+    void drawWithWrapping(QPainter& painter, QPixmap image, QPointF position, qreal rotation);
 
 	/*
 	 *  const int xoffset=(m_const.squarePixelSize-m_tankTower.width())/2;
@@ -88,6 +90,7 @@ private:
     void PaintMines(QPainter& painter);
     void PaintTank(const Tank& tank, bool blue, QPainter& painter);
     void PaintMissile(const Missile& missile, QPainter& painter);
+    void PaintRedeemer(const Redeemer& redeemer, QPainter& painter);
     void PaintSprite(const Sprite& sprite, QPainter& painter);
     //void PaintSpriteDude(const Sprite& sprite, QPainter& painter);
     void PaintText(const ScreenText& txt, QPainter& painter);

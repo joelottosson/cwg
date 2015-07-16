@@ -49,9 +49,13 @@ namespace TankEngine
 
         void MoveMissiles();
 
+        void MoveRedeemers();
+
         bool MissilesLeft();
 
-        bool FireMissile(int pos_head_x, int pos_head_y, int pos_tail_x, int pos_tail_y, Consoden::TankGame::Direction::Enumeration direction, int tank_id);
+        bool FireRedeemer(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration direction, int time_to_detonation, int tank_id);
+
+        bool FireMissile(int pos_x,int pos_y, Consoden::TankGame::Direction::Enumeration direction, int tank_id);
 
         Consoden::TankGame::Direction::Enumeration InvertDirection(Consoden::TankGame::Direction::Enumeration d);
         

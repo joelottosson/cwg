@@ -116,6 +116,8 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/smoke_grenade.png", 1, 72, 72,1000,0,0,0.75, &Board::Smoke));
 
+	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.jpg", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
+
 
 }
 
@@ -572,7 +574,6 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
 
-    //TODO fix so that no copying is required
     for(auto a : m_passive_objects){
     	a->updateGroupOnChange(boardParser ,m_matchState.gameState, m_eventQueue);
     }
@@ -606,31 +607,6 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
 
     }
-
-    //Remove missiles that are removed and be a tautology
-    for (MissileMap::const_iterator it=m_matchState.gameState.missiles.begin(); it!=m_matchState.gameState.missiles.end(); )
-    {
-        bool remove=true;
-        for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
-        {
-            if (!game->Missiles()[i].IsNull() && game->Missiles()[i]->MissileId().GetVal()==it->first)
-            {
-                remove=false;
-                break;
-            }
-        }
-
-        if (remove)
-        {
-            m_matchState.gameState.missiles.erase(it++);
-        }
-        else
-        {
-            ++it;
-        }
-    }
-
-
 
     //We need to do a special check is the tanks are colliding with eachother.
     //If we don't do this the collision s will be completely wrong since the second tank may
@@ -670,93 +646,10 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 		}
     }
 
-		//creates and updates missiles
-		for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
-		{
-			if (game->Missiles()[i].IsNull())
-			{
-				continue;
-			}
 
 
-
-
-			const Consoden::TankGame::MissileConstPtr& missile=game->Missiles()[i].GetPtr();
-
-			if(m_matchState.gameState.missiles.find(missile->MissileId().GetVal()) == m_matchState.gameState.missiles.end()){
-				if(m_matchState.gameState.tanks[0].explosion != NotInFlames && m_matchState.gameState.tanks[1].explosion != NotInFlames){
-					continue;
-				}else{
-					auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
-					Missile& m=inserted.first->second;
-					m.tankId=missile->TankId();
-					m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-					m.paintPosition=m.position;
-					m.explosion=NotInFlames;
-					m.visible=false;
-					m.paintFire=true;
-
-
-					m.moveDirection=ToDirection(missile->Direction());
-
-					if (missile->InFlames().GetVal()){
-						m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
-						m.visible = false;
-
-					}else if (m.explosion!=NotInFlames){
-						m.explosion=Destroyed;
-					}else{
-						m.moveDirection=ToDirection(missile->Direction());
-					}
-
-					//continue;
-				}
-			}else{
-
-				auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
-				Missile& m=inserted.first->second;
-				//update of existing missile
-				m.paintPosition=m.position;
-				m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-				m.visible=true;
-
-
-
-
-
-				if (missile->InFlames().GetVal()){
-					m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
-
-				}else if (m.explosion!=NotInFlames){
-					m.explosion=Destroyed;
-				}else{
-					m.moveDirection=ToDirection(missile->Direction());
-				}
-
-
-	/*			if (inserted.second && m_matchState.gameState.tanks[0].explosion == NotInFlames && m_matchState.gameState.tanks[1].explosion == NotInFlames)
-				{
-					//new missile
-					m.tankId=missile->TankId();
-					m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-					m.paintPosition=m.position;
-					m.explosion=NotInFlames;
-					m.visible=false;
-					m.paintFire=true;
-				}
-				else
-				{
-					//update of existing missile
-					m.paintPosition=m.position;
-					m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
-					m.visible=true;
-				}*/
-			}
-
-
-		}
-
-
+    UpdateMissiles(game);
+    UpdateRedeemers(game);
 
 
     //Update if game is finished and if we have a winner
@@ -923,37 +816,12 @@ void GameWorld::Update()
     for (auto& vt : m_matchState.gameState.missiles)
     {
         Missile& missile=vt.second;
+        //std::wcout << "Trying to draw a missile " << std::endl;
         UpdatePositionNoOvershoot(timeToNextUpdate, 2*movement, missile,false); //missiles have double speed
         Tank tank=m_matchState.gameState.tanks[missile.tankId];
         //std::wcout << "And the missile direction is " << directionToString(missile.moveDirection) << std::endl;
         if (missile.paintFire && missile.moveDirection != None)
         {
-            QPointF firePos=missile.position;
-            QPointF animationMoveSpeed(0,0);
-            switch(missile.moveDirection)
-            {
-            case LeftHeading:
-                animationMoveSpeed.setX(-1*m_moveSpeed);
-                firePos.setX(firePos.x()+1);
-                break;
-            case RightHeading:
-                animationMoveSpeed.setX(m_moveSpeed);
-                firePos.setX(firePos.x()-1);
-                break;
-            case UpHeading:
-                animationMoveSpeed.setY(-1*m_moveSpeed);
-                firePos.setY(firePos.y()+1);
-                break;
-            case DownHeading:
-                animationMoveSpeed.setY(m_moveSpeed);
-                firePos.setY(firePos.y()-1);
-                break;
-            case None:
-            	//std::wcout << "LOL FAIL " << std::endl;
-                break;
-            }
-
-
             QPointF flame_pos  = tank.position+directionToVector(tank.towerDirection);
             bool into_wall = false;
             for(auto p : m_matchState.gameState.walls){
@@ -964,7 +832,8 @@ void GameWorld::Update()
             }
 
             if(!into_wall){
-            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(missile.moveDirection)*m_moveSpeed*2, DirectionToAngle(missile.moveDirection)+270, now +timeToNextUpdate, 1));
+            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(missile.moveDirection)*m_moveSpeed*2,
+            			DirectionToAngle(missile.moveDirection)+270, now +timeToNextUpdate, 1));
             }
             missile.paintFire=false;
 
@@ -1028,10 +897,90 @@ void GameWorld::Update()
 
 
 
+    for (auto& vt : m_matchState.gameState.redeemers)
+    {
+
+        Redeemer& redeemer=vt.second;
+        UpdatePosition(timeToNextUpdate, 1*movement, redeemer,false); //redeemers have double speed
+
+        Tank tank=m_matchState.gameState.tanks[redeemer.tankId];
+        //std::wcout << "And the redeemer direction is " << directionToString(redeemer.moveDirection) << std::endl;
+        if (redeemer.paintFire && redeemer.moveDirection != None)
+        {
+            QPointF flame_pos  = tank.position+directionToVector(tank.towerDirection);
+            bool into_wall = false;
+            for(auto p : m_matchState.gameState.walls){
+            	if(p == flame_pos){
+            		into_wall = true;
+            		break;
+            	}
+            }
+
+            if(!into_wall){
+            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(redeemer.moveDirection)*m_moveSpeed*2,
+            			DirectionToAngle(redeemer.moveDirection)+270, now +timeToNextUpdate, 1));
+            }
+            redeemer.paintFire=false;
+
+            if (m_soundEnabled)
+            {
+                qint64 redeemerPlayerId=m_matchState.gameState.tanks[redeemer.tankId].playerId;
+                m_eventQueue.insert(WorldEvents::value_type(timeToNextUpdate+now, [=]
+                {
+                    auto p1=GetPlayerOne();
+                    if (!p1)
+                    {
+                        return;
+                    }
+                    else if (p1->id==redeemerPlayerId)
+                    {
+                        m_fireMediaPlayer1.stop();
+                        m_fireMediaPlayer1.play();
+                    }
+                    else
+                    {
+                        m_fireMediaPlayer2.stop();
+                        m_fireMediaPlayer2.play();
+                    }
+                }));
+            }
+        }
 
 
 
+        if (redeemer.explosion==SetInFlames)
+        {
+            //qreal distanceToExplosion=QPointF(redeemer.position.x()-redeemer.paintPosition.x(), redeemer.position.y()-redeemer.paintPosition.y()).manhattanLength();
+            //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
+            m_sprites.push_back(Sprite(m_explosion, redeemer.position, nextUpdate, 1));
+            redeemer.explosion=Burning;
 
+            if (m_soundEnabled)
+            {
+                qint64 redeemerPlayerId=m_matchState.gameState.tanks[redeemer.tankId].playerId;
+                m_eventQueue.insert(WorldEvents::value_type(nextUpdate, [=]
+                {
+                    auto p1=GetPlayerOne();
+                    if (!p1)
+                    {
+                        return;
+                    }
+                    else if (p1->id==redeemerPlayerId)
+                    {
+                        m_explosionMediaPlayer1.stop();
+                        m_explosionMediaPlayer1.play();
+                    }
+                    else
+                    {
+                        m_explosionMediaPlayer2.stop();
+                        m_explosionMediaPlayer2.play();
+                    }
+                }));
+            }
+        }
+
+
+    }
 
     for(auto a : m_passive_objects){
     	a->updateSprites();
@@ -1314,54 +1263,185 @@ int GameWorld::wrap(int pos, int size){
 	}
 }
 
-/*void GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
+inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &game){
+    //Remove missiles that are removed and be a tautology
+    for (MissileMap::const_iterator it=m_matchState.gameState.missiles.begin(); it!=m_matchState.gameState.missiles.end(); )
+    {
+        bool remove=true;
+        for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
+        {
+            if (!game->Missiles()[i].IsNull() && game->Missiles()[i]->MissileId().GetVal()==it->first)
+            {
+                remove=false;
+                break;
+            }
+        }
 
-	qreal offs = 0.25;
-	//QPointF diff = own.position - enemy.position;
+        if (remove)
+        {
+            m_matchState.gameState.missiles.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 
+	//creates and updates missiles
+	for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
+	{
 
-
-	//QPoint diffint = (QPoint)diff;
-	//std::wcout << "testing "<< diff.x() << "," << diff.y() << std::endl;
-	std::wcout << " Own direction = " << directionToString(own.moveDirection) << std::endl;
-	std::wcout << " enemy direction = " << directionToString(enemy.moveDirection)<< std::endl << std::endl;
-	if(own.moveDirection == None){
-		return;
-	}
-
-	if(enemy.moveDirection == None){
-
-		switch (own.moveDirection)
+		if (game->Missiles()[i].IsNull())
 		{
-		case LeftHeading:
-			own.position.setX(own.position.x()+offs);
-			break;
-		case RightHeading:
-			own.position.setX(own.position.x()-offs);
-			break;
-		case UpHeading:
-			own.position.setY(own.position.y()+offs);
-			break;
-		case DownHeading:
-			own.position.setY(own.position.y()-offs);
-			break;
-		case None:
-			break;
+			continue;
 		}
 
-		return;
-	}else{
-		//We need to do stuff difrently if tanks are colliding diagonaly.
-		if((directionToVector(own.moveDirection).y() != 0 && directionToVector(enemy.moveDirection).y() == 0 ) ||
-				(directionToVector(own.moveDirection).x() != 0 && directionToVector(enemy.moveDirection).x() == 0 )){
-			own.position = (own.position - directionToVector(own.moveDirection)*(offs));
+		const Consoden::TankGame::MissileConstPtr& missile=game->Missiles()[i].GetPtr();
+
+
+
+
+		if(m_matchState.gameState.missiles.find(missile->MissileId().GetVal()) == m_matchState.gameState.missiles.end()){
+			if(m_matchState.gameState.tanks[0].explosion != NotInFlames && m_matchState.gameState.tanks[1].explosion != NotInFlames){
+				continue;
+			}else{
+				auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
+				Missile& m=inserted.first->second;
+				m.tankId=missile->TankId();
+				m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+				m.paintPosition=m.position;
+				m.explosion=NotInFlames;
+				m.visible=false;
+				m.paintFire=true;
+
+
+				m.moveDirection=ToDirection(missile->Direction());
+
+				if (missile->InFlames().GetVal()){
+					m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+
+				}else if (m.explosion!=NotInFlames){
+					m.explosion=Destroyed;
+				}else{
+					m.moveDirection=ToDirection(missile->Direction());
+				}
+
+				//continue;
+			}
 		}else{
-			own.position = (own.position + directionToVector(own.moveDirection)*(offs));
+			auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
+			Missile&  m = inserted.first->second;
+			//update of existing missile
+			m.paintPosition=m.position;
+			m.position=QPointF(missile->HeadPosX().GetVal(), missile->HeadPosY().GetVal());
+			m.visible=true;
+
+			if (missile->InFlames().GetVal()){
+				m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
+
+			}else if (m.explosion!=NotInFlames){
+				m.explosion=Destroyed;
+			}else{
+				m.moveDirection=ToDirection(missile->Direction());
+			}
 
 		}
+
+	}
+}
+
+inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &game){
+    //Remove redeemers that are removed and be a tautology
+
+    for (RedeemerMap::const_iterator it=m_matchState.gameState.redeemers.begin(); it!=m_matchState.gameState.redeemers.end(); )
+    {
+        bool remove=true;
+        for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->RedeemersArraySize(); i++)
+        {
+
+            if (!game->Redeemers()[i].IsNull() && game->Redeemers()[i]->RedeemerId().GetVal()==it->first)
+            {
+                remove=false;
+                break;
+            }
+        }
+
+        if (remove)
+        {
+            m_matchState.gameState.redeemers.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+	//creates and updates redeemers
+	for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->RedeemersArraySize(); i++)
+	{
+		if (game->Redeemers()[i].IsNull())
+		{
+			continue;
+		}
+
+		const Consoden::TankGame::RedeemerConstPtr& redeemer=game->Redeemers()[i].GetPtr();
+		if(m_matchState.gameState.redeemers.find(redeemer->RedeemerId().GetVal()) == m_matchState.gameState.redeemers.end()){
+			if(m_matchState.gameState.tanks[0].explosion != NotInFlames && m_matchState.gameState.tanks[1].explosion != NotInFlames){
+				continue;
+			}else{
+
+
+				auto inserted=m_matchState.gameState.redeemers.insert(std::make_pair(redeemer->RedeemerId().GetVal(), Redeemer()));
+				Redeemer& r = inserted.first->second;
+				r.tankId=redeemer->TankId();
+				r.position=QPointF(redeemer->PosX().GetVal(), redeemer->PosY().GetVal());
+				r.paintPosition=r.position;
+				r.explosion=NotInFlames;
+				r.visible=false;
+				r.paintFire=true;
+				r.time_to_Explosion = redeemer->TimeToExplosion().GetVal();
+
+				r.moveDirection=ToDirection(redeemer->Direction());
+				if (redeemer->InFlames().GetVal()){
+					r.explosion = (r.explosion == NotInFlames) ? SetInFlames : Burning;
+					r.visible = false;
+
+				}else if (r.explosion!=NotInFlames){
+					r.explosion=Destroyed;
+				}else{
+					r.moveDirection=ToDirection(redeemer->Direction());
+				}
+
+
+
+				//continue;
+			}
+		}else{
+			auto inserted=m_matchState.gameState.redeemers.insert(std::make_pair(redeemer->RedeemerId().GetVal(), Redeemer()));
+			Redeemer& r = inserted.first->second;
+			r.tankId=redeemer->TankId();
+			r.paintPosition=r.position;
+			r.position=QPointF(redeemer->PosX().GetVal(), redeemer->PosY().GetVal());
+
+			r.visible=true;
+			r.time_to_Explosion = redeemer->TimeToExplosion().GetVal();
+			if (redeemer->InFlames().GetVal()){
+				r.explosion = (r.explosion == NotInFlames) ? SetInFlames : Burning;
+				r.visible = false;
+
+			}else if (r.explosion!=NotInFlames){
+				r.explosion=Destroyed;
+			}else{
+				r.moveDirection=ToDirection(redeemer->Direction());
+			}
+
+		}
+
+
 	}
 
-}*/
+
+}
 
 QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
 

@@ -64,6 +64,11 @@
             <type>Consoden.TankGame.Missile</type>
         </member>
         <member>
+            <name>Redeemers</name>
+            <arraySize>25</arraySize>
+            <type>Consoden.TankGame.Redeemer</type>
+        </member>
+        <member>
             <summary>mine='o', obstacle='x', flag='f', free='.'</summary>
             <name>Board</name>
             <type>Binary</type>

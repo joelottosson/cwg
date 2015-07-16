@@ -111,6 +111,26 @@ struct Missile
 };
 typedef std::map<int, Missile> MissileMap;
 
+
+//************************************
+// Redeemer
+//************************************
+struct Redeemer
+{
+
+	//bool accepts_updates = true;
+    int tankId;
+    QPointF position; //front position, might be outside board bounds
+    Direction moveDirection;
+    bool visible;
+    ExplosionStatus explosion;
+    int time_to_Explosion;
+    bool paintFire;
+    bool detonate;
+    QPointF paintPosition;
+};
+typedef std::map<int, Redeemer> RedeemerMap;
+
 //************************************
 // Player
 //************************************
@@ -167,6 +187,7 @@ struct GameState
     PointVec laser_ammo{};
     DudeMap dudes{};
     MissileMap missiles{};
+    RedeemerMap redeemers{};
     TankVec tanks{};
     JoystickMap joystics{};
 
