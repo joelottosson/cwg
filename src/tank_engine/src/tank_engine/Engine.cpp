@@ -231,12 +231,13 @@ namespace TankEngine
 
                     GameMap gm(game_ptr);
                     gm.MoveMissiles();
+                    gm.MoveRedeemers();
 
                     game_ptr->Counter() = game_ptr->Counter() + 1;
 
                     m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
 
-                    if (gm.MissilesLeft()) {
+                    if (gm.MissilesLeft() || gm.RedeemersLeft()) {
                         ScheduleMissileCleanup();
                     } else {
                         // We are done
@@ -411,7 +412,7 @@ namespace TankEngine
              redeemer_index++) {
 
         	if(!game_ptr->Redeemers()[redeemer_index].IsNull()){
-        		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 0){
+        		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 1){//Neds to be done when timer is one to mitigate for delayed updates
         			detonateRedeemer(game_ptr, game_ptr->Redeemers()[redeemer_index].GetPtr(), &gm, 1);
         			game_ptr->Redeemers()[redeemer_index].GetPtr()->InFlames() = true;
         		}else{
@@ -819,7 +820,7 @@ namespace TankEngine
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::Draw);
             SetWinner(game_ptr);
             StopGame();
-            if (gm.MissilesLeft()) {
+            if (gm.MissilesLeft() || gm.RedeemersLeft()) {
                 mMissileCleanupRunning = true;
                 ScheduleMissileCleanup();
             }
@@ -835,7 +836,7 @@ namespace TankEngine
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::PlayerTwo);
             SetWinner(game_ptr);
             StopGame();
-            if (gm.MissilesLeft()) {
+            if (gm.MissilesLeft()|| gm.RedeemersLeft()) {
                 mMissileCleanupRunning = true;
                 ScheduleMissileCleanup();
             }
@@ -851,7 +852,7 @@ namespace TankEngine
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::PlayerOne);
             SetWinner(game_ptr);
             StopGame();
-            if (gm.MissilesLeft()) {
+            if (gm.MissilesLeft() || gm.RedeemersLeft()) {
                 mMissileCleanupRunning = true;
                 ScheduleMissileCleanup();
             }
@@ -1128,6 +1129,7 @@ namespace TankEngine
 
         		if(x_pos == tank_0_x && y_pos == tank_0_y && !tank_0->InFlames()){
         			tank_0->InFlames() = true;
+
         			if(tank_0->TankId() != redeemer_ptr->TankId()){
         				AddPoints(m_config.m_hit_points,redeemer_ptr->TankId(), game_ptr);
         			}

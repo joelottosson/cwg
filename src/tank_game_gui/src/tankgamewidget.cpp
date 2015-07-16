@@ -364,7 +364,7 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 void TankGameWidget::PaintMissile(const Missile& missile, QPainter& painter)
 {
 
-    if (!missile.visible || missile.explosion == SetInFlames)
+	if (!missile.visible && !missile.explosion == SetInFlames)
     {
         return;
     }
@@ -373,11 +373,12 @@ void TankGameWidget::PaintMissile(const Missile& missile, QPainter& painter)
 }
 
 void TankGameWidget::PaintRedeemer(const Redeemer& redeemer, QPainter& painter){
-    if (!redeemer.visible || redeemer.explosion == SetInFlames )
-    {
-        return;
+
+    if (redeemer.visible || redeemer.explosion == SetInFlames || redeemer.detonate || redeemer.explosion == Burning){
+    	drawWithTranslationAndRotation(painter,m_redeemer,redeemer.paintPosition,DirectionToAngle(redeemer.moveDirection));
     }
-    drawWithTranslationAndRotation(painter,m_redeemer,redeemer.paintPosition,DirectionToAngle(redeemer.moveDirection));
+
+
 
 }
 

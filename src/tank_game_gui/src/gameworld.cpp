@@ -608,6 +608,9 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     }
 
+    UpdateMissiles(game);
+    UpdateRedeemers(game);
+
     //We need to do a special check is the tanks are colliding with eachother.
     //If we don't do this the collision s will be completely wrong since the second tank may
     //change its position and direction after the collision has been evaluated for the first tank
@@ -645,11 +648,6 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
 		}
     }
-
-
-
-    UpdateMissiles(game);
-    UpdateRedeemers(game);
 
 
     //Update if game is finished and if we have a winner
@@ -867,7 +865,7 @@ void GameWorld::Update()
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
-            m_sprites.push_back(Sprite(m_explosion, missile.position, nextUpdate, 1));
+            m_sprites.push_back(Sprite(m_explosion, missile.position-directionToVector(missile.moveDirection), nextUpdate, 1));
             missile.explosion=Burning;
 
             if (m_soundEnabled)
@@ -901,7 +899,7 @@ void GameWorld::Update()
     {
 
         Redeemer& redeemer=vt.second;
-        UpdatePosition(timeToNextUpdate, 1*movement, redeemer,false); //redeemers have double speed
+        UpdatePosition(timeToNextUpdate, 1*movement, redeemer,false);
 
         Tank tank=m_matchState.gameState.tanks[redeemer.tankId];
         //std::wcout << "And the redeemer direction is " << directionToString(redeemer.moveDirection) << std::endl;
@@ -917,7 +915,7 @@ void GameWorld::Update()
             }
 
             if(!into_wall){
-            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(redeemer.moveDirection)*m_moveSpeed*2,
+            	m_sprites.push_back(Sprite(m_tankFire, flame_pos-directionToVector(redeemer.moveDirection), directionToVector(redeemer.moveDirection)*m_moveSpeed,
             			DirectionToAngle(redeemer.moveDirection)+270, now +timeToNextUpdate, 1));
             }
             redeemer.paintFire=false;
@@ -952,7 +950,7 @@ void GameWorld::Update()
         {
             //qreal distanceToExplosion=QPointF(redeemer.position.x()-redeemer.paintPosition.x(), redeemer.position.y()-redeemer.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
-            m_sprites.push_back(Sprite(m_explosion, redeemer.position, nextUpdate, 1));
+            if(!redeemer.detonate){m_sprites.push_back(Sprite(m_explosion, redeemer.position, nextUpdate, 1));}
             redeemer.explosion=Burning;
 
             if (m_soundEnabled)
@@ -1403,7 +1401,7 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 
 				r.moveDirection=ToDirection(redeemer->Direction());
 				if (redeemer->InFlames().GetVal()){
-					r.explosion = (r.explosion == NotInFlames) ? SetInFlames : Burning;
+					//r.explosion = (r.explosion == NotInFlames) ? SetInFlames : Burning;
 					r.visible = false;
 
 				}else if (r.explosion!=NotInFlames){
@@ -1424,13 +1422,24 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 			r.position=QPointF(redeemer->PosX().GetVal(), redeemer->PosY().GetVal());
 
 			r.visible=true;
-			r.time_to_Explosion = redeemer->TimeToExplosion().GetVal();
+			r.time_to_Explosion--;
+
+
+			if(r.time_to_Explosion == 0  && r.explosion != SetInFlames){
+				BadassExplosion(r, 1);
+				r.explosion = SetInFlames;
+				r.visible = false;
+			}else
 			if (redeemer->InFlames().GetVal()){
 				r.explosion = (r.explosion == NotInFlames) ? SetInFlames : Burning;
+				//r.explosion = SetInFlames;
+				r.detonate = false;
 				r.visible = false;
 
 			}else if (r.explosion!=NotInFlames){
 				r.explosion=Destroyed;
+				r.detonate = false;
+				r.visible = false;
 			}else{
 				r.moveDirection=ToDirection(redeemer->Direction());
 			}
@@ -1477,6 +1486,23 @@ QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
 
 }
 
+void GameWorld::BadassExplosion(Redeemer& redeemer, int radius){
+	qreal center_x = redeemer.position.x();
+	qreal center_y = redeemer.position.y();
+	redeemer.detonate = true;
+	redeemer.explosion = SetInFlames;
+	int exploisions_per_square = 7;
+	int exploision_time = (m_matchState.gameState.pace)/exploisions_per_square;
+	for(qreal x_pos = center_x - radius; x_pos <= center_x+radius; x_pos++){
+		for(qreal y_pos = center_y - radius; y_pos <= center_y+radius; y_pos++){
+	    	for(int i = 0; i < exploisions_per_square; i++){
+	    		QPointF random_start = QPointF(x_pos,y_pos) + QPointF(((qreal)(rand()%200-100))/100,((qreal)(rand()%200-100))/100)/2 /*- QPointF(m_smoke.fragments.front().width(),m_smoke.fragments.front().height())/(m_pixels_per_square*2)*/;
+	    		QPointF random_direction = QPointF(((float)((rand()%200)-100))/100,((float)((rand()%200)-100))/100)*m_moveSpeed*0.25;
+	        	m_sprites.push_back(Sprite(m_explosion, random_start, random_direction , rand()%360, QDateTime::currentMSecsSinceEpoch()+exploision_time*i, 1));
+	    	}
+		}
+	}
+}
 
 QPointF GameWorld::directionToVector(Direction dir){
 	switch(dir){

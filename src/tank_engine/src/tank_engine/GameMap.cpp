@@ -182,7 +182,7 @@ namespace TankEngine
 		redeemer_ptr->TankId() = tank_id;
 		redeemer_ptr->Direction() = direction;
 		redeemer_ptr->InFlames() = false;
-		redeemer_ptr->TimeToExplosion() = time_to_detonation;
+		redeemer_ptr->TimeToExplosion() = time_to_detonation - 1; //We actually need to compensate for the redeemer not being updated in the round in wich it is fired.
 
 		if (OnBoard(pos_x, pos_y) && WallSquare(pos_x, pos_y)) {
 			// Missile totally into wall, set in flames
@@ -193,7 +193,6 @@ namespace TankEngine
 		redeemer_ptr->PosX() = pos_head_x;
 		redeemer_ptr->PosY() = pos_head_y;
 		m_Game_ptr->Redeemers()[empty_index].SetPtr(redeemer_ptr);
-		std::wcout << "459" << std::endl;
 		return true;
 
 
@@ -476,6 +475,23 @@ namespace TankEngine
              missile_index++) {
 
             if (m_Game_ptr->Missiles()[missile_index].IsNull()) {
+                // No missile in this slot
+                continue;
+            } else {
+                // Still missiles left
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool GameMap::RedeemersLeft()
+    {
+        for (Safir::Dob::Typesystem::ArrayIndex redeemer_index = 0;
+             redeemer_index < m_Game_ptr->RedeemersArraySize();
+             redeemer_index++) {
+
+            if (m_Game_ptr->Redeemers()[redeemer_index].IsNull()) {
                 // No missile in this slot
                 continue;
             } else {

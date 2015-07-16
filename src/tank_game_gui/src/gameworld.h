@@ -138,6 +138,7 @@ private:
     inline void UpdateTank(const Consoden::TankGame::TankPtr& tank,const Board& board);
     inline void UpdateDude(const Consoden::TankGame::DudePtr& dude);
     inline void DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& board);
+    void BadassExplosion(Redeemer& redeemer, int radius);
 
 
     inline void UpdateDudes(const Board& board);
