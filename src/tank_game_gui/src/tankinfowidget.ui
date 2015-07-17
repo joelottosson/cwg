@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>TankInfoWidget</class>
  <widget class="QWidget" name="TankInfoWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>150</width>
+    <height>600</height>
+   </rect>
+  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
     <horstretch>0</horstretch>
@@ -11,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>150</width>
-    <height>520</height>
+    <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>150</width>
-    <height>520</height>
+    <height>600</height>
    </size>
   </property>
   <property name="font">
@@ -25,6 +33,12 @@
     <family>Sans Serif</family>
     <stylestrategy>PreferAntialias</stylestrategy>
    </font>
+  </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
   </property>
   <widget class="QLabel" name="towerDown">
    <property name="geometry">
@@ -305,7 +319,7 @@ color: rgb(90, 230, 10);</string>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>10</x>
      <y>390</y>
      <width>51</width>
      <height>20</height>
@@ -313,7 +327,7 @@ color: rgb(90, 230, 10);</string>
    </property>
    <property name="font">
     <font>
-     <pointsize>10</pointsize>
+     <pointsize>8</pointsize>
      <weight>75</weight>
      <italic>false</italic>
      <bold>true</bold>
@@ -321,7 +335,7 @@ color: rgb(90, 230, 10);</string>
     </font>
    </property>
    <property name="text">
-    <string>Lasers</string>
+    <string>Ammo</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
@@ -371,10 +385,10 @@ color: rgb(90, 230, 10);</string>
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>460</y>
-     <width>51</width>
-     <height>20</height>
+     <x>10</x>
+     <y>440</y>
+     <width>131</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="font">
@@ -419,10 +433,10 @@ color: rgb(90, 230, 10);</string>
     <number>0</number>
    </property>
   </widget>
-  <widget class="QLabel" name="smokeAvailiable">
+  <widget class="QLabel" name="SmokeActive">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>110</x>
      <y>480</y>
      <width>31</width>
      <height>30</height>
@@ -433,6 +447,305 @@ color: rgb(90, 230, 10);</string>
    </property>
    <property name="pixmap">
     <pixmap>../images/inactive-blue.png</pixmap>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="redeemerTimer">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>551</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(67, 67, 60);
+color: rgb(90, 230, 10);</string>
+   </property>
+   <property name="digitCount">
+    <number>2</number>
+   </property>
+   <property name="segmentStyle">
+    <enum>QLCDNumber::Flat</enum>
+   </property>
+   <property name="intValue" stdset="0">
+    <number>0</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="redeemerActive">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>551</y>
+     <width>31</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap>../images/inactive-blue.png</pixmap>
+   </property>
+  </widget>
+  <widget class="QLabel" name="redeemerAvaliable">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>551</y>
+     <width>31</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap>../images/inactive-green.png</pixmap>
+   </property>
+  </widget>
+  <widget class="QLabel" name="smokeAvailiable">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>480</y>
+     <width>31</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap>../images/inactive-green.png</pixmap>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>460</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Has</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>460</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Active</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>531</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Has</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_10">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>531</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Active</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_11">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>390</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Active</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_12">
+   <property name="geometry">
+    <rect>
+     <x>-10</x>
+     <y>531</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Timer</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_13">
+   <property name="geometry">
+    <rect>
+     <x>-10</x>
+     <y>460</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Timer</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_14">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>380</y>
+     <width>131</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Laser</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_15">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>510</y>
+     <width>131</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+     <weight>75</weight>
+     <italic>false</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="text">
+    <string>Redeemer</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
  </widget>

@@ -79,6 +79,10 @@
             <name>HasRedeemer</name>
             <type>Boolean</type>
         </member>
+         <member>
+            <name>RedeemerTimerLeft</name>
+            <type>Int32</type>
+        </member>
         
     </members>
 </class>

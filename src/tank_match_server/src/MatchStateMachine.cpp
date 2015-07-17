@@ -226,6 +226,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank1->Lasers() = 0;
     tank1->HasSmoke() = false;
     tank1->SmokeLeft() = 0;
+    tank1->HasRedeemer() = false;
+    tank1->RedeemerTimerLeft() = 0;
 
 
 
@@ -244,6 +246,8 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     tank2->Lasers() = 0;
     tank2->HasSmoke() = false;
     tank2->SmokeLeft() = 0;
+    tank2->HasRedeemer() = false;
+    tank2->RedeemerTimerLeft() = 0;
 
     if (!reversedPlayers)
     {

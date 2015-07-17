@@ -411,12 +411,24 @@ namespace TankEngine
              (redeemer_index < game_ptr->RedeemersArraySize());
              redeemer_index++) {
 
+
+
         	if(!game_ptr->Redeemers()[redeemer_index].IsNull()){
+    			Consoden::TankGame::RedeemerPtr redeemer =
+    			                boost::static_pointer_cast<Consoden::TankGame::Redeemer>(game_ptr->Redeemers()[redeemer_index].GetPtr());
+
         		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 1){//Neds to be done when timer is one to mitigate for delayed updates
+
         			detonateRedeemer(game_ptr, game_ptr->Redeemers()[redeemer_index].GetPtr(), &gm, 1);
         			game_ptr->Redeemers()[redeemer_index].GetPtr()->InFlames() = true;
+
         		}else{
+
+
         			game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() -= 1;
+
+
+
         		}
         	}
 
@@ -435,6 +447,10 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
+            //Be sneaky and decremt the redeemer timer here ^^
+            if(tank_ptr->RedeemerTimerLeft() > 0 ){
+            	tank_ptr->RedeemerTimerLeft()--;
+            }
 
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
@@ -694,11 +710,6 @@ namespace TankEngine
 
             //crazy cool missile fire
 
-            std::wcout << "======================" << std::endl;
-            std::wcout << "fire ? " << (joystick_ptr->Fire() ? "true" : "false ") << std::endl;
-            std::wcout << "fire redeemer ? " << (joystick_ptr->FireRedeemer() ? "true" : "false ") << std::endl;
-            std::wcout << "has redeemer ? " << (tank_ptr->HasRedeemer() ? "true" : "false ") << std::endl;
-            std::wcout << "redeemer timer? " << joystick_ptr->RedeemerTimer() << std::endl;
 
             if (joystick_ptr->Fire() && !joystick_ptr->FireLaser() && !joystick_ptr->FireRedeemer()) {
 
@@ -707,14 +718,15 @@ namespace TankEngine
 				tank_ptr->Fire() = fired; // Only indicate fire if firing was successful
 
 			}else if (joystick_ptr->Fire() && !joystick_ptr->FireLaser() && joystick_ptr->FireRedeemer() && tank_ptr->HasRedeemer()) {
-
-
                 bool fired = gm.FireRedeemer(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(),
                 		joystick_ptr->RedeemerTimer(), tank_ptr->TankId().GetVal());
                 tank_ptr->Fire() = fired; // Only indicate fire if firing was successful
+
                 if(fired){
+                	tank_ptr->RedeemerTimerLeft() = joystick_ptr->RedeemerTimer();
                 	tank_ptr->HasRedeemer() = false;
                 }
+
 			} else {
 				tank_ptr->Fire() = false;
 			}
@@ -1280,6 +1292,10 @@ namespace TankEngine
             if(tank_ptr->HasRedeemer().IsNull()){
 				std::wcout << "HasRedeemer is null. Setting to false" << std::endl;
 				tank_ptr->HasRedeemer()  = false;
+			}
+            if(tank_ptr->RedeemerTimerLeft().IsNull()){
+				std::wcout << "RedeemerTimer is null. Setting to 0" << std::endl;
+				tank_ptr->RedeemerTimerLeft()  = 0;
 			}
 
             //Nullchecks for joystic
