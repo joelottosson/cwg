@@ -118,6 +118,8 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.jpg", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
 
+	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/redeemer-ammo.png", 1, 72, 72,1000,0,0,0.75, &Board::RedeemerAmmo));
+
 
 }
 
@@ -1493,6 +1495,7 @@ void GameWorld::BadassExplosion(Redeemer& redeemer, int radius){
 	redeemer.explosion = SetInFlames;
 	int exploisions_per_square = 7;
 	int exploision_time = (m_matchState.gameState.pace)/exploisions_per_square;
+
 	for(qreal x_pos = center_x - radius; x_pos <= center_x+radius; x_pos++){
 		for(qreal y_pos = center_y - radius; y_pos <= center_y+radius; y_pos++){
 	    	for(int i = 0; i < exploisions_per_square; i++){

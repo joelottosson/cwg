@@ -779,7 +779,9 @@ namespace TankEngine
                     	tank_ptr->HasSmoke() = true;
                     }
 
-
+                }else if(gm.RedeemerAmmoSquare(tank_ptr->PosX(), tank_ptr->PosY())){
+                	//TODO: The picking up thingy goes here
+                	gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY());
 
                 } else {
                     // Clear took coin and gas
@@ -1126,6 +1128,7 @@ namespace TankEngine
 
     	for(int y_pos = center_y - radius; y_pos <= center_y + radius; y_pos++){
         	for(int x_pos = center_x - radius; x_pos <= center_x + radius; x_pos++){
+
 
         		if(x_pos == tank_0_x && y_pos == tank_0_y && !tank_0->InFlames()){
         			tank_0->InFlames() = true;

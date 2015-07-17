@@ -41,9 +41,12 @@ namespace TankEngine
         return (m_Game[pos_x][pos_y] == 'x');
     }
 
-    bool GameMap::SmokeGrenadeSquare(int pos_x, int pos_y)
-    {
+    bool GameMap::SmokeGrenadeSquare(int pos_x, int pos_y){
         return (m_Game[pos_x][pos_y] == 's');
+    }
+
+    bool GameMap::RedeemerAmmoSquare(int pos_x, int pos_y){
+    	return (m_Game[pos_x][pos_y] == 'r');
     }
 
 

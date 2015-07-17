@@ -109,3 +109,6 @@ build-*
 .cproject
 .project
 .settings/
+*.xcf
+
+
