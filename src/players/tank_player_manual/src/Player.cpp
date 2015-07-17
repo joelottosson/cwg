@@ -62,7 +62,7 @@ void Player::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
                 joystick->TankId()=m_currentTankId;
                 joystick->Counter()=0;
                 m_connection.SetAll(joystick, m_myJoystickId, m_myHandlerId);
-                m_logic.reset(new TankLogic(m_currentTankId, boost::bind(&Player::SetJoystick, this, _1, _2, _3, _4,_5,_6)));
+                m_logic.reset(new TankLogic(m_currentTankId, boost::bind(&Player::SetJoystick, this, _1, _2, _3, _4, _5, _6, _7, _8)));
                 break;
             }
         }
@@ -130,11 +130,12 @@ void Player::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, 
     }
 }
 
-//void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine){
-	//SetJoystick(moveDirection, towerDirection,  fire,  dropMine,false);
-//}
+/*void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine){
+	SetJoystick(moveDirection, towerDirection,  fire,  dropMine,false,false,false,0);
+}*/
 
-void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine,bool laser,bool deploySmoke){
+void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine,bool laser,
+		bool deploySmoke, bool fireRedeemer, int redeemerTimer){
     static int counter=0;
 
     if (m_myJoystickId.GetRawValue()==-1)
@@ -153,5 +154,7 @@ void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirectio
     joystick->FireLaser() = laser;
     joystick->MineDrop()=dropMine;
     joystick->DeploySmoke() = deploySmoke;
+    joystick->FireRedeemer() = fireRedeemer;
+    joystick->RedeemerTimer() = redeemerTimer;
     m_connection.SetAll(joystick, m_myJoystickId, m_myHandlerId);
 }

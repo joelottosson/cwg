@@ -68,7 +68,16 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     	fire_laser = true;
     }
 
+    bool fire_redeemer = false;
+    int redemer_timer = 3;
+    if(gm.HasRedeemer()){
+    	fire_redeemer = true;
+    }
 
+    bool deploy_smoke = false;
+    if(gm.HasSmoke()){
+    	deploy_smoke = true;
+    }
     //Move our joystick.
-    SetJoystick(moveDirection, towerDirection, fire, dropMine, fire_laser,false);
+    SetJoystick(moveDirection, towerDirection, fire, dropMine, fire_laser,deploy_smoke,fire_redeemer, redemer_timer);
 }

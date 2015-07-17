@@ -120,6 +120,9 @@ namespace TankEngine
 
     bool GameMap::FireRedeemer(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration direction, int time_to_detonation, int tank_id){
     	Safir::Dob::Typesystem::ArrayIndex redeemer_index;
+    	if(time_to_detonation < 2){
+    		return false;
+    	}
 
         int pos_head_x = -1;
         int pos_head_y = -1;

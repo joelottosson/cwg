@@ -43,6 +43,14 @@
             <name>Counter</name>
             <type>Int32</type>
         </member>
+        <member>
+            <name>FireRedeemer</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <name>RedeemerTimer</name>
+            <type>Int32</type>
+        </member>
     </members>
 </class>
 

@@ -75,6 +75,11 @@
             <name>SmokeLeft</name>
             <type>Int32</type>
         </member>
+        <member>
+            <name>HasRedeemer</name>
+            <type>Boolean</type>
+        </member>
+        
     </members>
 </class>
 

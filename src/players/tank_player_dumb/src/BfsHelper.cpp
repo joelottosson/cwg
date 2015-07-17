@@ -6,7 +6,7 @@
 *
 *******************************************************************************/
 
-#include "../../tank_player_dumb/src/BfsHelper.h"
+#include "BfsHelper.h"
 
 #include <iostream>
 #include <map>

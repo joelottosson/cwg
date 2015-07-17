@@ -693,15 +693,32 @@ namespace TankEngine
 
 
             //crazy cool missile fire
-            if (joystick_ptr->Fire() && !joystick_ptr->FireLaser()) {
 
-                bool fired = gm.FireRedeemer(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(),3, tank_ptr->TankId().GetVal());
-            	//bool fired = gm.FireMissile(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(), tank_ptr->TankId().GetVal());
+            std::wcout << "======================" << std::endl;
+            std::wcout << "fire ? " << (joystick_ptr->Fire() ? "true" : "false ") << std::endl;
+            std::wcout << "fire redeemer ? " << (joystick_ptr->FireRedeemer() ? "true" : "false ") << std::endl;
+            std::wcout << "has redeemer ? " << (tank_ptr->HasRedeemer() ? "true" : "false ") << std::endl;
+            std::wcout << "redeemer timer? " << joystick_ptr->RedeemerTimer() << std::endl;
 
+            if (joystick_ptr->Fire() && !joystick_ptr->FireLaser() && !joystick_ptr->FireRedeemer()) {
+
+				bool fired = gm.FireMissile(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(), tank_ptr->TankId().GetVal());
+
+				tank_ptr->Fire() = fired; // Only indicate fire if firing was successful
+
+			}else if (joystick_ptr->Fire() && !joystick_ptr->FireLaser() && joystick_ptr->FireRedeemer() && tank_ptr->HasRedeemer()) {
+
+
+                bool fired = gm.FireRedeemer(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(),
+                		joystick_ptr->RedeemerTimer(), tank_ptr->TankId().GetVal());
                 tank_ptr->Fire() = fired; // Only indicate fire if firing was successful
-            } else {
-                tank_ptr->Fire() = false;
-            }
+                if(fired){
+                	tank_ptr->HasRedeemer() = false;
+                }
+			} else {
+				tank_ptr->Fire() = false;
+			}
+
         }
 
         // Evaluate hits & collissions
@@ -780,8 +797,10 @@ namespace TankEngine
                     }
 
                 }else if(gm.RedeemerAmmoSquare(tank_ptr->PosX(), tank_ptr->PosY())){
-                	//TODO: The picking up thingy goes here
+                	if(!tank_ptr->HasRedeemer()){
                 	gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY());
+                	tank_ptr->HasRedeemer() = true;
+                	}
 
                 } else {
                     // Clear took coin and gas
@@ -1258,6 +1277,10 @@ namespace TankEngine
 				std::wcout << "SmokeLeft is null. Setting to 0" << std::endl;
 				tank_ptr->SmokeLeft()  = 0;
 			}
+            if(tank_ptr->HasRedeemer().IsNull()){
+				std::wcout << "HasRedeemer is null. Setting to false" << std::endl;
+				tank_ptr->HasRedeemer()  = false;
+			}
 
             //Nullchecks for joystic
             if(joystick_ptr->GameId().IsNull()){
@@ -1296,6 +1319,14 @@ namespace TankEngine
             if(joystick_ptr->DeploySmoke().IsNull()){
 				std::wcout << "Joystick DeploySmoke is null. Setting to false" << std::endl;
 				joystick_ptr->DeploySmoke() = false;
+			}
+            if(joystick_ptr->FireRedeemer().IsNull()){
+				std::wcout << "Joystick FireRedeemer is null. Setting to false" << std::endl;
+				joystick_ptr->FireRedeemer() = false;
+			}
+            if(joystick_ptr->RedeemerTimer().IsNull()){
+				std::wcout << "Joystick RedeemerTimer is null. Setting to 0" << std::endl;
+				joystick_ptr->RedeemerTimer() = 0;
 			}
 
         }

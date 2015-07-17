@@ -54,6 +54,12 @@ public:
     bool HasSmoke() const;
 
     /**
+     * checks if you have a redeemer
+     */
+    bool HasRedeemer() const;
+
+
+    /**
      * Check if square is a wall.
      */
     bool IsWall(const std::pair<int, int>& pos) const;
@@ -69,6 +75,11 @@ public:
      */
     bool IsLaserAmmo(const std::pair<int, int>& pos) const;
 
+
+    /**
+	 * Check if there is redeemer ammo in this square.
+	 */
+	bool IsRedeemerAmmo(const std::pair<int, int>& pos) const;
 
     /**
      * Check if there is a smoke_grenade

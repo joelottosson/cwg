@@ -6,10 +6,11 @@
 *
 *******************************************************************************/
 
+#include "BfsHelper.h"
+
 #include <iostream>
 #include <map>
 
-#include "BfsHelper.h"
 
 BfsHelper::BfsHelper(const Consoden::TankGame::GameStatePtr& gamePtr, std::pair<int, int> start_pos) :
     m_GamePtr(gamePtr),
