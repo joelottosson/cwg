@@ -867,7 +867,20 @@ void GameWorld::Update()
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
-            m_sprites.push_back(Sprite(m_explosion, missile.position-directionToVector(missile.moveDirection), nextUpdate, 1));
+            bool into_wall = false;
+            for(auto p : m_matchState.gameState.walls){
+            	if(p == missile.position){
+            		into_wall = true;
+            		break;
+            	}
+            }
+            if(into_wall){
+            	m_sprites.push_back(Sprite(m_explosion, missile.position, nextUpdate, 1));
+            }else{
+            	m_sprites.push_back(Sprite(m_explosion, missile.position-directionToVector(missile.moveDirection), nextUpdate, 1));
+            }
+
+
             missile.explosion=Burning;
 
             if (m_soundEnabled)

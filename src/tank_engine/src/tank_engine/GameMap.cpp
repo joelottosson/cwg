@@ -432,11 +432,14 @@ namespace TankEngine
 
             int pos_x = redeemer_ptr->PosX().GetVal();
             int pos_y = redeemer_ptr->PosY().GetVal();
+            int old_x = pos_x;
+            int old_y = pos_y;
 
             // Moved position
             switch (redeemer_ptr->Direction()) {
                 case Consoden::TankGame::Direction::Left:
                 	pos_x--;
+
                     break;
 
                 case Consoden::TankGame::Direction::Right:
@@ -456,7 +459,7 @@ namespace TankEngine
 
             }
 
-            if (!OnBoard(pos_x, pos_y)) {
+            if (!OnBoard(old_x, old_y)) {//We need to wait untill the entire redeemer is outside the board before we delete it
                 // Moved completely off board, remove it
                 m_Game_ptr->Redeemers()[redeemer_index].SetNull();
                 continue;

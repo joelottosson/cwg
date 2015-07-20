@@ -418,14 +418,18 @@ namespace TankEngine
     			                boost::static_pointer_cast<Consoden::TankGame::Redeemer>(game_ptr->Redeemers()[redeemer_index].GetPtr());
 
         		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 1){//Neds to be done when timer is one to mitigate for delayed updates
+        			if(gm.OnBoard(redeemer->PosX(),redeemer->PosY())){
+						detonateRedeemer(game_ptr, redeemer, &gm, 1);
+						redeemer->InFlames() = true;
+        			}else{
 
-        			detonateRedeemer(game_ptr, game_ptr->Redeemers()[redeemer_index].GetPtr(), &gm, 1);
-        			game_ptr->Redeemers()[redeemer_index].GetPtr()->InFlames() = true;
+        				game_ptr->Redeemers()[redeemer_index].SetNull();
+        			}
 
         		}else{
 
 
-        			game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() -= 1;
+        			redeemer->TimeToExplosion() -= 1;
 
 
 
@@ -447,7 +451,7 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
-            //Be sneaky and decremt the redeemer timer here ^^
+            //We need to decremet the tanks own redeemer timer here to fix the stupid lagging.
             if(tank_ptr->RedeemerTimerLeft() > 0 ){
             	tank_ptr->RedeemerTimerLeft()--;
             }

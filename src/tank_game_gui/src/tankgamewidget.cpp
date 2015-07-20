@@ -192,7 +192,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         //start = 	QDateTime::currentMSecsSinceEpoch();
 
     global_timer_averages[8] += ((float)(clock() - total)/CLOCKS_PER_SEC);
-    /*std::wcout << "current fraim rate = " << 1/(((float)(clock() - total)/CLOCKS_PER_SEC)) << std::endl;
+/*    std::wcout << "current fraim rate = " << 1/(((float)(clock() - total)/CLOCKS_PER_SEC)) << std::endl;
     global_refresh_count++;
     std::wcout << "constraints = " << global_timer_averages[0]/global_refresh_count << std::endl;
     std::wcout << "setup = " << global_timer_averages[1]/global_refresh_count << std::endl;
