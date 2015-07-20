@@ -34,6 +34,11 @@ TankInfoWidget::TankInfoWidget(int playerNumber, QWidget *parent) :
     m_buttons[8]=ui->fireButton;
 
     ResetLeds();
+	ui->laserActive->setPixmap(m_blue_off);
+	ui->smokeAvailiable->setPixmap(m_green_off);
+	ui->SmokeActive->setPixmap(m_blue_off);
+	ui->redeemerActive->setPixmap(m_blue_off);
+	ui->redeemerAvaliable->setPixmap(m_green_off);
 
     if (m_playerNumber==0)
     {
@@ -62,7 +67,7 @@ void TankInfoWidget::SetPoints(int points)
 
 void TankInfoWidget::ResetLeds()
 {
-	ui->laserActive->setPixmap(m_blue_off);
+
     for (size_t i=0; i<9; ++i)
     {
     	if(i==8){
@@ -122,9 +127,30 @@ void TankInfoWidget::updateSmoke(bool has_smoke, int smoke_left){
     }else{
     	ui->smokeAvailiable->setPixmap(m_green_off);
     }
+    if(smoke_left > 0){
+    	ui->SmokeActive->setPixmap(m_blue_on);
+    }else{
+    	ui->SmokeActive->setPixmap(m_blue_off);
+    }
     ui->smokeLcd->display(smoke_left);
 }
 
+void TankInfoWidget::updateReddemerWithTankyStuff(bool available, int timer){
+	if(available){
+		ui->redeemerAvaliable->setPixmap(m_green_on);
+	}else{
+		ui->redeemerAvaliable->setPixmap(m_green_off);
+	}
+
+    ui->redeemerTimer->display(timer);
+    if(timer > 0 ){
+    	ui->redeemerActive->setPixmap(m_blue_on);
+    }else{
+    	ui->redeemerActive->setPixmap(m_blue_off);
+    }
+
+
+}
 
 void TankInfoWidget::Update(const Joystick* js){
 

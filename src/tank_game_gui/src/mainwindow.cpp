@@ -180,6 +180,10 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
         m_tankInfoWidget[0]->updateSmoke(game->Tanks()[0]->HasSmoke(),game->Tanks()[0]->SmokeLeft());
 		m_tankInfoWidget[1]->updateSmoke(game->Tanks()[1]->HasSmoke(),game->Tanks()[1]->SmokeLeft());
 
+		m_tankInfoWidget[0]->updateReddemerWithTankyStuff(game->Tanks()[0]->HasRedeemer(),game->Tanks()[0]->RedeemerTimerLeft());
+		m_tankInfoWidget[1]->updateReddemerWithTankyStuff(game->Tanks()[1]->HasRedeemer(),game->Tanks()[1]->RedeemerTimerLeft());
+
+
 
         return;
     }

@@ -23,6 +23,7 @@ class GameMap {
 	private byte poison=(byte)'p';
 	private byte laser_ammo=(byte)'l';
 	private byte smoke_grenade=(byte)'s';
+	private byte redeemer_ammo=(byte)'r';
 	
 	//Constructor, creates a new GameMap from a GameState.
 	public GameMap(int tankId, consoden.tankgame.GameState gameState) {		
@@ -71,6 +72,11 @@ class GameMap {
 		}
 	}
 	
+	//Enemy tank position.
+	public boolean hasRedeemer() {
+		return gameState.tanks().get(tankId).getObj().hasRedeemer().getVal();
+	}
+	
 	//Do we have a smoke grenade ??
 	public boolean hasSmoke(){
 		return gameState.tanks().get(tankId).getObj().hasSmoke().getVal();
@@ -105,6 +111,11 @@ class GameMap {
 	//Check if there is poison gas in this square.
 	public boolean isPoisonGas(final Position pos) {
 		return gameState.board().getVal()[toIndex(pos)]==poison;
+	}
+	
+	//Check if there is poison gas in this square.
+	public boolean isRedeemerAmmo(final Position pos) {
+		return gameState.board().getVal()[toIndex(pos)]==redeemer_ammo;
 	}
 	
 

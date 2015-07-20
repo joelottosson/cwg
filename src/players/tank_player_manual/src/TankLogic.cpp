@@ -37,6 +37,8 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     bool drop_mine = false;
     bool fire_laser = false;
     bool deploy_smoke = false;
+    bool fire_redeemer = false;
+    int redeemer_timer = 0;
 
 
     char input = '\n';
@@ -97,6 +99,13 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 					  fire = true;
 					  fire_laser = true;
 					  break;
+
+				  case 't':
+					  fire = true;
+					  fire_redeemer = true;
+					  redeemer_timer = 3;
+					  break;
+
 				  case 'q':
 					  abort();
 					  break;
@@ -139,5 +148,5 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 
 
     //Move our joystick.
-    SetJoystick(moveDirection, towerDirection, fire, drop_mine, fire_laser,deploy_smoke);
+    SetJoystick(moveDirection, towerDirection, fire, drop_mine, fire_laser,deploy_smoke,fire_redeemer,redeemer_timer);
 }

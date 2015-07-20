@@ -32,6 +32,8 @@ public:
     void SetLaserAmmo(int lasers);
     void Update(const Joystick* js);
     void updateSmoke(bool has_smoke, int smoke_left);
+    void updateReddemerWithTankyStuff(bool available, int timer);
+
 
     void ResetLeds();
     void SetLed(Led led, bool on);

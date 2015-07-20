@@ -19,6 +19,7 @@ Board::Board(const std::string& filepath)
     ,m_poison()
 	,m_dudes()
 	,m_smoke()
+	,m_redeemers()
 
 {
     std::ifstream is;
@@ -62,6 +63,7 @@ Board::Board(const char* binary, int xSize, int ySize)
     ,m_poison()
 	,m_dudes()
 	,m_smoke()
+	,m_redeemers()
 
 {
     Parse(binary);
@@ -117,6 +119,12 @@ void Board::ToBinary(std::vector<char>& bin) const
     {
         size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
         bin[index]='s';
+    }
+
+    for (const auto& pos : m_redeemers)
+    {
+        size_t index=static_cast<size_t>(pos.y()*m_xSize+pos.x());
+        bin[index]='r';
     }
 
 
@@ -207,15 +215,21 @@ void Board::Parse(const char* data)
             }
                 break;
 
-            case 'l': //poison
+            case 'l': //laser
             {
                 m_laser_ammo.push_back(QPointF(x, y));
             }
                 break;
 
-            case 's': //poison
+            case 's': //smoke
             {
                 m_smoke.push_back(QPointF(x, y));
+            }
+                break;
+
+            case 'r': //redeemerammo
+            {
+                m_redeemers.push_back(QPointF(x, y));
             }
                 break;
 

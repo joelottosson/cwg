@@ -71,11 +71,13 @@ namespace TankEngine
         void ScheduleMissileCleanup();
         bool collisonDetector(CWG::DudePtr& dude, CWG::TankPtr& tank);
 
+        void detonateRedeemer(Consoden::TankGame::GameStatePtr game_ptr, Consoden::TankGame::RedeemerPtr redeemer_ptr, GameMap* gm, int radius);
+
 
         /*
          * Nullchecks everything and sets null fields to default values.*
          *
-         * this might seem redundant but it keeps us from having to manually nullcheck everything 50000000 times in the evaluate loop
+         * this might seem redundant but it keeps	 us from having to manually nullcheck everything 50000000 times in the evaluate loop
          * and get flippin nullpointer exceptions in the DOB wich exits the engine and leavs you without a stack to trace.
          * This makes debuggingn about as enjoyable as slowly driving a rusty angle grinder trough your knee whilst having to listen
          * to someone who thinks Ayn Rand had valid ideas talking about their political philosphy.

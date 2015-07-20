@@ -6,10 +6,11 @@
 *
 *******************************************************************************/
 
+#include "BfsHelper.h"
+
 #include <iostream>
 #include <map>
 
-#include "BfsHelper.h"
 
 BfsHelper::BfsHelper(const Consoden::TankGame::GameStatePtr& gamePtr, std::pair<int, int> start_pos) :
     m_GamePtr(gamePtr),
@@ -22,7 +23,7 @@ BfsHelper::BfsHelper(const Consoden::TankGame::GameStatePtr& gamePtr, std::pair<
 bool BfsHelper::IsEmpty(const std::pair<int, int>& pos) const
 {
     char c=m_GamePtr->Board().GetVal()[Index(pos)];
-    return c=='.' || c=='$' || c=='p';
+    return c=='.' || c=='$' || c=='p' || c == 's' || c == 'l' || c == 'r';
 }
 
 void BfsHelper::GenerateShortestPaths(std::pair<int, int> start_pos)

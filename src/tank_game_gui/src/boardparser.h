@@ -45,6 +45,7 @@ public:
     const PointVec& Dudes() const {return m_dudes;}
     const PointVec& Smoke() const {return m_smoke;}
     const PointVec& LaserAmmo() const {return m_laser_ammo;}
+    const PointVec& RedeemerAmmo() const {return m_redeemers;}
 
     const bool isWall(qreal x, qreal y) const;
 
@@ -63,6 +64,7 @@ private:
     PointVec m_poison;
     PointVec m_dudes;
     PointVec m_smoke;
+    PointVec m_redeemers;
 
     void Parse(const char* data);
     //bool IsWall(const char* data, int x, int y);

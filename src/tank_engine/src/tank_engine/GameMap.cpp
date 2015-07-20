@@ -41,9 +41,12 @@ namespace TankEngine
         return (m_Game[pos_x][pos_y] == 'x');
     }
 
-    bool GameMap::SmokeGrenadeSquare(int pos_x, int pos_y)
-    {
+    bool GameMap::SmokeGrenadeSquare(int pos_x, int pos_y){
         return (m_Game[pos_x][pos_y] == 's');
+    }
+
+    bool GameMap::RedeemerAmmoSquare(int pos_x, int pos_y){
+    	return (m_Game[pos_x][pos_y] == 'r');
     }
 
 
@@ -115,8 +118,134 @@ namespace TankEngine
         m_Game[pos_x][pos_y] = 'o';
     }
 
-    bool GameMap::FireMissile(int pos_head_x, int pos_head_y, int pos_tail_x, int pos_tail_y, Consoden::TankGame::Direction::Enumeration direction, int tank_id) 
+    bool GameMap::FireRedeemer(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration direction, int time_to_detonation, int tank_id){
+    	Safir::Dob::Typesystem::ArrayIndex redeemer_index;
+    	if(time_to_detonation < 2){
+    		return false;
+    	}
+
+        int pos_head_x = -1;
+        int pos_head_y = -1;
+
+        switch (direction) {
+            case Consoden::TankGame::Direction::Left:
+                pos_head_x = pos_x - 1;
+                pos_head_y = pos_y;
+
+                break;
+
+            case Consoden::TankGame::Direction::Right:
+                pos_head_x = pos_x + 1;
+                pos_head_y = pos_y;
+                break;
+
+            case Consoden::TankGame::Direction::Up:
+                pos_head_x = pos_x;
+                pos_head_y = pos_y - 1;
+                break;
+
+            case Consoden::TankGame::Direction::Down:
+                pos_head_x = pos_x;
+                pos_head_y = pos_y + 1;
+                break;
+
+            default:
+                break;
+        }
+
+
+
+    	int empty_index = -1;
+    	bool tank_redeemer_active = false;
+        for (redeemer_index = 0;
+        		redeemer_index < m_Game_ptr->RedeemersArraySize();
+        		redeemer_index++) {
+            if (m_Game_ptr->Redeemers()[redeemer_index].IsNull()) {
+                // Reached empty missile slot
+                if (empty_index == -1) {
+                    empty_index = redeemer_index;
+                    break;
+                }else{
+                	continue;
+                }
+            }else{
+				Consoden::TankGame::RedeemerConstPtr redeemer_ptr =
+					boost::static_pointer_cast<Consoden::TankGame::Redeemer>(m_Game_ptr->Redeemers()[redeemer_index].GetPtr());
+				if (redeemer_ptr->TankId().GetVal() == tank_id) {
+					return false;
+				}
+            }
+        }
+
+        if (empty_index == -1) {
+            // Only one missile per tank can be active, or array is full
+            return false;
+        }
+
+		Consoden::TankGame::RedeemerPtr redeemer_ptr = Consoden::TankGame::Redeemer::Create();
+
+		redeemer_ptr->RedeemerId() = m_missileCounter++;
+		redeemer_ptr->TankId() = tank_id;
+		redeemer_ptr->Direction() = direction;
+		redeemer_ptr->InFlames() = false;
+		redeemer_ptr->TimeToExplosion() = time_to_detonation - 1; //We actually need to compensate for the redeemer not being updated in the round in wich it is fired.
+
+		if (OnBoard(pos_x, pos_y) && WallSquare(pos_x, pos_y)) {
+			// Missile totally into wall, set in flames
+
+			redeemer_ptr->InFlames() = true;
+		}
+
+		redeemer_ptr->PosX() = pos_head_x;
+		redeemer_ptr->PosY() = pos_head_y;
+		m_Game_ptr->Redeemers()[empty_index].SetPtr(redeemer_ptr);
+		return true;
+
+
+    }
+
+    bool GameMap::FireMissile(int pos_x ,int pos_y, Consoden::TankGame::Direction::Enumeration direction, int tank_id)
     {
+
+        int pos_head_x = -1;
+        int pos_head_y = -1;
+        int pos_tail_x = -1;
+        int pos_tail_y = -1;
+
+        switch (direction) {
+            case Consoden::TankGame::Direction::Left:
+                pos_head_x = pos_x - 2;
+                pos_head_y = pos_y;
+                pos_tail_x = pos_x- 1;
+                pos_tail_y = pos_y;
+                break;
+
+            case Consoden::TankGame::Direction::Right:
+                pos_head_x = pos_x + 2;
+                pos_head_y = pos_y;
+                pos_tail_x = pos_x + 1;
+                pos_tail_y = pos_y;
+                break;
+
+            case Consoden::TankGame::Direction::Up:
+                pos_head_x = pos_x;
+                pos_head_y = pos_y - 2;
+                pos_tail_x = pos_x;
+                pos_tail_y = pos_y - 1;
+                break;
+
+            case Consoden::TankGame::Direction::Down:
+                pos_head_x = pos_x;
+                pos_head_y = pos_y + 2;
+                pos_tail_x = pos_x;
+                pos_tail_y = pos_y + 1;
+                break;
+
+            default:
+                break;
+        }
+
+
         Safir::Dob::Typesystem::ArrayIndex missile_index;
         bool tank_missile_active = false;
         int empty_index = -1;
@@ -146,6 +275,7 @@ namespace TankEngine
         }
 
         Consoden::TankGame::MissilePtr missile_ptr = Consoden::TankGame::Missile::Create();
+
         missile_ptr->MissileId() = m_missileCounter++;
         missile_ptr->TankId() = tank_id;
         missile_ptr->Direction() = direction;
@@ -262,6 +392,7 @@ namespace TankEngine
                 pos_head_x = pos_tail_x;
                 pos_head_y = pos_tail_y;
                 missile_ptr->InFlames() = true;
+
             } else {
                 if (WallSquare(pos_head_x, pos_head_y)) {
                     // Head in wall, set in flames
@@ -278,6 +409,74 @@ namespace TankEngine
         }
     }
 
+    void GameMap::MoveRedeemers()
+    {
+        for (Safir::Dob::Typesystem::ArrayIndex redeemer_index = 0;
+             redeemer_index < m_Game_ptr->RedeemersArraySize();
+             redeemer_index++) {
+
+
+            if (m_Game_ptr->Redeemers()[redeemer_index].IsNull()) {
+                // No redeemer in this slot
+                continue;
+            }
+
+            Consoden::TankGame::RedeemerPtr redeemer_ptr =
+                boost::static_pointer_cast<Consoden::TankGame::Redeemer>(m_Game_ptr->Redeemers()[redeemer_index].GetPtr());
+
+            if (redeemer_ptr->InFlames()) {
+                // Missile burned up last round, remove it
+                m_Game_ptr->Redeemers()[redeemer_index].SetNull();
+                continue;
+            }
+
+            int pos_x = redeemer_ptr->PosX().GetVal();
+            int pos_y = redeemer_ptr->PosY().GetVal();
+            int old_x = pos_x;
+            int old_y = pos_y;
+
+            // Moved position
+            switch (redeemer_ptr->Direction()) {
+                case Consoden::TankGame::Direction::Left:
+                	pos_x--;
+
+                    break;
+
+                case Consoden::TankGame::Direction::Right:
+                    pos_x++;
+                    break;
+
+                case Consoden::TankGame::Direction::Up:
+                	pos_y--;
+                    break;
+
+                case Consoden::TankGame::Direction::Down:
+                	pos_y++;
+                    break;
+
+                default:
+                    break;
+
+            }
+
+            if (!OnBoard(old_x, old_y)) {//We need to wait untill the entire redeemer is outside the board before we delete it
+                // Moved completely off board, remove it
+                m_Game_ptr->Redeemers()[redeemer_index].SetNull();
+                continue;
+            }
+
+            if (WallSquare(pos_x, pos_y)) {
+
+                // Missile totally into wall, set in flames
+                redeemer_ptr->InFlames() = true;
+            }
+
+            redeemer_ptr->PosX() = pos_x;
+            redeemer_ptr->PosY() = pos_y;
+
+        }
+    }
+
     bool GameMap::MissilesLeft()
     {
         for (Safir::Dob::Typesystem::ArrayIndex missile_index = 0; 
@@ -285,6 +484,23 @@ namespace TankEngine
              missile_index++) {
 
             if (m_Game_ptr->Missiles()[missile_index].IsNull()) {
+                // No missile in this slot
+                continue;
+            } else {
+                // Still missiles left
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool GameMap::RedeemersLeft()
+    {
+        for (Safir::Dob::Typesystem::ArrayIndex redeemer_index = 0;
+             redeemer_index < m_Game_ptr->RedeemersArraySize();
+             redeemer_index++) {
+
+            if (m_Game_ptr->Redeemers()[redeemer_index].IsNull()) {
                 // No missile in this slot
                 continue;
             } else {

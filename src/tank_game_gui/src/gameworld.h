@@ -127,6 +127,9 @@ private:
     void SetTextPlayer(int playerNumber, const QStringList& lines);
     void clearPassiveObjects();
 
+    //TODO: Having all of these silly things inlined makes absolutely no sense.
+    inline void UpdateMissiles(const Consoden::TankGame::GameStatePtr &game);
+    inline void UpdateRedeemers(const Consoden::TankGame::GameStatePtr &game);
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
     inline void UpdateCoins(const Board& board);
     inline void UpdatePoison(const Board& board);
@@ -135,6 +138,7 @@ private:
     inline void UpdateTank(const Consoden::TankGame::TankPtr& tank,const Board& board);
     inline void UpdateDude(const Consoden::TankGame::DudePtr& dude);
     inline void DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& board);
+    void BadassExplosion(Redeemer& redeemer, int radius);
 
 
     inline void UpdateDudes(const Board& board);
