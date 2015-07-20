@@ -82,6 +82,14 @@ namespace tank_player_cs
 				return gameState.Tanks [tankId].Obj.HasSmoke.Val;
 			}
 		}
+		
+		//Cheks if you have some smoke avaliable
+		public bool HasRedeemer   {
+			get {
+				
+				return gameState.Tanks [tankId].Obj.HasRedeemer.Val;
+			}
+		}
 
 		//Check if square is a wall.
 		public bool IsWall (Position p)
@@ -93,6 +101,12 @@ namespace tank_player_cs
 		public bool IsSmokeGrenade (Position p)
 		{
 			return RawVal (p.X, p.Y) == 's';
+		}
+		
+		//Check if square has redeemerAmmo.
+		public bool isRedeemerAmmo (Position p)
+		{
+			return RawVal (p.X, p.Y) == 'r';
 		}
 
 		//Check if there is a mine in this square.
