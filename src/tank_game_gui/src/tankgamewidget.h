@@ -14,7 +14,7 @@
 #include "tankinfowidget.h"
 #include "sprite.h"
 
-
+namespace CWG= Consoden::TankGame;
 
 class TankGameWidget : public QWidget
 {
@@ -63,26 +63,6 @@ private:
         return QPointF(p.x()*m_const.squarePixelSize+xOffset, p.y()*m_const.squarePixelSize+yOffset);
     }
 
-    int CalculateWrappingCoordinate(int val, int maxVal, int boardSize, int padd);
-
-    void drawWithTranslationAndRotation(QPainter& painter, QPixmap image, QPointF position, qreal rotation);
-    void drawWithWrapping(QPainter& painter, QPixmap image, QPointF position, qreal rotation);
-
-	/*
-	 *  const int xoffset=(m_const.squarePixelSize-m_tankTower.width())/2;
-        const int yoffset=(m_const.squarePixelSize-m_tankTower.height())/2;
-        const int x=xoffset+tank.paintPosition.x()*m_const.squarePixelSize;
-        const int y=yoffset+tank.paintPosition.y()*m_const.squarePixelSize;
-        painter.save();
-        painter.translate(x+m_tankTower.width()/2, y+m_tankTower.height()/2);
-        painter.rotate(tank.paintTowerAngle);
-        painter.translate(m_tankTower.width()/-2, tankImage.height()/-2);
-        painter.drawPixmap(0, 0, m_tankTower);
-        painter.restore();
-	 *
-	 *
-	 * */
-
     void PaintGrid(QPainter& painter);
     void PaintWalls(QPainter& painter);
     void PaintPoison(QPainter& painter);
@@ -95,6 +75,8 @@ private:
     //void PaintSpriteDude(const Sprite& sprite, QPainter& painter);
     void PaintText(const ScreenText& txt, QPainter& painter);
     void PaintWinner(QPainter& painter);
+    inline void ManualDraw(QPainter& painter,QPixmap pixmap, QPointF pos,qreal rotation, bool wrap,Direction direction);
+    inline void ManualDraw(QPainter& painter,QPixmap pixmap, QPointF pos,qreal rotation, bool wrap);
 };
 
 #endif // TANKGAMEWIDGET_H

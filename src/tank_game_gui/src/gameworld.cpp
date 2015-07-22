@@ -116,7 +116,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/smoke_grenade.png", 1, 72, 72,1000,0,0,0.75, &Board::Smoke));
 
-	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.jpg", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
+	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.png", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/redeemer-ammo.png", 1, 72, 72,1000,0,0,0.75, &Board::RedeemerAmmo));
 
@@ -816,12 +816,31 @@ void GameWorld::Update()
     for (auto& vt : m_matchState.gameState.missiles)
     {
         Missile& missile=vt.second;
+
+
+
+        for(auto p : m_matchState.gameState.walls){
+        	if(p == missile.paintPosition){
+
+        		missile.visible = false;
+
+        		break;
+        	}
+        }
+
+
         //std::wcout << "Trying to draw a missile " << std::endl;
         UpdatePositionNoOvershoot(timeToNextUpdate, 2*movement, missile,false); //missiles have double speed
         Tank tank=m_matchState.gameState.tanks[missile.tankId];
         //std::wcout << "And the missile direction is " << directionToString(missile.moveDirection) << std::endl;
         if (missile.paintFire && missile.moveDirection != None)
         {
+
+
+            if(m_matchState.gameState.tanks[missile.tankId].explosion != NotInFlames || m_matchState.gameState.tanks[(missile.tankId + 1) % 2].explosion != NotInFlames){
+            	break;
+            }
+
             QPointF flame_pos  = tank.position+directionToVector(tank.towerDirection);
             bool into_wall = false;
             for(auto p : m_matchState.gameState.walls){
@@ -832,10 +851,11 @@ void GameWorld::Update()
             }
 
             if(!into_wall){
-            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(missile.moveDirection)*m_moveSpeed*2,
-            			DirectionToAngle(missile.moveDirection)+270, now +timeToNextUpdate, 1));
+            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(tank.towerDirection)*m_moveSpeed*2,
+            			DirectionToAngle(tank.towerDirection)+270, now +timeToNextUpdate, 1));
             }
             missile.paintFire=false;
+
 
             if (m_soundEnabled)
             {
@@ -865,12 +885,17 @@ void GameWorld::Update()
 
         if (missile.explosion==SetInFlames)
         {
+
+
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
+
             bool into_wall = false;
             for(auto p : m_matchState.gameState.walls){
             	if(p == missile.position){
             		into_wall = true;
+            		//missile.visible = false;
+
             		break;
             	}
             }
@@ -882,6 +907,7 @@ void GameWorld::Update()
 
 
             missile.explosion=Burning;
+
 
             if (m_soundEnabled)
             {
@@ -1300,6 +1326,8 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
         }
     }
 
+
+
 	//creates and updates missiles
 	for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
 	{
@@ -1315,7 +1343,8 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 
 
 		if(m_matchState.gameState.missiles.find(missile->MissileId().GetVal()) == m_matchState.gameState.missiles.end()){
-			if(m_matchState.gameState.tanks[0].explosion != NotInFlames && m_matchState.gameState.tanks[1].explosion != NotInFlames){
+			if(m_matchState.gameState.tanks[0].explosion != NotInFlames || m_matchState.gameState.tanks[1].explosion != NotInFlames){
+
 				continue;
 			}else{
 				auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
@@ -1328,7 +1357,7 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 				m.paintFire=true;
 
 
-				m.moveDirection=ToDirection(missile->Direction());
+				//m.moveDirection=ToDirection(missile->Direction());
 
 				if (missile->InFlames().GetVal()){
 					m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
@@ -1336,12 +1365,14 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 				}else if (m.explosion!=NotInFlames){
 					m.explosion=Destroyed;
 				}else{
+
 					m.moveDirection=ToDirection(missile->Direction());
 				}
 
 				//continue;
 			}
 		}else{
+
 			auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
 			Missile&  m = inserted.first->second;
 			//update of existing missile
@@ -1350,13 +1381,16 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 			m.visible=true;
 
 			if (missile->InFlames().GetVal()){
+
 				m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
 
 			}else if (m.explosion!=NotInFlames){
 				m.explosion=Destroyed;
 			}else{
+
 				m.moveDirection=ToDirection(missile->Direction());
 			}
+
 
 		}
 
