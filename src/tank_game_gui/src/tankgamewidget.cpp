@@ -331,40 +331,26 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
 
 
     if (tank.explosion==Destroyed){
-    	//drawWithTranslationAndRotation(painter,m_tankWreck,tank.paintPosition,rotation);
-    	ManualDraw(painter,m_tankWreck,tank.paintPosition,rotation,false);
-    	if (tank.isWrapping){
-    		ManualDraw(painter,m_tankWreck,tank.paintPosition,rotation,true,tank.moveDirection);
-    		//drawWithWrapping(painter,m_tankWreck,tank.paintPosition,rotation);
-    	}
+    	ManualDraw(painter,m_tankWreck,tank.paintPosition,rotation,tank.isWrapping,tank.moveDirection);
     	return;
 
     }
 
     const QPixmap& tankImage=blueTank ? m_tankBlue : m_tankRed;
-	//drawWithTranslationAndRotation(painter,tankImage,tank.paintPosition,rotation);*
-    ManualDraw(painter,tankImage,tank.paintPosition,rotation,false);
-	if (tank.isWrapping){
-		ManualDraw(painter,tankImage,tank.paintPosition,rotation,true,tank.moveDirection);
+	ManualDraw(painter,tankImage,tank.paintPosition,rotation,tank.isWrapping,tank.moveDirection);
 
-	}
+	//tank tower
+	ManualDraw(painter,m_tankTower,tank.paintPosition,tank.paintTowerAngle,tank.isWrapping,tank.moveDirection);
 
-
-//tank tower
-
-
-	//drawWithTranslationAndRotation(painter,m_tankTower,tank.paintPosition,tank.paintTowerAngle);
-	ManualDraw(painter,m_tankTower,tank.paintPosition,tank.paintTowerAngle,false);
-	if (tank.isWrapping){
-		ManualDraw(painter,m_tankTower,tank.paintPosition,tank.paintTowerAngle,true,tank.moveDirection);
-	}
 
 }
 
 void TankGameWidget::PaintMissile(const Missile& missile, QPainter& painter)
 {
 
-	if (!missile.visible && !missile.explosion == SetInFlames)
+	std::wcout << "well.. are we visible or what???" << (missile.visible ? "true"  : "false") <<  std::endl;
+	std::wcout << "well.. ???" << (missile.visible ? "true"  : "false") <<  std::endl;
+	if (!missile.visible || missile.explosion == SetInFlames)
     {
         return;
     }
@@ -376,7 +362,6 @@ void TankGameWidget::PaintRedeemer(const Redeemer& redeemer, QPainter& painter){
 
     if (redeemer.visible || redeemer.explosion == SetInFlames || redeemer.detonate || redeemer.explosion == Burning){
     	ManualDraw(painter,m_redeemer,redeemer.paintPosition,DirectionToAngle(redeemer.moveDirection),false);
-    	//drawWithTranslationAndRotation(painter,m_redeemer,redeemer.paintPosition,DirectionToAngle(redeemer.moveDirection));
     }
 
 
@@ -467,10 +452,12 @@ void TankGameWidget::ManualDraw(QPainter& painter,QPixmap image, QPointF pos, qr
 
 		}
 		pf=QPainter::PixmapFragment::create(screen_position,QRectF(0,0,image.width(),image.height()), 1, 1, 0, 1);
-	}else{
+		pf.rotation = rotation;
+		painter.drawPixmapFragments(&pf, 1, image);
+	}
 		pf=QPainter::PixmapFragment::create(ToScreen(pos, m_const.squarePixelSize/2, m_const.squarePixelSize/2),QRectF(0,0,image.width(),image.height()), 1, 1, 0, 1);
 
-	}
+
     pf.rotation = rotation;
     painter.drawPixmapFragments(&pf, 1, image);
 

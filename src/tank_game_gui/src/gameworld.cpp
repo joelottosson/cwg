@@ -816,6 +816,17 @@ void GameWorld::Update()
     for (auto& vt : m_matchState.gameState.missiles)
     {
         Missile& missile=vt.second;
+
+        for(auto p : m_matchState.gameState.walls){
+        	if(p == missile.paintPosition){
+
+        		missile.visible = false;
+
+        		break;
+        	}
+        }
+
+
         //std::wcout << "Trying to draw a missile " << std::endl;
         UpdatePositionNoOvershoot(timeToNextUpdate, 2*movement, missile,false); //missiles have double speed
         Tank tank=m_matchState.gameState.tanks[missile.tankId];
@@ -836,6 +847,7 @@ void GameWorld::Update()
             			DirectionToAngle(missile.moveDirection)+270, now +timeToNextUpdate, 1));
             }
             missile.paintFire=false;
+
 
             if (m_soundEnabled)
             {
@@ -867,10 +879,13 @@ void GameWorld::Update()
         {
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
+
             bool into_wall = false;
             for(auto p : m_matchState.gameState.walls){
             	if(p == missile.position){
             		into_wall = true;
+            		//missile.visible = false;
+
             		break;
             	}
             }
@@ -882,6 +897,7 @@ void GameWorld::Update()
 
 
             missile.explosion=Burning;
+
 
             if (m_soundEnabled)
             {
@@ -1328,7 +1344,7 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 				m.paintFire=true;
 
 
-				m.moveDirection=ToDirection(missile->Direction());
+				//m.moveDirection=ToDirection(missile->Direction());
 
 				if (missile->InFlames().GetVal()){
 					m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
@@ -1336,6 +1352,7 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 				}else if (m.explosion!=NotInFlames){
 					m.explosion=Destroyed;
 				}else{
+
 					m.moveDirection=ToDirection(missile->Direction());
 				}
 
@@ -1350,11 +1367,13 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 			m.visible=true;
 
 			if (missile->InFlames().GetVal()){
+
 				m.explosion = (m.explosion == NotInFlames) ? SetInFlames : Burning;
 
 			}else if (m.explosion!=NotInFlames){
 				m.explosion=Destroyed;
 			}else{
+
 				m.moveDirection=ToDirection(missile->Direction());
 			}
 
