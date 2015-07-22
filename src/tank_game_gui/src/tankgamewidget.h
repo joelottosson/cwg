@@ -63,11 +63,6 @@ private:
         return QPointF(p.x()*m_const.squarePixelSize+xOffset, p.y()*m_const.squarePixelSize+yOffset);
     }
 
-    int CalculateWrappingCoordinate(qreal val, qreal maxVal, qreal boardSize, int padd);
-
-    void drawWithTranslationAndRotation(QPainter& painter, QPixmap image, QPointF position, qreal rotation);
-    void drawWithWrapping(QPainter& painter, QPixmap image, QPointF position, qreal rotation);
-
     void PaintGrid(QPainter& painter);
     void PaintWalls(QPainter& painter);
     void PaintPoison(QPainter& painter);
@@ -80,8 +75,8 @@ private:
     //void PaintSpriteDude(const Sprite& sprite, QPainter& painter);
     void PaintText(const ScreenText& txt, QPainter& painter);
     void PaintWinner(QPainter& painter);
-    void ManualDraw(QPainter& painter,QPixmap pixmap, QPointF pos,qreal rotation, bool wrap,Direction direction);
-    void ManualDraw(QPainter& painter,QPixmap pixmap, QPointF pos,qreal rotation, bool wrap);
+    inline void ManualDraw(QPainter& painter,QPixmap pixmap, QPointF pos,qreal rotation, bool wrap,Direction direction);
+    inline void ManualDraw(QPainter& painter,QPixmap pixmap, QPointF pos,qreal rotation, bool wrap);
 };
 
 #endif // TANKGAMEWIDGET_H

@@ -116,7 +116,7 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/smoke_grenade.png", 1, 72, 72,1000,0,0,0.75, &Board::Smoke));
 
-	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.jpg", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
+	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.png", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/redeemer-ammo.png", 1, 72, 72,1000,0,0,0.75, &Board::RedeemerAmmo));
 
@@ -843,8 +843,8 @@ void GameWorld::Update()
             }
 
             if(!into_wall){
-            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(missile.moveDirection)*m_moveSpeed*2,
-            			DirectionToAngle(missile.moveDirection)+270, now +timeToNextUpdate, 1));
+            	m_sprites.push_back(Sprite(m_tankFire, flame_pos, directionToVector(tank.towerDirection)*m_moveSpeed*2,
+            			DirectionToAngle(tank.towerDirection)+270, now +timeToNextUpdate, 1));
             }
             missile.paintFire=false;
 
