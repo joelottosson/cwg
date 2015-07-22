@@ -817,6 +817,8 @@ void GameWorld::Update()
     {
         Missile& missile=vt.second;
 
+
+
         for(auto p : m_matchState.gameState.walls){
         	if(p == missile.paintPosition){
 
@@ -833,6 +835,12 @@ void GameWorld::Update()
         //std::wcout << "And the missile direction is " << directionToString(missile.moveDirection) << std::endl;
         if (missile.paintFire && missile.moveDirection != None)
         {
+
+
+            if(m_matchState.gameState.tanks[missile.tankId].explosion != NotInFlames || m_matchState.gameState.tanks[(missile.tankId + 1) % 2].explosion != NotInFlames){
+            	break;
+            }
+
             QPointF flame_pos  = tank.position+directionToVector(tank.towerDirection);
             bool into_wall = false;
             for(auto p : m_matchState.gameState.walls){
@@ -877,6 +885,8 @@ void GameWorld::Update()
 
         if (missile.explosion==SetInFlames)
         {
+
+
             //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
             //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
 
@@ -1316,6 +1326,8 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
         }
     }
 
+
+
 	//creates and updates missiles
 	for (Safir::Dob::Typesystem::ArrayIndex i=0; i < game->MissilesArraySize(); i++)
 	{
@@ -1331,7 +1343,8 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 
 
 		if(m_matchState.gameState.missiles.find(missile->MissileId().GetVal()) == m_matchState.gameState.missiles.end()){
-			if(m_matchState.gameState.tanks[0].explosion != NotInFlames && m_matchState.gameState.tanks[1].explosion != NotInFlames){
+			if(m_matchState.gameState.tanks[0].explosion != NotInFlames || m_matchState.gameState.tanks[1].explosion != NotInFlames){
+
 				continue;
 			}else{
 				auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
@@ -1359,6 +1372,7 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 				//continue;
 			}
 		}else{
+
 			auto inserted=m_matchState.gameState.missiles.insert(std::make_pair(missile->MissileId().GetVal(), Missile()));
 			Missile&  m = inserted.first->second;
 			//update of existing missile
@@ -1376,6 +1390,7 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 
 				m.moveDirection=ToDirection(missile->Direction());
 			}
+
 
 		}
 
