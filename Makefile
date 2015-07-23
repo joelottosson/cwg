@@ -12,6 +12,15 @@ server: .FORCE
 	cd src/tank_match_server/src && cmake . && make install
 	@cd ../../..
 	
+config: .FORCE
+	cd src/ && cmake . && make install
+	@cd ../
+	
+clean_config: .FORCE
+	cd src/ && cmake . && make clean
+	@cd ../
+
+	
 clean_engine: .FORCE
 	cd src/tank_engine/src && cmake . && make clean
 	@cd ../../..
@@ -54,11 +63,11 @@ clean_cool_players: .FORCE
 
 backend: engine gui server
 
-clean_backend: clean_engine clean_gui clean_server
+clean_backend: clean_engine clean_gui clean_server clean_config
 
-clean_all: clean_engine clean_gui clean_server clean_cool_players
+clean_all: clean_engine clean_gui clean_server clean_cool_players clean_config
 
-all: .FORCE engine gui server cool_players
+all: .FORCE engine gui server cool_players config
 
 
 

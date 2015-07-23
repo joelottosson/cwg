@@ -34,8 +34,9 @@ namespace
     }
 }
 
-GameWorld::GameWorld(int updateInterval, bool soundEnabled)
+GameWorld::GameWorld(int updateInterval, bool soundEnabled,ConfigSystem::Config conf)
     :m_matchState()
+	,m_c(conf)
     ,m_players()
     ,m_animationUpdateInterval(updateInterval)
     ,m_soundEnabled(soundEnabled)
@@ -95,21 +96,16 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 		m_smoke.fragments.push_back(QRectF(200*i, 0, 200, 200));
 	}
 
-
-	//m_matchState.gameState.
-
-
-	//m_passive_objects.push(new PassiveGroup(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,"coin.mp3",soundEnabled));
 	boost::shared_ptr<PassiveGroup> glenn = boost::make_shared<PassiveGroup>(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo);
-	glenn->setSoundPlayer("laser-pickup.mp3",soundEnabled,90);
+	glenn->setSoundPlayer("laser-pickup.mp3",soundEnabled,(int)((m_c.m_laser_sound_volume*100)/m_c.m_master_volume));
 	m_passive_objects.push_back(glenn);
 
 	glenn = boost::make_shared<PassiveGroup>(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,0.75, &Board::Coins);
-	glenn->setSoundPlayer("coin.mp3",soundEnabled,80);
+	glenn->setSoundPlayer("coin.mp3",soundEnabled,(int)((m_c.m_coin_volume*100)/m_c.m_master_volume));
 	m_passive_objects.push_back(glenn);
 
 	glenn = boost::make_shared<PassiveGroup>(m_matchState,":/images/poison.png", 1, 72, 72,1000,0,0,0.75, &Board::Poison);
-	glenn->setSoundPlayer("wilhelm_scream.mp3",soundEnabled,60);
+	glenn->setSoundPlayer("wilhelm_scream.mp3",soundEnabled,(int)((m_c.m_scream_volume*100)/m_c.m_master_volume));
 	m_passive_objects.push_back(glenn);
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
@@ -119,8 +115,6 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled)
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.png", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/redeemer-ammo.png", 1, 72, 72,1000,0,0,0.75, &Board::RedeemerAmmo));
-
-
 }
 
 std::vector<boost::shared_ptr<PassiveGroup>>  GameWorld::getPassiveGroups() const{
@@ -140,9 +134,6 @@ void GameWorld::Clear()
     m_sprites.clear();
     m_screenText.clear();
     clearPassiveObjects();
-
-
-
 }
 
 void GameWorld::ClearGameState()
@@ -152,7 +143,6 @@ void GameWorld::ClearGameState()
     m_sprites.clear();
     m_screenText.clear();
     clearPassiveObjects();
-
 }
 
 void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t id)
@@ -167,7 +157,6 @@ void GameWorld::Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t 
     clearPassiveObjects();
 
     Update(match);
-
 
     if (m_matchState.currentGameNumber==1 && !m_matchState.finished)
     {
@@ -321,7 +310,7 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     qreal x_pos = t.position.x();
     qreal y_pos = t.position.y();
 
-    double laser_delay = 0.0;
+    double laser_delay = 0.25;
 
 
     qreal rot = 0;
@@ -340,26 +329,18 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     switch (t.moveDirection){
     	case Direction::UpHeading:
     		y_pos--;
-    		laser_delay = 0.25;
-    		//rot = 0;
     		break;
     	case Direction::DownHeading:
     		y_pos++;
-    		laser_delay = 0.25;
-			//rot = 180;
 			break;
     	case Direction::LeftHeading:
     		x_pos--;
-    		laser_delay = 0.25;
-			//rot = 270;
 			break;
     	case Direction::RightHeading:
     		x_pos++;
-    		laser_delay = 0.25;
-			//rot = 90;
 			break;
     	default:
-
+    		laser_delay = 0;
     		break;
     }
 
@@ -420,20 +401,11 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
 void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board& board)
 {
 
-
-
     int i=tank->TankId().GetVal();
 
     Tank& t=m_matchState.gameState.tanks[i];
-    //UpdateTankWrapping(tank	, t);
     t.fires=tank->Fire().GetVal();
     t.towerDirection=ToDirection(tank->TowerDirection());
-
-/*    if(tank->HitTank().IsNull()==false && tank->HitTank().GetVal()==true && t.explosion == NotInFlames){
-    	calculateColisionPosition(t,m_matchState.gameState.tanks[(tank->TankId() + 1) % 2] );
-    	t.explosion=SetInFlames;
-    	return;
-    }*/
 
     if(ToDirection(tank->MoveDirection()) == None){
     	t.moveDirection = t.oldMoveDirection;
@@ -442,18 +414,14 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     }
     t.oldMoveDirection = t.moveDirection;
 
-
-
-
-
-
     if(!tank->SmokeLeft().IsNull() && tank->SmokeLeft() > 0){
 
-    	int smoke_puffs = 7;
+    	int smoke_puffs = m_c.m_smoke_puffs;
         qint64 time_per_puff=(m_matchState.gameState.pace)/smoke_puffs;
+        int smoke_spread = m_c.m_smoke_spread;
     	for(int i = 0; i <smoke_puffs; i++){
-    		QPointF random_start = t.position + QPointF(((qreal)(rand()%200-100))/100,((qreal)(rand()%200-100))/100)/2 /*- QPointF(m_smoke.fragments.front().width(),m_smoke.fragments.front().height())/(m_pixels_per_square*2)*/;
-    		QPointF random_direction = QPointF(((float)((rand()%200)-100))/100,((float)((rand()%200)-100))/100)*m_moveSpeed*0.25;
+    		QPointF random_start = t.position + QPointF(((qreal)(rand()%smoke_spread*2-smoke_spread))/100,((qreal)(rand()%smoke_spread-smoke_spread/2))/100)/2;
+    		QPointF random_direction = QPointF(((float)((rand()%smoke_spread*2)-smoke_spread))/100,((float)((rand()%smoke_spread*2)-smoke_spread))/100)*m_moveSpeed*m_c.m_smoke_speed;
         	m_sprites.push_back(Sprite(m_smoke, random_start, random_direction , rand()%360, QDateTime::currentMSecsSinceEpoch()+time_per_puff*i, 1));
     	}
     	if(!t.deploying_smoke && m_soundEnabled){
@@ -530,8 +498,6 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
 			default:
 				break;
         }
-
-
 
         if (!tank->HitWall().IsNull() && tank->HitWall()){
             t.deathCause=Tank::HitWall;
@@ -770,13 +736,13 @@ void GameWorld::Update()
         		time = now + timeToNextUpdate/2;
         	}
         	srand(clock());
-            m_sprites.push_back(Sprite(m_explosion, tank.position, now+timeToNextUpdate, 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)),
-            		time + (rand() % 300), 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)),
-            		time + (rand() % 300), 1));
-            m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % 600)-300)/600), tank.position.y() + (((float)(rand() % 600)-300)/600)),
-            		time + (rand() % 300), 1));
+            //m_sprites.push_back(Sprite(m_explosion, tank.position, now+timeToNextUpdate, 1));
+        	int spread = m_c.m_death_explosion_spread;
+        	for(int i = 0; i < m_c.m_death_explosion_count; i++){
+        		//TODO::this might be wrong like mao zedong...pling plong
+        		m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % spread*2)-spread)/(spread*2)), tank.position.y() + (((float)(rand() % spread*2)-spread)/(spread*2))),
+        				time + (rand() % m_c.m_death_eclosion_time), 1));
+        	}
 
 
             tank.explosion=Burning;
@@ -817,8 +783,6 @@ void GameWorld::Update()
     {
         Missile& missile=vt.second;
 
-
-
         for(auto p : m_matchState.gameState.walls){
         	if(p == missile.paintPosition){
 
@@ -828,14 +792,12 @@ void GameWorld::Update()
         	}
         }
 
-
         //std::wcout << "Trying to draw a missile " << std::endl;
         UpdatePositionNoOvershoot(timeToNextUpdate, 2*movement, missile,false); //missiles have double speed
         Tank tank=m_matchState.gameState.tanks[missile.tankId];
         //std::wcout << "And the missile direction is " << directionToString(missile.moveDirection) << std::endl;
         if (missile.paintFire && missile.moveDirection != None)
         {
-
 
             if(m_matchState.gameState.tanks[missile.tankId].explosion != NotInFlames || m_matchState.gameState.tanks[(missile.tankId + 1) % 2].explosion != NotInFlames){
             	break;
@@ -855,7 +817,6 @@ void GameWorld::Update()
             			DirectionToAngle(tank.towerDirection)+270, now +timeToNextUpdate, 1));
             }
             missile.paintFire=false;
-
 
             if (m_soundEnabled)
             {
@@ -881,14 +842,8 @@ void GameWorld::Update()
             }
         }
 
-
-
         if (missile.explosion==SetInFlames)
         {
-
-
-            //qreal distanceToExplosion=QPointF(missile.position.x()-missile.paintPosition.x(), missile.position.y()-missile.paintPosition.y()).manhattanLength();
-            //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
 
             bool into_wall = false;
             for(auto p : m_matchState.gameState.walls){
@@ -905,9 +860,7 @@ void GameWorld::Update()
             	m_sprites.push_back(Sprite(m_explosion, missile.position-directionToVector(missile.moveDirection), nextUpdate, 1));
             }
 
-
             missile.explosion=Burning;
-
 
             if (m_soundEnabled)
             {
@@ -933,8 +886,6 @@ void GameWorld::Update()
             }
         }
     }
-
-
 
     for (auto& vt : m_matchState.gameState.redeemers)
     {
@@ -985,12 +936,8 @@ void GameWorld::Update()
             }
         }
 
-
-
         if (redeemer.explosion==SetInFlames)
         {
-            //qreal distanceToExplosion=QPointF(redeemer.position.x()-redeemer.paintPosition.x(), redeemer.position.y()-redeemer.paintPosition.y()).manhattanLength();
-            //qint64 explosionTime=static_cast<qint64>(distanceToExplosion/(2*m_moveSpeed));
             if(!redeemer.detonate){m_sprites.push_back(Sprite(m_explosion, redeemer.position, nextUpdate, 1));}
             redeemer.explosion=Burning;
 
@@ -1017,14 +964,11 @@ void GameWorld::Update()
                 }));
             }
         }
-
-
     }
 
     for(auto a : m_passive_objects){
     	a->updateSprites();
     }
-
 
     for (auto it=m_sprites.begin(); it!=m_sprites.end();)
     {
@@ -1066,7 +1010,6 @@ bool GameWorld::MatchFinished() const
             bool spriteFinished=sprite.Repetitions()==0 || sprite.Finished();
             if (!spriteFinished)
             {
-            	// std::wcout << "We removed some sprajtz" << std::endl;
                 return false; //there are still sprites that will not run forever that has not finished
             }
         }
@@ -1115,11 +1058,11 @@ void GameWorld::HandleEventQueue(qint64 time)
 
 void GameWorld::InitMediaPlayers()
 {
-    m_fireMediaPlayer1.setVolume(35);
-    m_explosionMediaPlayer1.setVolume(80);
-    m_fireMediaPlayer2.setVolume(35);
-    m_explosionMediaPlayer2.setVolume(80);
-    m_smokeMediaPlayer.setVolume(75);
+    m_fireMediaPlayer1.setVolume((int)((m_c.m_fire_volume*100)/m_c.m_master_volume));
+    m_explosionMediaPlayer1.setVolume((int)((m_c.m_explosion_volume*100)/m_c.m_master_volume));
+    m_fireMediaPlayer2.setVolume((int)((m_c.m_fire_volume*100)/m_c.m_master_volume));
+    m_explosionMediaPlayer2.setVolume((int)((m_c.m_explosion_volume*100)/m_c.m_master_volume));
+    m_smokeMediaPlayer.setVolume((int)((m_c.m_smoke_volume*100)/m_c.m_master_volume));
 
     const char* runtime=getenv("SAFIR_RUNTIME");
     QString path=QDir::cleanPath(QString(runtime)+QDir::separator()+"data"+QDir::separator()+"tank_game"+QDir::separator()+"sounds");
@@ -1145,18 +1088,6 @@ void GameWorld::UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& 
 {
 
 	qreal endAngle = DirectionToAngle(tank.towerDirection);
-
-/*	std::wcout << "Tower direction is     " << tank.towerDirection << std::endl;
-	std::wcout << "Old Tower direction is " << tank.towerDirection << std::endl;
-	std::wcout << std::endl;
-
-	if(tank.towerDirection == Direction::None){
-		endAngle = DirectionToAngle(tank.oldTowerDirection);
-	}else{
-		endAngle = DirectionToAngle(tank.towerDirection);
-		tank.oldTowerDirection = tank.towerDirection;
-	}*/
-
 
     if (timeToNextUpdate<=m_animationUpdateInterval)
     {
@@ -1450,7 +1381,6 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 
 				r.moveDirection=ToDirection(redeemer->Direction());
 				if (redeemer->InFlames().GetVal()){
-					//r.explosion = (r.explosion == NotInFlames) ? SetInFlames : Burning;
 					r.visible = false;
 
 				}else if (r.explosion!=NotInFlames){
@@ -1458,10 +1388,6 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 				}else{
 					r.moveDirection=ToDirection(redeemer->Direction());
 				}
-
-
-
-				//continue;
 			}
 		}else{
 			auto inserted=m_matchState.gameState.redeemers.insert(std::make_pair(redeemer->RedeemerId().GetVal(), Redeemer()));
@@ -1475,7 +1401,7 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 
 
 			if(r.time_to_Explosion == 0  && r.explosion != SetInFlames){
-				BadassExplosion(r, 1);
+				BadassExplosion(r, m_c.m_redeemer_radius);
 				r.explosion = SetInFlames;
 				r.visible = false;
 			}else
@@ -1492,13 +1418,8 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 			}else{
 				r.moveDirection=ToDirection(redeemer->Direction());
 			}
-
 		}
-
-
 	}
-
-
 }
 
 QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
@@ -1512,7 +1433,6 @@ QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
 
 	if(enemy.moveDirection == None){
 
-
 		return (own.position + directionToVector(own.moveDirection)*(.5));
 
 	}else{
@@ -1520,7 +1440,6 @@ QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
 		if( (abs(directionToVector(own.moveDirection).y()) != abs(directionToVector(enemy.moveDirection).y())) ||
 				(abs(directionToVector(own.moveDirection).x()) != abs(directionToVector(enemy.moveDirection).x()))) {
 
-			//std::wcout << "Kollajded dajägonally" << std::endl;
 			return (own.position + directionToVector(own.moveDirection)*(0.5)); //Diagonally
 
 		}else{
@@ -1532,7 +1451,6 @@ QPointF GameWorld::calculateColisionPosition(Tank& own, Tank& enemy){
 
 		}
 	}
-
 }
 
 void GameWorld::BadassExplosion(Redeemer& redeemer, int radius){
@@ -1540,14 +1458,16 @@ void GameWorld::BadassExplosion(Redeemer& redeemer, int radius){
 	qreal center_y = redeemer.position.y();
 	redeemer.detonate = true;
 	redeemer.explosion = SetInFlames;
-	int exploisions_per_square = 7;
+	int exploisions_per_square = m_c.m_redeemer_explosion_per_square;
 	int exploision_time = (m_matchState.gameState.pace)/exploisions_per_square;
+
+	int spread = m_c.m_redeemer_explosion_spread;
 
 	for(qreal x_pos = center_x - radius; x_pos <= center_x+radius; x_pos++){
 		for(qreal y_pos = center_y - radius; y_pos <= center_y+radius; y_pos++){
 	    	for(int i = 0; i < exploisions_per_square; i++){
-	    		QPointF random_start = QPointF(x_pos,y_pos) + QPointF(((qreal)(rand()%200-100))/100,((qreal)(rand()%200-100))/100)/2 /*- QPointF(m_smoke.fragments.front().width(),m_smoke.fragments.front().height())/(m_pixels_per_square*2)*/;
-	    		QPointF random_direction = QPointF(((float)((rand()%200)-100))/100,((float)((rand()%200)-100))/100)*m_moveSpeed*0.25;
+	    		QPointF random_start = QPointF(x_pos,y_pos) + QPointF(((qreal)(rand()%(spread*2)-spread))/spread,((qreal)(rand()%(spread*2)-spread))/spread)/2;
+	    		QPointF random_direction = QPointF(((float)((rand()%(spread*2))-spread))/spread,((float)((rand()%(spread*2))-spread))/spread)*m_moveSpeed*0.25;
 	        	m_sprites.push_back(Sprite(m_explosion, random_start, random_direction , rand()%360, QDateTime::currentMSecsSinceEpoch()+exploision_time*i, 1));
 	    	}
 		}
@@ -1588,9 +1508,6 @@ const char* GameWorld::directionToString(Direction dir){
 
 void GameWorld::collisionOverride(Tank& own, Tank& enemy){
 	return;
-	//QPointF diff = own.position - enemy.position;
-	//int key = (int)(diff.y()*10) + (int)(diff.x());
-
 }
 
 
@@ -1609,24 +1526,13 @@ qreal GameWorld::manhattanDistanceOnTorus(QPointF a, QPointF b){
 }
 
 qreal GameWorld::timeToEvent(QPointF a, QPointF b,qreal speed){
-	//qreal distance = manhattanDistanceOnTorus(a,b);
 	qreal distance = simpleDistance(a,b);
-
-	//std::wcout << "a is " << a.x() <<","<<a.y() << std::endl;
-	//std::wcout << "b is " << b.x() <<","<<b.y() << std::endl;
-
-	//std::wcout << "distance is " << distance << std::endl;
-	//std::wcout << "computed time is  " << distance/speed << std::endl << std::endl;
 	return distance/speed;
-
 }
 
 
 qreal GameWorld::simpleDistance(QPointF a, QPointF b){
 	QPointF tmp = (a-b);
-	//std::wcout << "tmp is " << tmp.x() <<","<<tmp.y() << std::endl;
-	//std::wcout << "abs of tmp is " << std::abs((double)tmp.x()) <<","<< std::abs((double)tmp.y()) << std::endl;
-
 	return std::abs((double)tmp.x()) + std::abs((double)tmp.y());
 }
 

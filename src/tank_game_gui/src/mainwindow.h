@@ -19,6 +19,7 @@
 #include "tankinfowidget.h"
 #include "gamemodel.h"
 #include "newgamedialog.h"
+#include "../../Config.h"
 
 //----------------------------------------
 class DobConnector : public QThread
@@ -63,10 +64,13 @@ class MainWindow : public QMainWindow,
     Q_OBJECT
     
 public:
-    explicit MainWindow(int updateFrequency, bool soundEnalbed, QWidget *parent = 0);
+    explicit MainWindow(int updateFrequency, bool soundEnalbed, bool override_sound, bool override_freq, QWidget *parent = 0);
     ~MainWindow();
 
+    ConfigSystem::Config m_conf;
+
     virtual bool eventFilter(QObject* o, QEvent* e);
+
 
     //Dob stuff
     virtual void OnDoDispatch();
@@ -82,7 +86,7 @@ private:
     const int m_updateInterval;
     TankGameWidget* m_tankGameWidget;
     TankInfoWidget* m_tankInfoWidget[2];
-    GameWorld m_world;
+    boost::shared_ptr<GameWorld> m_world;
     Safir::Dob::Connection m_dobConnection;
     QEvent::Type m_dispatchEvent;
     DobConnector m_conThread;

@@ -8,11 +8,17 @@
 #include "mainwindow.h"
 #include <QApplication>
 
+#include <../../Config.h>
 
 int main(int argc, char *argv[])
 {
+
+
     int updateFrequency=30;
     bool soundEnabled=true;
+    bool override_freq = false;
+    bool override_sound = false;
+
 
     for (int i=1; i<argc; ++i)
     {
@@ -20,6 +26,7 @@ int main(int argc, char *argv[])
         if (param=="--no-sound")
         {
             soundEnabled=false;
+            override_sound = true;
         }
         else
         {
@@ -28,12 +35,13 @@ int main(int argc, char *argv[])
             if (isNumber)
             {
                 updateFrequency=frequency;
+                override_freq = true;
             }
         }
     }
 
     QApplication a(argc, argv);
-    MainWindow w(updateFrequency, soundEnabled);
+    MainWindow w(updateFrequency, soundEnabled,override_sound, override_freq);
     w.show();
     return a.exec();
 }
