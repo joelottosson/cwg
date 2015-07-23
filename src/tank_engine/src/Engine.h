@@ -15,7 +15,7 @@
 
 #include "JoystickEntityHandler.h"
 #include "JoystickEngineIF.h"
-#include "Config.h"
+#include "../../Config.h"
 
 
 #include "GameMap.h"
@@ -30,7 +30,7 @@ namespace TankEngine
     {
     public:
 
-    	Config m_config;
+    	ConfigSystem::Config m_config;
 
         Engine(boost::asio::io_service& io);
 
