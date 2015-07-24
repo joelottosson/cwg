@@ -690,7 +690,7 @@ namespace TankEngine
 			}
 
 
-            if(joystick_ptr->Fire() &&	joystick_ptr->FireLaser() && joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
+            if(joystick_ptr->Fire() &&	joystick_ptr->FireLaser() && joystick_ptr->TowerDirection() != CWG::Direction::Neutral && joystick_ptr->MoveDirection() == CWG::Direction::Neutral){
 
             	if(tank_ptr->Lasers() > 0){
 
@@ -956,6 +956,8 @@ namespace TankEngine
     			own_tank->InFlames() = true;
 
     			own_tank->HitMissile() = true;
+    			return true;
+    		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
     			return true;
     		}
 
