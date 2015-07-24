@@ -310,6 +310,7 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     qreal x_pos = t.position.x();
     qreal y_pos = t.position.y();
 
+
     double laser_delay = 0.25;
 
 
@@ -344,7 +345,6 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     		break;
     }
 
-
     switch (t.towerDirection){
     	case Direction::UpHeading:
     		dy = -1;
@@ -369,6 +369,7 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
 
 
     m_sprites.push_back(Sprite(m_laser_start, QPointF(x_pos,y_pos),QPointF(0,0),rot, m_matchState.gameState.lastUpdate+m_matchState.gameState.pace*laser_delay, 1));
+
 
     while(true){
     	x_pos = wrap(x_pos + dx,m_matchState.gameState.size.x());
@@ -415,23 +416,31 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     t.oldMoveDirection = t.moveDirection;
 
     if(!tank->SmokeLeft().IsNull() && tank->SmokeLeft() > 0){
-
+    	std::wcout << "entered smoke drawing thing" << std::endl;
     	int smoke_puffs = m_c.m_smoke_puffs;
         qint64 time_per_puff=(m_matchState.gameState.pace)/smoke_puffs;
+        std::wcout << "tried to compute time per puff" << std::endl;
         int smoke_spread = m_c.m_smoke_spread;
+        std::wcout << "smeuk spread is " << smoke_spread <<std::endl;
     	for(int i = 0; i <smoke_puffs; i++){
-    		QPointF random_start = t.position + QPointF(((qreal)(rand()%smoke_spread*2-smoke_spread))/100,((qreal)(rand()%smoke_spread-smoke_spread/2))/100)/2;
-    		QPointF random_direction = QPointF(((float)((rand()%smoke_spread*2)-smoke_spread))/100,((float)((rand()%smoke_spread*2)-smoke_spread))/100)*m_moveSpeed*m_c.m_smoke_speed;
+    		std::wcout << "Jumped into the leup" << std::endl;
+    		QPointF random_start = t.position + QPointF(((qreal)(rand()%smoke_spread*2-smoke_spread))/100,((qreal)(rand()%smoke_spread*2-smoke_spread))/100)/2;
+    		std::wcout << "computed position" << std::endl;
+    		QPointF random_direction = QPointF(((float)((rand()%smoke_spread*2)-smoke_spread))/100,((float)((rand()%smoke_spread*2)-smoke_spread))/100)*m_moveSpeed*(((float)1)/m_c.m_smoke_speed);
+    		std::wcout << "computed direction" << std::endl;
         	m_sprites.push_back(Sprite(m_smoke, random_start, random_direction , rand()%360, QDateTime::currentMSecsSinceEpoch()+time_per_puff*i, 1));
+        	std::wcout << "pushed the sprite...wich is quite allright" << std::endl;
     	}
     	if(!t.deploying_smoke && m_soundEnabled){
     		m_smokeMediaPlayer.stop();
     		m_smokeMediaPlayer.play();
     		t.deploying_smoke = true;
     	}
+    	std::wcout << "left smoke drawing thingy" << std::endl;
     }else{
     	t.deploying_smoke = false;
     }
+
 
     if(!tank->FireLaser().IsNull() && tank->FireLaser() && t.explosion == NotInFlames ){
     	//std::wcout << "is fiering laser" << std::endl;

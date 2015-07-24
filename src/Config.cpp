@@ -21,10 +21,10 @@ Config::Config(const char *file_path){
 		CFG_SIMPLE_BOOL("audio_enabled",&m_audio_enabled),
 		CFG_SIMPLE_INT("master_volume",&m_master_volume),
 
-		CFG_SIMPLE_FLOAT("laser_delay" ,&m_laser_delay),
+		CFG_SIMPLE_INT("laser_delay" ,&m_laser_delay),
 		CFG_SIMPLE_INT( "smoke_puffs" ,&m_smoke_puffs),
-		CFG_SIMPLE_FLOAT("smoke_speed", &m_smoke_speed),
-		CFG_SIMPLE_FLOAT("smoke_spread", &m_smoke_spread),
+		CFG_SIMPLE_INT("smoke_speed", &m_smoke_speed),
+		CFG_SIMPLE_INT("smoke_spread", &m_smoke_spread),
 		CFG_SIMPLE_INT( "death_explosion_count" ,&m_death_explosion_count),
 		CFG_SIMPLE_INT( "death_explosion_spread" ,&m_death_explosion_spread),
 		CFG_SIMPLE_INT( "death_explosion_time" ,&m_death_eclosion_time),

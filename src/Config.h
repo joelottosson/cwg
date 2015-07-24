@@ -35,10 +35,10 @@ public:
 	bool m_audio_enabled;
 	int m_master_volume;
 
-	float m_laser_delay;
+	int m_laser_delay;
 	int m_smoke_puffs;
 	int m_smoke_spread;
-	float m_smoke_speed;
+	int m_smoke_speed;
 	int m_death_explosion_count;
 	int m_death_explosion_spread;
 	int m_death_eclosion_time;
