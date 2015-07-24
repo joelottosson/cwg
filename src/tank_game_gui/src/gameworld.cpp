@@ -416,38 +416,27 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     t.oldMoveDirection = t.moveDirection;
 
     if(!tank->SmokeLeft().IsNull() && tank->SmokeLeft() > 0){
-    	std::wcout << "entered smoke drawing thing" << std::endl;
     	int smoke_puffs = m_c.m_smoke_puffs;
         qint64 time_per_puff=(m_matchState.gameState.pace)/smoke_puffs;
-        std::wcout << "tried to compute time per puff" << std::endl;
         int smoke_spread = m_c.m_smoke_spread;
-        std::wcout << "smeuk spread is " << smoke_spread <<std::endl;
     	for(int i = 0; i <smoke_puffs; i++){
-    		std::wcout << "Jumped into the leup" << std::endl;
     		QPointF random_start = t.position + QPointF(((qreal)(rand()%smoke_spread*2-smoke_spread))/100,((qreal)(rand()%smoke_spread*2-smoke_spread))/100)/2;
-    		std::wcout << "computed position" << std::endl;
     		QPointF random_direction = QPointF(((float)((rand()%smoke_spread*2)-smoke_spread))/100,((float)((rand()%smoke_spread*2)-smoke_spread))/100)*m_moveSpeed*(((float)1)/m_c.m_smoke_speed);
-    		std::wcout << "computed direction" << std::endl;
         	m_sprites.push_back(Sprite(m_smoke, random_start, random_direction , rand()%360, QDateTime::currentMSecsSinceEpoch()+time_per_puff*i, 1));
-        	std::wcout << "pushed the sprite...wich is quite allright" << std::endl;
     	}
     	if(!t.deploying_smoke && m_soundEnabled){
     		m_smokeMediaPlayer.stop();
     		m_smokeMediaPlayer.play();
     		t.deploying_smoke = true;
     	}
-    	std::wcout << "left smoke drawing thingy" << std::endl;
     }else{
     	t.deploying_smoke = false;
     }
 
 
     if(!tank->FireLaser().IsNull() && tank->FireLaser() && t.explosion == NotInFlames ){
-    	//std::wcout << "is fiering laser" << std::endl;
     	DrawLaser(tank,board);
     }
-
-    //std::wcout << "tank position " << tank->PosX().GetVal() << "," << tank->PosY().GetVal()   << std::endl;
     if (tank->InFlames().GetVal()){
         switch (t.explosion)
         {
@@ -465,8 +454,6 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
 				bool hasSpecialEndPos=false;
 				qreal specialEndPos=0;
 
-				//calculateColisionPosition(t,m_matchState.gameState.tanks[(tank->TankId() + 1) % 2]);
-
 				if (tank->HitWall().IsNull()==false && tank->HitWall().GetVal()==true){
 					t.deathCause=Tank::HitWall;
 					specialEndPos=0.5;
@@ -477,7 +464,6 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
 				//if tank hit wall or drove into other tank, we calculate a position half inside the
 				//next square before start explosion.
 				if (hasSpecialEndPos){
-					//didnt know this before, calculate a special end position inside wall
 					switch (t.moveDirection)
 					{
 					case LeftHeading:
@@ -514,8 +500,6 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
             t.deathCause=Tank::HitMine;
         }else if (!tank->HitMissile().IsNull() && tank->HitMissile()){
             t.deathCause=Tank::HitMissile;
-            //t.position = t.position + directionToVector(t.moveDirection)*.5;
-            //t.paintPosition = t.position;
         }else if (!tank->HitTank().IsNull() && tank->HitTank()){
             t.deathCause=Tank::HitTank;
         }else{
@@ -718,9 +702,6 @@ void GameWorld::Update()
     //updates each tank.
     for (Tank& tank : m_matchState.gameState.tanks)
     {
-    	//if(tank.explosion == SetInFlames){
-
-    	//std::wcout << tank.playerId <<" explosion status is " <<  tank.explosion <<std::endl;
 
 			if(tank.deathCause == tank.Death::HitWall){
 
@@ -745,7 +726,6 @@ void GameWorld::Update()
         		time = now + timeToNextUpdate/2;
         	}
         	srand(clock());
-            //m_sprites.push_back(Sprite(m_explosion, tank.position, now+timeToNextUpdate, 1));
         	int spread = m_c.m_death_explosion_spread;
         	for(int i = 0; i < m_c.m_death_explosion_count; i++){
         		//TODO::this might be wrong like mao zedong...pling plong
@@ -801,10 +781,8 @@ void GameWorld::Update()
         	}
         }
 
-        //std::wcout << "Trying to draw a missile " << std::endl;
         UpdatePositionNoOvershoot(timeToNextUpdate, 2*movement, missile,false); //missiles have double speed
         Tank tank=m_matchState.gameState.tanks[missile.tankId];
-        //std::wcout << "And the missile direction is " << directionToString(missile.moveDirection) << std::endl;
         if (missile.paintFire && missile.moveDirection != None)
         {
 
@@ -903,7 +881,6 @@ void GameWorld::Update()
         UpdatePosition(timeToNextUpdate, 1*movement, redeemer,false);
 
         Tank tank=m_matchState.gameState.tanks[redeemer.tankId];
-        //std::wcout << "And the redeemer direction is " << directionToString(redeemer.moveDirection) << std::endl;
         if (redeemer.paintFire && redeemer.moveDirection != None)
         {
             QPointF flame_pos  = tank.position+directionToVector(tank.towerDirection);
@@ -1232,7 +1209,6 @@ void GameWorld::SetTextPlayer(int playerNumber, const QStringList& lines)
 }
 
 int GameWorld::wrap(int pos, int size){
-   	//return pos == 0 ? 0 : (size - std::abs(pos)*(size/std::abs(pos)));
 	if(pos > size){
 			return 0;
 	}else if(pos < 0){
