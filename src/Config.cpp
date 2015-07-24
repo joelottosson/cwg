@@ -38,6 +38,7 @@ Config::Config(const char *file_path){
 		CFG_SIMPLE_INT( "fire_volume" ,&m_fire_volume),
 		CFG_SIMPLE_INT( "explosion_volume" ,&m_explosion_volume),
 		CFG_SIMPLE_INT( "smoke_volume" ,&m_smoke_volume),
+		CFG_SIMPLE_INT( "redeemer_ammo_volume" ,&m_redeemer_ammo_volume),
 
 
 

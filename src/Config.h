@@ -52,6 +52,7 @@ public:
 	int m_fire_volume;
 	int m_explosion_volume;
 	int m_smoke_volume;
+	int m_redeemer_ammo_volume;
 
 
 
