@@ -4,6 +4,17 @@
 *
 * Created by: Joel Ottosson / joot
 *
+* Wellcome to the gui. Eventually this will annoy you.
+* Some notes:
+*
+* Be careful about the fact that the Engine and Gui does not always work together and some overriding and 
+* general tomfoolery might be usefull.
+*
+* Use PassiveGroup for objects for items on the board wich may be interacted with but wich does not move
+* or do anything spontaneously.
+*
+* Use the push sprite thing for drawing of temporary stuffs such as explosions.
+*
 *******************************************************************************/
 #include "gameworld.h"
 #include "PassiveGroup.h"
@@ -96,6 +107,11 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled,ConfigSystem::Config 
 		m_smoke.fragments.push_back(QRectF(200*i, 0, 200, 200));
 	}
 
+    /*
+    In this chunk of code we create all of the passive objects.
+    Removing a object from here will only remove them from the gui but not from the
+    actual game so they can still be interacted with by the tanks.
+    */
 	boost::shared_ptr<PassiveGroup> glenn = boost::make_shared<PassiveGroup>(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo);
 	glenn->setSoundPlayer("laser-pickup.mp3",soundEnabled,(int)((m_c.m_laser_sound_volume*100)/m_c.m_master_volume));
 	m_passive_objects.push_back(glenn);
@@ -642,8 +658,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
             break;
         }
 
-        //TODO: Reset  to +2 before release.
-        auto paintGameEndTime=m_matchState.gameState.lastUpdate+0*m_matchState.gameState.pace;
+        auto paintGameEndTime=m_matchState.gameState.lastUpdate+2*m_matchState.gameState.pace;
         m_eventQueue.insert(WorldEvents::value_type(paintGameEndTime, [&]
         {
             //set paint winner, and then set a new event to remove text after 3 sec
@@ -730,7 +745,6 @@ void GameWorld::Update()
         	srand(clock());
         	int spread = m_c.m_death_explosion_spread;
         	for(int i = 0; i < m_c.m_death_explosion_count; i++){
-        		//TODO::this might be wrong like mao zedong...pling plong
         		m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % spread*2)-spread)/(spread*2)), tank.position.y() + (((float)(rand() % spread*2)-spread)/(spread*2))),
         				time + (rand() % m_c.m_death_eclosion_time), 1));
         	}
@@ -767,9 +781,6 @@ void GameWorld::Update()
         }
     }
 
-    /**
-     * Appears to update the missiles
-     */
     for (auto& vt : m_matchState.gameState.missiles)
     {
         Missile& missile=vt.second;

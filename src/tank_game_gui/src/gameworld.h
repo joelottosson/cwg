@@ -47,9 +47,23 @@ public:
     void Reset(const Consoden::TankGame::MatchPtr& match, boost::int64_t id);
     void Reset(const Consoden::TankGame::GameStatePtr& game, boost::int64_t id);
 
+    /*
+    Does the updating of the graphics. All sprites and objects gets moved,changed and altered here.
+    */
     void Update();
+    /*
+    Gets called every time the match ends
+	*/
     void Update(const Consoden::TankGame::MatchPtr& match);
+    /*
+    Gets called after at each round.
+    Performs most of the syncronization between the the Engine and the Gui.
+    there are some really annoying pitfalls here and irritating workarounds
+    */
     void Update(const Consoden::TankGame::GameStatePtr& game);
+    /*
+    Updates the joystick.
+    */
     void Update(const Consoden::TankGame::JoystickConstPtr& joystick);
 
 
@@ -114,6 +128,9 @@ private:
     void HandleEventQueue(qint64 time);
     void InitMediaPlayers();
 
+    /*
+    Computes the new wrapping cordinate.
+    */
     int wrap(int pos, int size);
 
     QMediaPlayer m_fireMediaPlayer1;
@@ -129,16 +146,17 @@ private:
     void SetTextPlayer(int playerNumber, const QStringList& lines);
     void clearPassiveObjects();
 
-    //TODO: Having all of these silly things inlined makes absolutely no sense.
+
     inline void UpdateMissiles(const Consoden::TankGame::GameStatePtr &game);
     inline void UpdateRedeemers(const Consoden::TankGame::GameStatePtr &game);
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
-    inline void UpdateCoins(const Board& board);
-    inline void UpdatePoison(const Board& board);
-    inline void UpdateLaserAmmo(const Board& boardParser);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
     inline void UpdateTank(const Consoden::TankGame::TankPtr& tank,const Board& board);
     inline void UpdateDude(const Consoden::TankGame::DudePtr& dude);
+    /*
+    This function draws the laser. right now the tank may not move and fire the laser at 
+    the same time since that would cause the laser to loop forever.
+    */
     inline void DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& board);
     void BadassExplosion(Redeemer& redeemer, int radius);
 

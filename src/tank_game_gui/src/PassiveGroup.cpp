@@ -46,13 +46,6 @@ PassiveGroup::PassiveGroup(MatchState match_state, char const* image_name, int f
 
 	m_lol_function = board_function;
 
-	//  abort();
-
-}
-
-void PassiveGroup::setSillyFunction( boost::function<const Board::PointVec& ( const Board&)> silly){
-	m_lol_function = silly;
-
 }
 
 PassiveGroup::PassiveGroup(MatchState match_state, char const* image_name, int frames, int width, int height, int life_time, int repetitions, int layer,double delay,char const* sound_file, bool sound_enabled,  boost::function<const Board::PointVec& ( const Board&)> board_function){
@@ -91,17 +84,7 @@ bool PassiveGroup::operator<(const PassiveGroup& other) const{
 	return m_layer < other.m_layer;
 }
 
-/*void PassiveGroup::updateGroupOnChange(Board board,GameState game_state, std::multimap<qint64, boost::function<void()>>&  events_queue){
 
-
-	updateGroupOnChange(m_lol_function(board), game_state,events_queue,1.0);
-}*/
-
-
-/*
- * This function removes sprites on the board only when the amount of objects in this class differs from the amount on the board.
- * Will also play sound if sound is enabled and the sound is not already playing.
- */
 void  PassiveGroup::updateGroupOnChange(Board board,GameState game_state,std::multimap<qint64, boost::function<void()>>&  events_queue,double delay){
 	PointVec board_positions = m_lol_function(board);
     if (board_positions.size() != m_positions.size())
@@ -178,7 +161,6 @@ void PassiveGroup::updateSprites(){
         }
         else
         {
-        	//std::wcout << "We updated a sprite." << std::endl;
             it->Update();
 
             ++it;

@@ -45,7 +45,7 @@ public:
 	virtual ~PassiveGroup();
 
 
-	void setSillyFunction( boost::function<const Board::PointVec& ( const Board&)> silly);
+
 	void clear();
 
 	/**
@@ -53,11 +53,14 @@ public:
 	 */
 	void setSoundPlayer(char const* sound_file, bool sound_enabled,int volume);
 
-	void trollUpdate(Board board,GameState game_state, std::multimap<qint64, boost::function<void()>>&  events_queue);
 
+    /*
+     * This function removes sprites on the board only when the amount of objects in this class differs from the amount on the board.
+     * Will also play sound if sound is enabled and the sound is not already playing.
+     */
 	void updateGroupOnChange(Board board,GameState game_state,std::multimap<qint64, boost::function<void()>>&  events_queue,double delay);
 	void updateGroupOnChange(Board board,GameState game_state,std::multimap<qint64, boost::function<void()>>&  events_queue);
-	//void updateGroupOnChange(const PointVec& board_positions,GameState game_state, std::multimap<qint64, boost::function<void()>>&  events_queue, double delay);
+
 
 
 	bool operator<(const PassiveGroup& other) const;
