@@ -67,7 +67,7 @@ clean_backend: clean_engine clean_gui clean_server clean_config
 
 clean_all: clean_engine clean_gui clean_server clean_cool_players clean_config
 
-all: .FORCE engine gui server cool_players config
+all: .FORCE config engine gui server cool_players 
 
 
 
