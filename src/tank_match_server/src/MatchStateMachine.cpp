@@ -285,18 +285,12 @@ int MatchStateMachine::hashBoard(std::vector<char> board) const{
 
 	int h = 0;
 	for(char ki: board){
-		int highorder = h & 0xf8000000;    // extract high-order 5 bits from h
-									  	  // 0xf8000000 is the hexadecimal representation
-									  	  //   for the 32-bit number with the first five
-									  	  //   bits = 1 and the other bits = 0
-			h = h << 5;                    // shift h left by 5 bits
-			h = h ^ (highorder >> 27);     // move the highorder 5 bits to the low-order
-									  	  //   end and XOR into h
-			h = h ^ ki;                    // XOR h and ki
-									  	  //taken from http://www.cs.hmc.edu/~geoff/classes/hmc.cs070.200101/homework10/hashfuncs.html
+		int highorder = h & 0xf8000000;
+			h = h << 5;
+			h = h ^ (highorder >> 27);
+			h = h ^ ki;
+			//taken from http://www.cs.hmc.edu/~geoff/classes/hmc.cs070.200101/homework10/hashfuncs.html
 	}
-
 	return h;
-
 }
 

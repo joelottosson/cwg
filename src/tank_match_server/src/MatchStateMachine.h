@@ -47,6 +47,9 @@ private:
     int m_player2PointsAccumulated;
 
     void CreateBoards();
+    /**
+     * Initialize entities here!
+     */
     cwg::GameStatePtr CreateGameState(const std::string& boardFile, bool reversedPlayers) const;
     void StartNextGame();    
     void UpdatePoints();
