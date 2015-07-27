@@ -64,15 +64,11 @@ private:
     }
 
     void PaintGrid(QPainter& painter);
-    void PaintWalls(QPainter& painter);
-    void PaintPoison(QPainter& painter);
     void PaintDudes(const Dude& dude, QPainter& painter);
-    void PaintMines(QPainter& painter);
     void PaintTank(const Tank& tank, bool blue, QPainter& painter);
     void PaintMissile(const Missile& missile, QPainter& painter);
     void PaintRedeemer(const Redeemer& redeemer, QPainter& painter);
     void PaintSprite(const Sprite& sprite, QPainter& painter);
-    //void PaintSpriteDude(const Sprite& sprite, QPainter& painter);
     void PaintText(const ScreenText& txt, QPainter& painter);
     void PaintWinner(QPainter& painter);
     inline void ManualDraw(QPainter& painter,QPixmap pixmap, QPointF pos,qreal rotation, bool wrap,Direction direction);

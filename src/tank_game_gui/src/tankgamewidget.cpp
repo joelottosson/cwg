@@ -25,6 +25,9 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     ,m_world(world)
     ,m_margin(10)
     ,m_scale(1.0)
+    /*
+    these images must also be added to the aplication.qrc file or you are going to have a bad time!
+    */
     ,m_tankBlue(":/images/panzerIV_blue.png")
     ,m_tankRed(":/images/panzerIV_red.png")
     ,m_tankTower(":/images/panzerIV_tower.png")
@@ -57,7 +60,6 @@ void TankGameWidget::Reset()
     m_backgroundPainter.reset(new QPainter(m_backgroundPixmap.get()));
     m_backgroundPainter->setRenderHint(QPainter::Antialiasing);
     PaintGrid(*m_backgroundPainter);
-    //PaintWalls(*m_backgroundPainter);
 }
 
 void TankGameWidget::UpdatePaintConstants()
@@ -97,18 +99,12 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
     global_timer_averages[1] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
-
-    //PaintWalls(painter);
-
     start = clock();
 
-    //std::vector<PassiveGroup*>  passives = ;
     for(auto a : m_world.getPassiveGroups()){
 	    for (auto& s : a->m_sprites)
 	    {
-
 	        PaintSprite(s, painter);
-	        //s.killToggle();
 	    }
 	}
     global_timer_averages[2] += ((float)(clock() - start)/CLOCKS_PER_SEC);
@@ -123,7 +119,6 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 
 
     start = clock();
-    //Paint tanks
     int blueTank=true;
     for (auto& tank : m_world.GetGameState().tanks)
     {
@@ -131,10 +126,6 @@ void TankGameWidget::paintEvent(QPaintEvent*)
         blueTank=!blueTank;
     }
     global_timer_averages[3] += ((float)(clock() - start)/CLOCKS_PER_SEC);
-
-
-
-
 
     start = clock();
     //Paint missiles
@@ -152,12 +143,10 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     }
 
     start = clock();
-    //Paint sprites
+
     for (auto& s : m_world.Sprites())
     {
-
         PaintSprite(s, painter);
-        //s.killToggle();
     }
     global_timer_averages[6] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
@@ -233,28 +222,6 @@ void TankGameWidget::PaintGrid(QPainter &painter)
     }
 }
 
-
-void TankGameWidget::PaintWalls(QPainter& painter)
-{
-    for (auto& p : m_world.GetGameState().walls)
-    {
-        painter.drawPixmap(p.x()*m_const.squarePixelSize,
-                           p.y()*m_const.squarePixelSize,
-                           m_const.squarePixelSize,
-                           m_const.squarePixelSize,
-                           m_obstacle);
-    }
-}
-
-void TankGameWidget::PaintPoison(QPainter& painter)
-{
-    for (const auto& pos : m_world.GetGameState().poison)
-    {
-        painter.drawPixmap(ToScreen(pos, 0, 0), m_poison);
-    }
-}
-
-//TODO: Stuff added by me
 /*
  * Draws and moves the dude.
  *
@@ -268,32 +235,21 @@ void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 
 	if(!dude.is_dead){
 
-		//painter.save();
         dude.updateFramecounter(dude.walking_sprite);
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
                                                                      dude.walking_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
         painter.drawPixmapFragments(&pf, 1, dude.walking_sprite.image);
-		//painter.restore();
 
 	}else{
-
-		//painter.save();
 		dude.updateFramecounter(dude.dead_sprite);
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
                                                                      dude.dead_sprite.fragments[dude.current_frame], 1, 1, 0, 1);
         painter.drawPixmapFragments(&pf, 1, dude.dead_sprite.image);
-		//painter.restore();
+
 	}
 
 }
 
-void TankGameWidget::PaintMines(QPainter& painter)
-{    
-    for (const auto& mine : m_world.GetGameState().mines)
-    {
-        painter.drawPixmap(ToScreen(mine, 0, 0), m_mine);
-    }
-}
 
 void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painter)
 {
@@ -306,10 +262,6 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
     	tank.oldMoveDirection = tank.moveDirection;
     }
 
-
-
-
-
     if (tank.explosion==Destroyed){
     	ManualDraw(painter,m_tankWreck,tank.paintPosition,rotation,tank.isWrapping,tank.moveDirection);
     	return;
@@ -319,7 +271,6 @@ void TankGameWidget::PaintTank(const Tank& tank, bool blueTank, QPainter& painte
     const QPixmap& tankImage=blueTank ? m_tankBlue : m_tankRed;
 	ManualDraw(painter,tankImage,tank.paintPosition,rotation,tank.isWrapping,tank.moveDirection);
 
-	//tank tower
 	ManualDraw(painter,m_tankTower,tank.paintPosition,tank.paintTowerAngle,tank.isWrapping,tank.moveDirection);
 
 
@@ -333,7 +284,6 @@ void TankGameWidget::PaintMissile(const Missile& missile, QPainter& painter)
     }
 
 	ManualDraw(painter,m_missile,missile.paintPosition,DirectionToAngle(missile.moveDirection),false);
-    //drawWithTranslationAndRotation(painter,m_missile,missile.paintPosition,DirectionToAngle(missile.moveDirection));
 }
 
 void TankGameWidget::PaintRedeemer(const Redeemer& redeemer, QPainter& painter){
