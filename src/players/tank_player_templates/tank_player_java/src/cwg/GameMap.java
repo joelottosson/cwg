@@ -126,6 +126,22 @@ class GameMap {
 		return gameState.board().getVal()[toIndex(pos)]==laser_ammo;
 	}
 
+	//Is there a redeemer in this square
+	public boolean isRedeemerInPosition (Position p) {
+		for (int i=0; i<this.gameState.redeemers().size(); i++) {
+			if (gameState.redeemers().get(i).isNull())
+				continue;
+
+			consoden.tankgame.Redeemer redeemer = gameState.redeemers().get(i).getObj();
+			
+			if (p.x == redeemer.posX().getVal() && p.y == redeemer.posY().getVal()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 	//Is there a missile in this square
 	public boolean isMissileInPosition (Position p) {
 		for (int i=0; i<this.gameState.missiles().size(); i++) {

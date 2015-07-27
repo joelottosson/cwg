@@ -114,7 +114,9 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled,ConfigSystem::Config 
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.png", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
 
-	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/redeemer-ammo.png", 1, 72, 72,1000,0,0,0.75, &Board::RedeemerAmmo));
+	glenn = boost::make_shared<PassiveGroup>(m_matchState,":/images/redeemer-ammo.png", 1, 72, 72,1000,0,0,0.75, &Board::RedeemerAmmo);
+	glenn->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((m_c.m_redeemer_ammo_volume*100)/m_c.m_master_volume));
+	m_passive_objects.push_back(glenn);
 }
 
 std::vector<boost::shared_ptr<PassiveGroup>>  GameWorld::getPassiveGroups() const{

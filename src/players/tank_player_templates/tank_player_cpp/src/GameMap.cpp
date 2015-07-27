@@ -205,6 +205,35 @@ bool GameMap::IsPenguin(const std::pair<int, int>& pos) const
    return pos.first == m_gamePtr->TheDude().GetPtr()->PosX() && pos.second == m_gamePtr->TheDude().GetPtr()->PosY();
 }
 
+bool GameMap::IsRedeemerInPosition(const std::pair<int, int>& pos) const{
+    Safir::Dob::Typesystem::ArrayIndex redeemerIndex;
+
+    for (redeemerIndex = 0;
+    		redeemerIndex < m_gamePtr->RedeemersArraySize();
+    		redeemerIndex++) {
+
+        if (m_gamePtr->Redeemers()[redeemerIndex].IsNull()) {
+            // empty missile slot
+            continue;
+        }
+
+        Consoden::TankGame::RedeemerPtr redeemerPtr =
+                boost::dynamic_pointer_cast<Consoden::TankGame::Redeemer>(m_gamePtr->Redeemers()[redeemerIndex].GetPtr());
+
+        std::pair<int, int> redeemerPosition = std::make_pair(redeemerPtr->PosX().GetVal(), redeemerPtr->PosY().GetVal());
+
+
+        if ((pos == redeemerPosition)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const
 {
     Safir::Dob::Typesystem::ArrayIndex missileIndex;

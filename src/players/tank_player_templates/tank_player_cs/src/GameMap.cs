@@ -148,6 +148,21 @@ namespace tank_player_cs
 			}
 			return false;
 		}
+		
+		//Is there a redeemer in this square
+		public bool IsRedeemerInPosition (Position p)
+		{
+			for (int i=0; i<this.gameState.Redeemers.Count; i++) {
+				if (gameState.Redeemers [i].IsNull ())
+					continue;
+
+				Consoden.TankGame.Redeemer redeemer = gameState.Redeemers [i].Obj;
+				if (p.X == redeemer.PosX.Val && p.Y == redeemer.PosY.Val) {
+					return true;
+				}
+			}
+			return false;
+		}
 
 		//Move p one step in specified direction and returns the new position.
 		public Position Move(Position p, Consoden.TankGame.Direction.Enumeration d)

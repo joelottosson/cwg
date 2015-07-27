@@ -108,6 +108,11 @@ public:
     bool IsMissileInPosition(const std::pair<int, int>& pos) const;
 
     /**
+     * Is there a redeemer in this position right now?
+     */
+    bool IsRedeemerInPosition(const std::pair<int, int>& pos) const;
+
+    /**
      * Helper functions that moves pos one step in the indicated direction.
      * Returns a new positon after the move operation.
      */
