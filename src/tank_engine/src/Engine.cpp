@@ -390,7 +390,11 @@ namespace TankEngine
 
 
     /*
-     * I think this actually is the game "logic"...and we use logic in the most liberal sense of the word.
+     * the order of execution in this function is critical.
+     *
+     * This function is very confusing so unfortunately I have added some inline comments.
+     *
+     * Some serious refactoring of this function would not hurt.
      */
     void Engine::Evaluate()
     {
@@ -407,38 +411,28 @@ namespace TankEngine
         gm.MoveRedeemers();
         bool tank_tank_collission = false;
 
+        //Decrement redeemer counter
+        //And detonate redeemer if necessary.
         for (Safir::Dob::Typesystem::ArrayIndex redeemer_index = 0;
              (redeemer_index < game_ptr->RedeemersArraySize());
              redeemer_index++) {
-
-
 
         	if(!game_ptr->Redeemers()[redeemer_index].IsNull()){
     			Consoden::TankGame::RedeemerPtr redeemer =
     			                boost::static_pointer_cast<Consoden::TankGame::Redeemer>(game_ptr->Redeemers()[redeemer_index].GetPtr());
 
-        		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 1){//Neds to be done when timer is one to mitigate for delayed updates
+        		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 1){//Needs to be done when timer is 1 to mitigate for delayed updates
         			if(gm.OnBoard(redeemer->PosX(),redeemer->PosY())){
 						detonateRedeemer(game_ptr, redeemer, &gm, 1);
 						redeemer->InFlames() = true;
         			}else{
-
         				game_ptr->Redeemers()[redeemer_index].SetNull();
         			}
-
         		}else{
-
-
         			redeemer->TimeToExplosion() -= 1;
-
-
-
         		}
         	}
-
         }
-
-
 
         CWG::DudePtr dude_ptr = game_ptr->TheDude().GetPtr();
         dudeUpdater(dude_ptr,gm,game_ptr);
@@ -451,17 +445,8 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
-            //We need to decremet the tanks own redeemer timer here to fix the stupid lagging.
-            if(tank_ptr->RedeemerTimerLeft() > 0 ){
-            	tank_ptr->RedeemerTimerLeft()--;
-            }
-
-
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
-            /**
-             * TODO: COLLISION DETECTION
-             */
             for (Safir::Dob::Typesystem::ArrayIndex tank2_index = tank_index + 1;
                  (tank2_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank2_index].IsNull());
                  tank2_index++) {
@@ -537,8 +522,6 @@ namespace TankEngine
         }
 
 
-
-
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
              (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
              tank_index++) {
@@ -558,6 +541,9 @@ namespace TankEngine
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
+            /***********************************
+             * Get information from joysticks
+             ***********************************/
             // Player one made a move?
             if (game_ptr->PlayerOneId().GetVal() == joystick_ptr->PlayerId().GetVal()) {
                 if (mPlayerOneCounter == joystick_ptr->Counter().GetVal()) {
@@ -594,6 +580,9 @@ namespace TankEngine
             int request_pos_x = tank_ptr->PosX();
             int request_pos_y = tank_ptr->PosY();
 
+            /***********************************
+			 * Move tanks and do rudimentary collision checks
+			 ***********************************/
             if (joystick_ptr->MoveDirection() == Consoden::TankGame::Direction::Neutral){
             	tank_ptr->MoveDirection() = joystick_ptr->MoveDirection(); //We still need to set the move direction even though we don't move!
             }else{
@@ -638,6 +627,9 @@ namespace TankEngine
                         }
                     }
 
+                    /***********************************
+        			 * Palce mines
+        			 ***********************************/
                     // Check if something in the way!!
                     if (!gm.WallSquare(request_pos_x, request_pos_y)) {
                         // Moving,  place mine in last position?
@@ -655,7 +647,9 @@ namespace TankEngine
             }
         }
 
-        // Fire missiles - this must be done after movement, otherwise the "MoveAgainstMissile" logic is broken
+        /******************************************************************************************************
+		 * Fire weapons or deploy smoke - this must be done after movement, otherwise the "MoveAgainstMissile" logic is broken
+		 ******************************************************************************************************/
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
              (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
              tank_index++) {
@@ -671,7 +665,6 @@ namespace TankEngine
 
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
-
 			if(tank_ptr->SmokeLeft() <= 0){
 				tank_ptr->SmokeLeft() = 0;
 			}else{
@@ -684,36 +677,25 @@ namespace TankEngine
             }
 
 
-			//TODO: Some od things happen here. Apparently we dont care much for neutral tower directions...
 			if(joystick_ptr->TowerDirection() != CWG::Direction::Neutral){
 				tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
 			}
 
-
             if(joystick_ptr->Fire() &&	joystick_ptr->FireLaser() && joystick_ptr->TowerDirection() != CWG::Direction::Neutral && joystick_ptr->MoveDirection() == CWG::Direction::Neutral){
-
             	if(tank_ptr->Lasers() > 0){
-
             		tank_ptr->Lasers() = tank_ptr->Lasers() - 1;
             		tank_ptr->FireLaser() = true;
             		tank_ptr->Fire() = true;
 
             		Consoden::TankGame::TankPtr enemy_ptr =
             		                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[(tank_index+1) % 2].GetPtr());
-
-
             		fireTheLaser(tank_ptr, enemy_ptr,gm,game_ptr);
-
 
             	}else{
             		tank_ptr->FireLaser() = false;
             		tank_ptr->Fire() = false;
             	}
             }
-
-
-            //crazy cool missile fire
-
 
             if (joystick_ptr->Fire() && !joystick_ptr->FireLaser() && !joystick_ptr->FireRedeemer()) {
 
@@ -737,7 +719,9 @@ namespace TankEngine
 
         }
 
-        // Evaluate hits & collissions
+        /***********************************
+		 * Evaluate hits and collisions
+		 ***********************************/
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
              (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
              tank_index++) {
@@ -751,17 +735,14 @@ namespace TankEngine
                 AddPoints(m_config.m_dude_penalty, tank_ptr->TankId(), game_ptr);
             }
 
-
             // Stepped on mine
             if (gm.MineSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal())) {
                 tank_ptr->InFlames() = true;
                 tank_ptr->HitMine() = true;
             }
 
-
             // Hit by missile?
             if (gm.IsTankHit(tank_ptr->PosX(), tank_ptr->PosY())) {
-                // BOOM!
                 // Hit by missile awards two points to opponent
                 AddPoints(m_config.m_hit_points, OpponentTankId(tank_ptr->TankId()), game_ptr);
                 tank_ptr->InFlames() = true;
@@ -899,7 +880,6 @@ namespace TankEngine
         game_ptr->ElapsedTime().SetVal(mCounter);
 
         // Push new state
-        //gm.Print();
         gm.SetChanges();
 
         if (mGameRunning) {
@@ -1040,13 +1020,6 @@ namespace TankEngine
 			permutation[i] = permutation[j];
 			permutation[j] = swap;
 		}
-
-/*		std::wcout << "the rendom list is ";
-		for(int i = 0; i < 5; i++){
-			std::wcout << permutation[i] << " ";
-		}
-		std::wcout << std::endl;*/
-
 		return permutation;
     }
 
@@ -1096,23 +1069,17 @@ namespace TankEngine
 						break;
 				}
 
-				//Lets skip mines and wrapping for now.
 				if(		gm.WallSquare(dude_new_x, dude_new_y)
 						|| dude_new_x < 0
 						|| dude_new_x >= game_ptr->Width()
 						|| dude_new_y < 0
 						|| dude_new_y >= game_ptr->Height()
 					){
-
-					//Direction leads to silly possition, do nothing.
-
 				}else{
 					if((dude_new_x == dude_ptr->OldX() && dude_new_y == dude_ptr->OldY()) || candidate_direction == CWG::Direction::Neutral){
 						lame_x = dude_new_x;
 						lame_y = dude_new_y;
 						lame_direction = candidate_direction;
-
-
 					}else{
 						dude_ptr->OldX() = dude_ptr->PosX();
 						dude_ptr->OldY() = dude_ptr->PosY();
@@ -1134,7 +1101,6 @@ namespace TankEngine
 				dude_ptr->PosY() = lame_y;
 				dude_ptr->Direction() = lame_direction;
 				delete random_list;
-
 			}
 			dude_ptr->Seed() = std::rand();
         }
@@ -1143,7 +1109,6 @@ namespace TankEngine
     }
 
     int Engine::wrap(int pos, int size){
-       	//return pos == 0 ? 0 : (size - std::abs(pos)*(size/std::abs(pos)));
     	if(pos > size){
     			return 0;
     	}else if(pos < 0){
@@ -1165,7 +1130,6 @@ namespace TankEngine
 
     	for(int y_pos = center_y - radius; y_pos <= center_y + radius; y_pos++){
         	for(int x_pos = center_x - radius; x_pos <= center_x + radius; x_pos++){
-
 
         		if(x_pos == tank_0_x && y_pos == tank_0_y && !tank_0->InFlames()){
         			tank_0->InFlames() = true;
@@ -1190,7 +1154,6 @@ namespace TankEngine
     	}
 
     }
-
 
     std::pair<int,int> Engine::directionToVector(CWG::Direction::Enumeration dir){
     	switch(dir){
@@ -1225,28 +1188,21 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr =
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
-
-
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
-
-
 
             //Nullceck tank fields:
             if(tank_ptr->PlayerId().IsNull()){
             	std::wcout << "Player Id is null... No other option but to abort everything and silently sit and cry" << std::endl;
             	abort();
             }
-
             if(tank_ptr->PosX().IsNull() || tank_ptr->PosY().IsNull()){
             	std::wcout << "Player position is null... No other option but to abort everything and silently sit and cry" << std::endl;
             	abort();
             }
-
             if(tank_ptr->MoveDirection().IsNull()){
 				std::wcout << "Move Direction is null. Setting to neutral" << std::endl;
 				tank_ptr->MoveDirection()  = CWG::Direction::Neutral;
 			}
-
             if(tank_ptr->TowerDirection().IsNull()){
 				std::wcout << "Tower Direction is null. Setting to neutral" << std::endl;
 				tank_ptr->TowerDirection()  = CWG::Direction::Neutral;

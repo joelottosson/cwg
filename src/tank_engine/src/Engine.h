@@ -4,6 +4,9 @@
 *
 * Created by: Björn Weström / bjws
 *
+* Hello and welcome to the game engine. This is the greatest code ever written.
+* One could say it's the gods gift to computer science.
+*
 *******************************************************************************/
 #ifndef __ENGINE_H
 #define __ENGINE_H
@@ -42,9 +45,6 @@ namespace TankEngine
                   int gamePace,
                   int maxGameTime);
 
-        /** 
-         *
-         */
         void InitTimerExpired(const boost::system::error_code& e);
         void JoystickTimerExpired(const boost::system::error_code& e);
         void UpdateTimerExpired(const boost::system::error_code& e);
@@ -57,7 +57,6 @@ namespace TankEngine
             JOYSTICK_TIMEOUT = 1 * 1000
         };
 
-
         virtual void NewJoystickCB(int tankId, Safir::Dob::Typesystem::EntityId entityId);
         virtual void DeleteJoystickCB(Safir::Dob::Typesystem::EntityId entityId);
 
@@ -67,23 +66,31 @@ namespace TankEngine
         void StopGame();
         void CacheJoysticks();
         void UpdateState();
+
+        /**
+         * This is the main function in which the game gets updated.
+         * this is the game "logic"...and we use logic in the most liberal sense of the word.
+         */
         void Evaluate();
+
+        /**
+         * Function needed to remove missiles after the game has stopped.
+         */
         void ScheduleMissileCleanup();
+
         bool collisonDetector(CWG::DudePtr& dude, CWG::TankPtr& tank);
 
         void detonateRedeemer(Consoden::TankGame::GameStatePtr game_ptr, Consoden::TankGame::RedeemerPtr redeemer_ptr, GameMap* gm, int radius);
-
 
         /*
          * Nullchecks everything and sets null fields to default values.*
          *
          * this might seem redundant but it keeps	 us from having to manually nullcheck everything 50000000 times in the evaluate loop
-         * and get flippin nullpointer exceptions in the DOB wich exits the engine and leavs you without a stack to trace.
+         * and get flippin nullpointer exceptions in the DOB which exits the engine and leaves you without a stack to trace.
          * This makes debuggingn about as enjoyable as slowly driving a rusty angle grinder trough your knee whilst having to listen
-         * to someone who thinks Ayn Rand had valid ideas talking about their political philosphy.
+         * to someone who thinks Ayn Rand talk about their views.
          */
         void nullCheckEverything(Consoden::TankGame::GameStatePtr game_ptr);
-
 
         /*
          * Makes the dude choose a new direction based on random movement. alltough the dude will not return to its previous position
@@ -98,7 +105,6 @@ namespace TankEngine
         std::pair<int,int> addPair(std::pair<int,int> a, std::pair<int,int> b);
         std::pair<int,int> subPair(std::pair<int,int> a, std::pair<int,int> b);
 
-
         int wrap(int pos, int size);
 
         /*
@@ -112,15 +118,12 @@ namespace TankEngine
          */
         int* directionPermuter();
 
-
         std::string FindPlayerName(Safir::Dob::Typesystem::InstanceId playerId);
 
         void AddPoints(int points, int tank_id, Consoden::TankGame::GameStatePtr game_ptr);
         void SetWinner(Consoden::TankGame::GameStatePtr game_ptr);
         Consoden::TankGame::Winner::Enumeration TankIdToWinner(int tank_id) { if (tank_id == mPlayerOneTankId) { return Consoden::TankGame::Winner::PlayerOne; } else { return Consoden::TankGame::Winner::PlayerTwo; } }
         int  OpponentTankId(int tank_id) { if (tank_id == mPlayerOneTankId) { return mPlayerTwoTankId; } else { return mPlayerOneTankId; } }
-
-
 
         bool mGamePrepare;
         bool mGameRunning;

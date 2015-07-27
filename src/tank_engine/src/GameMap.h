@@ -22,43 +22,26 @@ namespace TankEngine
         GameMap(Consoden::TankGame::GameStatePtr game_ptr);
 
         bool EmptySquare(int pos_x, int pos_y);
-
         bool WallSquare(int pos_x, int pos_y);
-
         bool OnBoard(int pos_x, int pos_y);
-
         bool MineSquare(int pos_x, int pos_y);
-
         bool CoinSquare(int pos_x, int pos_y);
-
         bool PoisonSquare(int pos_x, int pos_y);
-
         bool RedeemerAmmoSquare(int pos_x, int pos_y);
-
         bool LaserAmmo(int pos_x, int pos_y);
-
         void ClearSquare(int pos_x, int pos_y);
-
         bool DudeSquare(int pos_x, int pos_y);
-
         bool SmokeGrenadeSquare(int pos_x, int pos_y);
 
         bool IsTankHit(int pos_x, int pos_y);
-
         void AddMine(int pos_x, int pos_y);
 
         bool TankMoveAgainstMissile(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration move_direction);
-
         void MoveMissiles();
-
         void MoveRedeemers();
-
         bool MissilesLeft();
-
         bool RedeemersLeft();
-
         bool FireRedeemer(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration direction, int time_to_detonation, int tank_id);
-
         bool FireMissile(int pos_x,int pos_y, Consoden::TankGame::Direction::Enumeration direction, int tank_id);
 
         Consoden::TankGame::Direction::Enumeration InvertDirection(Consoden::TankGame::Direction::Enumeration d);
