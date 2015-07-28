@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 set(proj_name tank_match_server)
 
+foreach(flag ${MYFLAGS})
+  message("Adding define for ${flag}")
+  add_definitions(-D${flag})
+endforeach()
+
 project(${proj_name} CXX)
 include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 

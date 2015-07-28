@@ -109,6 +109,7 @@ bool BoardHandler::FromFile(const std::string &file, int &xSize, int &ySize, std
             {
                 continue;
             }
+
             else if (c=='t' && numberOfTanks<2)
             {
                 Point& tankRef=numberOfTanks==0 ? tank1 : tank2;

@@ -86,7 +86,7 @@ void TankGameWidget::paintEvent(QPaintEvent*)
 {
 	//std::wcout << "================================"<< std::endl;
 	clock_t start = clock();
-	clock_t total = clock();
+	//clock_t total = clock();
 
     UpdatePaintConstants();
     global_timer_averages[0] += ((float)(clock() - start)/CLOCKS_PER_SEC);

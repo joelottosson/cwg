@@ -1,6 +1,17 @@
 # cwg
 CWG version awesome
 
+## Building
+Building CWG is fairly straight forward just stand in the root directory and type:
+`make all`
+To build the entire project.
+
+To se the other targets just run `make targets`
+
+One can compile CWG without the new additions for CWG 16 by running:
+`make FLAGS='NOSMOKE;NOLASER;NOREDEEMER' all`
+And thus one can  chose wich features to be disabled
+
 
 ## Installing Safir
 You need to have the latest version of the Safir SDK Core. 

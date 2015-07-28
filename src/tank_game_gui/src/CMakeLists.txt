@@ -8,6 +8,11 @@ if (NOT MSVC)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -pg")
 endif()
 
+foreach(flag ${MYFLAGS})
+  message("Adding define for ${flag}")
+  add_definitions(-D${flag})
+endforeach()
+
 FILE(GLOB qrc *.qrc)
 FILE(GLOB ui *.ui)
 FILE(GLOB sources *.cpp)

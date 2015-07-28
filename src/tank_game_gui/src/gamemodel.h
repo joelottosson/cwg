@@ -73,8 +73,8 @@ struct Tank
     //mutable QPointF old_position;
     Direction moveDirection;
     Direction towerDirection;
-    mutable Direction oldTowerDirection;
     mutable Direction oldMoveDirection;
+    mutable Direction oldTowerDirection;
     bool fires;
 
     ExplosionStatus explosion;

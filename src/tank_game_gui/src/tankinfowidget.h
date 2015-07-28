@@ -13,6 +13,7 @@
 #include <QMouseEvent>
 #include "gamemodel.h"
 
+
 namespace Ui {
 class TankInfoWidget;
 }

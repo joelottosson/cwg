@@ -445,6 +445,11 @@ namespace TankEngine
             Consoden::TankGame::TankPtr tank_ptr = 
                 boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[tank_index].GetPtr());
 
+            //We need to decremet the tanks own redeemer timer here to fix the stupid lagging in the gui.
+            if(tank_ptr->RedeemerTimerLeft() > 0 ){
+            	tank_ptr->RedeemerTimerLeft()--;
+            }
+
             Consoden::TankGame::JoystickPtr joystick_ptr = m_JoystickCacheMap[tank_ptr->TankId().GetVal()];
 
             for (Safir::Dob::Typesystem::ArrayIndex tank2_index = tank_index + 1;

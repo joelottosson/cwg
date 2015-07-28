@@ -153,11 +153,6 @@ void Board::Save(const std::string& filepath) const
     os.close();
 }
 
-/*bool Board::IsWall(const char* data, int x, int y){
-	size_t index=static_cast<size_t>(y*m_xSize+x);
-	return data[index]  == 'x';
-}*/
-
 const bool Board::isWall(qreal x, qreal y) const{
 	for(auto p : m_walls){
 		if(p.x() == x && p.y() == y){
@@ -217,19 +212,25 @@ void Board::Parse(const char* data)
 
             case 'l': //laser
             {
+#ifndef NOLASER
                 m_laser_ammo.push_back(QPointF(x, y));
+#endif
             }
                 break;
 
             case 's': //smoke
             {
+#ifndef NOSMOKE
                 m_smoke.push_back(QPointF(x, y));
+#endif
             }
                 break;
 
             case 'r': //redeemerammo
             {
+#ifndef NOREDEEMER
                 m_redeemers.push_back(QPointF(x, y));
+#endif
             }
                 break;
 

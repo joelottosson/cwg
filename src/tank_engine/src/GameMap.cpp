@@ -25,7 +25,29 @@ namespace TankEngine
         for (int y = 0; y < y_size; y++) {
             for (int x = 0; x < x_size; x++) {
                 int index = (y * x_size) + x;
-                m_Game[x][y] = m_Game_ptr->Board().GetVal()[index];
+                char c = m_Game_ptr->Board().GetVal()[index];
+                switch(c){
+                	case 'l':
+						#ifdef NOLASER
+                		c = '.';
+						#endif
+                		break;
+                	case 's':
+						#ifdef NOSMOKE
+						c = '.';
+						#endif
+						break;
+                	case 'r':
+						#ifdef NOREDEEMER
+						c = '.';
+						#endif
+						break;
+                	default:
+                		break;
+                }
+
+
+                m_Game[x][y] = c;
             }
         }   
     }
@@ -156,7 +178,6 @@ namespace TankEngine
 
 
     	int empty_index = -1;
-    	bool tank_redeemer_active = false;
         for (redeemer_index = 0;
         		redeemer_index < m_Game_ptr->RedeemersArraySize();
         		redeemer_index++) {

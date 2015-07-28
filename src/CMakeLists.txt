@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 2.8)
 project(config CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+
+foreach(flag ${MYFLAGS})
+  message("Adding define for ${flag}")
+  add_definitions(-D${flag})
+endforeach()
+
 if (NOT MSVC)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wno-write-strings")
 endif()

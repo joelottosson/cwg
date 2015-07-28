@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>150</width>
-    <height>600</height>
+    <height>555</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>150</width>
-    <height>600</height>
+    <height>555</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>150</width>
-    <height>600</height>
+    <height>555</height>
    </size>
   </property>
   <property name="font">
@@ -44,7 +44,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>342</y>
+     <y>322</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -60,7 +60,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>278</y>
+     <y>258</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -76,7 +76,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>138</y>
+     <y>120</y>
      <width>111</width>
      <height>20</height>
     </rect>
@@ -101,7 +101,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>158</y>
+     <y>138</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -117,7 +117,7 @@
    <property name="geometry">
     <rect>
      <x>28</x>
-     <y>190</y>
+     <y>170</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -133,7 +133,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>310</y>
+     <y>290</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -149,7 +149,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>258</y>
+     <y>238</y>
      <width>111</width>
      <height>20</height>
     </rect>
@@ -174,7 +174,7 @@
    <property name="geometry">
     <rect>
      <x>92</x>
-     <y>310</y>
+     <y>290</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -190,7 +190,7 @@
    <property name="geometry">
     <rect>
      <x>92</x>
-     <y>190</y>
+     <y>170</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -206,7 +206,7 @@
    <property name="geometry">
     <rect>
      <x>28</x>
-     <y>310</y>
+     <y>290</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -222,7 +222,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>222</y>
+     <y>202</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -238,7 +238,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>10</y>
+     <y>0</y>
      <width>151</width>
      <height>61</height>
     </rect>
@@ -268,7 +268,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>80</y>
+     <y>70</y>
      <width>91</width>
      <height>41</height>
     </rect>
@@ -294,7 +294,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>410</y>
+     <y>380</y>
      <width>51</width>
      <height>31</height>
     </rect>
@@ -316,11 +316,11 @@ color: rgb(90, 230, 10);</string>
     <number>0</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="laserAmmoLabel">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>390</y>
+     <y>360</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -345,7 +345,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>410</y>
+     <y>380</y>
      <width>31</width>
      <height>30</height>
     </rect>
@@ -361,7 +361,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>60</y>
+     <y>50</y>
      <width>111</width>
      <height>20</height>
     </rect>
@@ -382,11 +382,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_5">
+  <widget class="QLabel" name="smokeLabel">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>440</y>
+     <y>410</y>
      <width>131</width>
      <height>31</height>
     </rect>
@@ -411,7 +411,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>480</y>
+     <y>450</y>
      <width>51</width>
      <height>31</height>
     </rect>
@@ -437,7 +437,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>480</y>
+     <y>450</y>
      <width>31</width>
      <height>30</height>
     </rect>
@@ -453,7 +453,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>551</y>
+     <y>521</y>
      <width>51</width>
      <height>31</height>
     </rect>
@@ -479,7 +479,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>551</y>
+     <y>521</y>
      <width>31</width>
      <height>30</height>
     </rect>
@@ -495,7 +495,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>551</y>
+     <y>521</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -511,7 +511,7 @@ color: rgb(90, 230, 10);</string>
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>480</y>
+     <y>450</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -523,11 +523,11 @@ color: rgb(90, 230, 10);</string>
     <pixmap>../images/inactive-green.png</pixmap>
    </property>
   </widget>
-  <widget class="QLabel" name="label_7">
+  <widget class="QLabel" name="smokeHasLabel">
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>460</y>
+     <y>430</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -548,11 +548,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_8">
+  <widget class="QLabel" name="smokeActiveLabel">
    <property name="geometry">
     <rect>
      <x>100</x>
-     <y>460</y>
+     <y>430</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -573,11 +573,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_9">
+  <widget class="QLabel" name="redeemerHasLabel">
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>531</y>
+     <y>501</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -598,11 +598,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_10">
+  <widget class="QLabel" name="redeemerActiveLabel">
    <property name="geometry">
     <rect>
      <x>100</x>
-     <y>531</y>
+     <y>501</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -623,11 +623,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_11">
+  <widget class="QLabel" name="laserActiveLabel">
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>390</y>
+     <y>360</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -648,11 +648,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_12">
+  <widget class="QLabel" name="redeemerTimerlabel">
    <property name="geometry">
     <rect>
      <x>-10</x>
-     <y>531</y>
+     <y>501</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -673,11 +673,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_13">
+  <widget class="QLabel" name="smokeTimerLabel">
    <property name="geometry">
     <rect>
      <x>-10</x>
-     <y>460</y>
+     <y>430</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -698,11 +698,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_14">
+  <widget class="QLabel" name="laserLabel">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>380</y>
+     <y>350</y>
      <width>131</width>
      <height>21</height>
     </rect>
@@ -723,11 +723,11 @@ color: rgb(90, 230, 10);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_15">
+  <widget class="QLabel" name="redeemerLabel">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>510</y>
+     <y>480</y>
      <width>131</width>
      <height>31</height>
     </rect>

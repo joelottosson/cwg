@@ -33,6 +33,36 @@ TankInfoWidget::TankInfoWidget(int playerNumber, QWidget *parent) :
     m_buttons[7]=ui->towerDown;
     m_buttons[8]=ui->fireButton;
 
+
+#ifdef NOLASER
+    ui->laserActive->setVisible(false);
+	ui->laserLcdNumber->setVisible(false);
+	ui->laserLabel->setVisible(false);
+	ui->laserActiveLabel->setVisible(false);
+	ui->laserAmmoLabel->setVisible(false);
+#endif
+
+#ifdef NOSMOKE
+	ui->SmokeActive->setVisible(false);
+
+	ui->smokeAvailiable->setVisible(false);
+	ui->smokeHasLabel->setVisible(false);
+	ui->smokeActiveLabel->setVisible(false);
+	ui->smokeLabel->setVisible(false);
+	ui->smokeLcd->setVisible(false);
+	ui->smokeTimerLabel->setVisible(false);
+#endif
+
+#ifdef NOREDEEMER
+	ui->redeemerActive->setVisible(false);
+	ui->redeemerAvaliable->setVisible(false);
+	ui->redeemerTimer->setVisible(false);
+	ui->redeemerLabel->setVisible(false);
+	ui->redeemerActiveLabel->setVisible(false);
+	ui->redeemerHasLabel->setVisible(false);
+	ui->redeemerTimerlabel->setVisible(false);
+#endif
+
     ResetLeds();
 	ui->laserActive->setPixmap(m_blue_off);
 	ui->smokeAvailiable->setPixmap(m_green_off);
@@ -174,7 +204,6 @@ void TankInfoWidget::Update(const Joystick* js){
     	ui->laserActive->setPixmap(m_blue_on);
     }else{
     	ui->laserActive->setPixmap(m_blue_off);
-
     }
 
     if (js->moveDirection != None){

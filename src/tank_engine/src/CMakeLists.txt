@@ -3,6 +3,11 @@ project(tank_engine CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
+foreach(flag ${MYFLAGS})
+  message("Adding define for ${flag}")
+  add_definitions(-D${flag})
+endforeach()
+
 FILE(GLOB sources *.cpp)
 FILE(GLOB headers *.h)
 
