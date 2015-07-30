@@ -75,6 +75,15 @@ private:
         m_joystick(moveDirection, towerDirection, fire, dropMine, fireLaser,deploySmoke,fireRedeemer, redeemerTimer);
     }
 
+    Consoden::TankGame::Direction::Enumeration moveDirection = Consoden::TankGame::Direction::Neutral;
+    Consoden::TankGame::Direction::Enumeration towerDirection = Consoden::TankGame::Direction::Neutral;
+    bool fire = false;
+    bool drop_mine = false;
+    bool fire_laser = false;
+    bool deploy_smoke = false;
+    bool fire_redeemer = false;
+    int redeemer_timer = 0;
+
 };
 
 #endif
