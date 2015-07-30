@@ -15,7 +15,7 @@
 
 MainWindow::MainWindow(int updateFrequency, bool soundEnalbed, bool override_sound, bool override_freq, QWidget *parent)
     :QMainWindow(parent)
-	,m_conf("rules.cfg")
+	,m_conf(std::string(getenv("SAFIR_RUNTIME")) + std::string("/data/tank_game/rules.cfg"))
 	//,m_world(updateFrequency,soundEnalbed,m_conf)
     ,ui(new Ui::MainWindow)
     ,m_updateInterval(1000/updateFrequency) //hz
