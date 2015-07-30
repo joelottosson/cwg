@@ -4,7 +4,7 @@
 #include <iostream>
 
 namespace ConfigSystem {
-Config::Config(const char *file_path){
+Config::Config(const std::string file_path){
 
     cfg_opt_t opts[] = {
 
@@ -52,7 +52,7 @@ Config::Config(const char *file_path){
 
     cfg_t *cfg;
     cfg = cfg_init(opts, 0);
-    int status = cfg_parse(cfg, file_path);
+    int status = cfg_parse(cfg, file_path.c_str());
     if(status == CFG_FILE_ERROR){
     	std::wcout << "File error when reading config file." << std::endl;
     	abort();
