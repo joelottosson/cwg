@@ -567,6 +567,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     if(!game->TheDude().IsNull()){
     	auto& dude_game = game->TheDude().GetPtr();
     	Dude& dude = m_matchState.gameState.dudes.front();
+    	dude.stop_instantly = dude_game->StopInstantly();
 
     	if(!dude.is_dead && dude_game->Dying().GetVal() && m_soundEnabled){
     		m_dude_dies_MediaPlayer.play();
@@ -585,7 +586,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
 
     	}
 
-    	if(!dude.is_dead){
+    	if(!dude.is_dead && !dude.stop_instantly){
     		dude.position.setX(dude_game->PosX());
     		dude.position.setY(dude_game->PosY());
     		dude.moveDirection = ToDirection(dude_game->Direction());
@@ -712,6 +713,9 @@ void GameWorld::Update()
     HandleEventQueue(now);
 
     for (auto& dude : m_matchState.gameState.dudes){
+    	if(dude.stop_instantly){
+    		break;
+    	}
         if(dude.just_died){
         	UpdatePositionNoOvershoot(timeToNextUpdate, movement, dude,false);
 
