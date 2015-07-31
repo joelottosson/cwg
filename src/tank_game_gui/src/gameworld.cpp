@@ -114,24 +114,24 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled,ConfigSystem::Config 
     */
 #ifndef NOLASER
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo));
-	m_passive_objects.front()->setSoundPlayer("laser-pickup.mp3",soundEnabled,(int)((m_c.m_laser_sound_volume*100)/m_c.m_master_volume));
+	m_passive_objects.back()->setSoundPlayer("laser-pickup.mp3",soundEnabled,(int)((m_c.m_laser_sound_volume*100)/m_c.m_master_volume));
 #endif
 
 #ifndef NOREDEEMER
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/redeemer-ammo.png", 1, 72, 72,1000,0,0,0.75, &Board::RedeemerAmmo));
-	m_passive_objects.front()->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((m_c.m_redeemer_ammo_volume*100)/m_c.m_master_volume));
+	m_passive_objects.back()->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((m_c.m_redeemer_ammo_volume*100)/m_c.m_master_volume));
 #endif
 
 #ifndef NOSMOKE
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/smoke_grenade.png", 1, 72, 72,1000,0,0,0.75, &Board::Smoke));
-	m_passive_objects.front()->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((m_c.m_redeemer_ammo_volume*100)/m_c.m_master_volume));
+	m_passive_objects.back()->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((m_c.m_redeemer_ammo_volume*100)/m_c.m_master_volume));
 #endif
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,0.75, &Board::Coins));
-	m_passive_objects.front()->setSoundPlayer("coin.mp3",soundEnabled,(int)((m_c.m_coin_volume*100)/m_c.m_master_volume));
+	m_passive_objects.back()->setSoundPlayer("coin.mp3",soundEnabled,(int)((m_c.m_coin_volume*100)/m_c.m_master_volume));
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/poison.png", 1, 72, 72,1000,0,0,0.75, &Board::Poison));
-	m_passive_objects.front()->setSoundPlayer("wilhelm_scream.mp3",soundEnabled,(int)((m_c.m_scream_volume*100)/m_c.m_master_volume));
+	m_passive_objects.back()->setSoundPlayer("wilhelm_scream.mp3",soundEnabled,(int)((m_c.m_scream_volume*100)/m_c.m_master_volume));
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
 
