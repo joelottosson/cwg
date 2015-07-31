@@ -212,7 +212,7 @@ bool TankLogic::aligned(TG::Direction::Enumeration a,TG::Direction::Enumeration 
     	return false;
     }
 
-char* TankLogic::direction2String(Dir::Enumeration dir){
+const char* TankLogic::direction2String(Dir::Enumeration dir){
 	if(dir == Dir::Neutral){return "Neutral";}
 	if(dir == Dir::Right){return "Right";}
 	if(dir == Dir::Left){return "Left";}

@@ -56,7 +56,7 @@ public:
 
 
 
-	Config(const char *file_path);
+	Config(const std::string file_path);
 
 	void printConfig();
 

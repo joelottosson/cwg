@@ -30,7 +30,7 @@
 namespace TankEngine
 {
     Engine::Engine(boost::asio::io_service& io) :
-    	m_config("rules.cfg"),
+    	m_config(std::string(getenv("SAFIR_RUNTIME")) + std::string("/data/tank_game/rules.cfg")),
         mGamePrepare(true),
         mGameRunning(false),
         mMissileCleanupRunning(false),

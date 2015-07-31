@@ -79,19 +79,21 @@ all: .FORCE copy_and_rebuild_dob config engine gui server cool_players
 remove_cache: .FORCE
 	-find . -name CMakeCache.txt | xargs rm	
 
-copy_and_rebuid_dob_cpp: .FORCE
-	 cp -uv tank_dou/*.dou $(SAFIR_SDK)/dots/dots_generated/tank/
+copy_and_rebuild_dob_cpp: .FORCE
+	 mkdir -p $(SAFIR_SDK)/dots/dots_generated/tank_game/
+	 cp -uv tank_dou/*.dou $(SAFIR_SDK)/dots/dots_generated/tank_game/
 	 dobmake.py --no-java --no-ada --no-dotnet --batch
 	 
-copy_and_rebuid_dob: .FORCE
-	 cp -uv tank_dou/*.dou $(SAFIR_SDK)/dots/dots_generated/tank/
+copy_and_rebuild_dob: .FORCE
+	 mkdir -p $(SAFIR_SDK)/dots/dots_generated/tank_game/
+	 cp -uv tank_dou/*.dou $(SAFIR_SDK)/dots/dots_generated/tank_game/
 	 dobmake.py --no-ada  --batch
 
 targets:
 	@echo "all                        - builds everything including the dobs and the default players"
-	@echo "backend                    - builds only the engine,match server ,the gui and the config system"
+	@echo "backend                    - builds only the engine, match server, the gui and the config system"
 	@echo "cool_players               - builds the default players"
-	@echo "clean_all                  - cleans everything except the dobs"
+	@echo "clean_all                  - cleans everything except the backend"
 	@echo "gui|engine|server|config   - builds a specific module"
 	@echo "clean_*                    - cleans a specific module where * is the name of the module"
 	@echo "copy_and_rebuild_dob       - copies dou files from the tank_dou to the runtime path and rebuilds them"

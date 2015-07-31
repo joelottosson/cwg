@@ -8,8 +8,6 @@
 #include "mainwindow.h"
 #include <QApplication>
 
-#include <../../Config.h>
-
 int main(int argc, char *argv[])
 {
 

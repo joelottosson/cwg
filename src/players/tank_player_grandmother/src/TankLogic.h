@@ -77,7 +77,7 @@ private:
 
     bool aligned(TG::Direction::Enumeration a,TG::Direction::Enumeration b);
 
-    char* direction2String(Dir::Enumeration);
+    const char* direction2String(Dir::Enumeration);
 
 };
 
