@@ -1155,6 +1155,12 @@ namespace TankEngine
         			gm->ClearSquare(x_pos,y_pos);
 
         		}
+
+        		if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY()){
+        			game_ptr->TheDude().GetPtr()->Dying() = true;
+        			AddPoints(m_config.m_dude_penalty,redeemer_ptr->TankId(), game_ptr);
+        		}
+
         	}
     	}
 
