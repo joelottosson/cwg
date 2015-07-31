@@ -102,12 +102,40 @@ namespace TankEngine
         m_Game[pos_x][pos_y] = '.';
     }
 
-    //TODO:Crap added by me
     bool GameMap::DudeSquare(int pos_x, int pos_y)
        {
            return pos_x == m_Game_ptr->TheDude().GetPtr()->PosX() && pos_y == m_Game_ptr->TheDude().GetPtr()->PosY();
        }
  
+    int GameMap::HitByMissile(int pos_x, int pos_y)
+     {
+         int is_hit = 0;
+
+         for (Safir::Dob::Typesystem::ArrayIndex missile_index = 0;
+              missile_index < m_Game_ptr->MissilesArraySize();
+              missile_index++) {
+
+             if (m_Game_ptr->Missiles()[missile_index].IsNull()) {
+                 // empty slot
+                 continue;
+             }
+
+             Consoden::TankGame::MissilePtr missile_ptr =
+                 boost::static_pointer_cast<Consoden::TankGame::Missile>(m_Game_ptr->Missiles()[missile_index].GetPtr());
+
+             if ((missile_ptr->HeadPosX() == pos_x && missile_ptr->HeadPosY() == pos_y) ||
+                 (missile_ptr->TailPosX() == pos_x && missile_ptr->TailPosY() == pos_y)) {
+                 // Hit by missile
+                 missile_ptr->InFlames() = true;
+                 is_hit = missile_ptr->TankId();
+             }
+         }
+
+         return is_hit;
+     }
+
+
+
     bool GameMap::IsTankHit(int pos_x, int pos_y)
     {
         bool tank_is_hit = false;
@@ -323,6 +351,35 @@ namespace TankEngine
         m_Game_ptr->Missiles()[empty_index].SetPtr(missile_ptr);
         return true;
     }
+
+    int GameMap::MoveAgainstMissile(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration move_direction)
+    {
+        for (Safir::Dob::Typesystem::ArrayIndex missile_index = 0;
+             missile_index < m_Game_ptr->MissilesArraySize();
+             missile_index++) {
+
+            if (m_Game_ptr->Missiles()[missile_index].IsNull()) {
+                // No missile in this slot
+                continue;
+            }
+
+            Consoden::TankGame::MissilePtr missile_ptr =
+                boost::static_pointer_cast<Consoden::TankGame::Missile>(m_Game_ptr->Missiles()[missile_index].GetPtr());
+
+            // To move against missile, the move direction must be opposite the missile direction
+            if (move_direction == InvertDirection(missile_ptr->Direction().GetVal())) {
+                // If we move against the missile, our pos will be in the moved missiles tail
+                if (pos_x == missile_ptr->TailPosX().GetVal() && pos_y == missile_ptr->TailPosY().GetVal()) {
+                	missile_ptr->InFlames();
+                    return missile_ptr->TankId();
+                }
+            }
+        }
+
+        return 0;
+    }
+
+
 
     bool GameMap::TankMoveAgainstMissile(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration move_direction)
     {

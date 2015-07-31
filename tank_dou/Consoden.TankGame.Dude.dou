@@ -35,6 +35,10 @@
             <name>Dying</name>
             <type>Boolean</type>
         </member>
+        <member>
+            <name>StopInstantly</name>
+        		<type>Boolean</type>
+        </member>
     </members>
 </class>
 

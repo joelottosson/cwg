@@ -40,6 +40,8 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
 	,m_dead_dude(":/images/dead-tux.png")
     ,m_poison(":/images/poison.png")
 	,m_redeemer(":/images/redeemer.png")
+	,m_redeemer_shadow(":/images/redeemer-shadow.png")
+	,m_missile_shadow(":/images/missile-shadow.png")
 {
 
 
@@ -233,7 +235,7 @@ void TankGameWidget::PaintGrid(QPainter &painter)
 void TankGameWidget::PaintDudes(const Dude& dude, QPainter& painter)
 {
 
-	if(!dude.is_dead){
+	if(!dude.is_dead && !dude.stop_instantly){
 
         dude.updateFramecounter(dude.walking_sprite);
         QPainter::PixmapFragment pf=QPainter::PixmapFragment::create(ToScreen(dude.paintPosition, m_const.squarePixelSize/2, m_const.squarePixelSize/2),
@@ -284,12 +286,14 @@ void TankGameWidget::PaintMissile(const Missile& missile, QPainter& painter)
     }
 
 	ManualDraw(painter,m_missile,missile.paintPosition,DirectionToAngle(missile.moveDirection),false);
+	ManualDraw(painter,m_missile_shadow,missile.paintPosition-QPointF(-0.1,-0.1),DirectionToAngle(missile.moveDirection),false);
 }
 
 void TankGameWidget::PaintRedeemer(const Redeemer& redeemer, QPainter& painter){
 
     if (redeemer.visible || redeemer.explosion == SetInFlames || redeemer.detonate || redeemer.explosion == Burning){
     	ManualDraw(painter,m_redeemer,redeemer.paintPosition,DirectionToAngle(redeemer.moveDirection),false);
+    	ManualDraw(painter,m_redeemer_shadow,redeemer.paintPosition-QPointF(-0.3,-0.3),DirectionToAngle(redeemer.moveDirection),false);
     }
 
 
