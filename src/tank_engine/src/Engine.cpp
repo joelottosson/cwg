@@ -935,6 +935,7 @@ namespace TankEngine
     			enemy_tank->InFlames() = true;
 
     			enemy_tank->HitMissile() = true;
+    			AddPoints(m_config.m_hit_points,own_tank->TankId(),game_ptr);
     			return true;
     		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
 
@@ -944,6 +945,9 @@ namespace TankEngine
     			return true;
     		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
     			return true;
+    		}else if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY()){
+    			game_ptr->TheDude().GetPtr()->Dying() = true;
+    			AddPoints(m_config.m_dude_penalty,own_tank->TankId(),game_ptr);
     		}
 
     	}
