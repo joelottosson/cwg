@@ -27,7 +27,7 @@ int main(int argc, const char** argv)
     std::cout << "    W                       U                f  Missle" << std::endl;
     std::cout << "  A E D                   H   K              r  Smoke" << std::endl;
     std::cout << "    S                       J                g  Laser" << std::endl;
-    std::cout << "                                             k  Redeemer" << std::endl;
+    std::cout << "                                             t  Redeemer" << std::endl;
     std::cout << "                                             m  Drop mine" << std::endl;
     std::cout << "Input must be given every round. " << std::endl;
 
