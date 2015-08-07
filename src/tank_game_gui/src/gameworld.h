@@ -148,7 +148,7 @@ private:
 
 
     inline void UpdateMissiles(const Consoden::TankGame::GameStatePtr &game);
-    inline void UpdateRedeemers(const Consoden::TankGame::GameStatePtr &game);
+    inline void UpdateRedeemers(const Consoden::TankGame::GameStatePtr &game, Board board);
     inline void UpdateTowerAngle(qint64 timeToNextUpdate, qreal movement, Tank& tank);
     inline void UpdatePoints(const Consoden::TankGame::MatchPtr& match);
     inline void UpdateTank(const Consoden::TankGame::TankPtr& tank,const Board& board);
