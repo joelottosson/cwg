@@ -200,7 +200,8 @@ namespace TankEngine
                 break;
 
             default:
-                break;
+            	return false;
+
         }
 
 
