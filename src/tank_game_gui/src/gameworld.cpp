@@ -596,7 +596,7 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     }
 
     UpdateMissiles(game);
-    UpdateRedeemers(game);
+    UpdateRedeemers(game, boardParser);
 
     //We need to do a special check is the tanks are colliding with eachother.
     //If we don't do this the collision s will be completely wrong since the second tank may
@@ -1337,7 +1337,7 @@ inline void GameWorld::UpdateMissiles(const Consoden::TankGame::GameStatePtr &ga
 	}
 }
 
-inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &game){
+inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &game,Board board){
     //Remove redeemers that are removed and be a tautology
 
     for (RedeemerMap::const_iterator it=m_matchState.gameState.redeemers.begin(); it!=m_matchState.gameState.redeemers.end(); )
@@ -1389,6 +1389,13 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 				r.time_to_Explosion = redeemer->TimeToExplosion().GetVal();
 
 				r.moveDirection=ToDirection(redeemer->Direction());
+				if(board.isWall(r.position.x(),r.position.y())){
+					//Welcome to the land of the glourious workarounds!
+	                m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace, [&]
+	                {
+	                	BadassExplosion(r, m_c.m_redeemer_radius);
+	                }));
+				}
 				if (redeemer->InFlames().GetVal()){
 					r.visible = false;
 
@@ -1405,11 +1412,11 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 			r.paintPosition=r.position;
 			r.position=QPointF(redeemer->PosX().GetVal(), redeemer->PosY().GetVal());
 
-			r.visible=true;
+			if(r.explosion == NotInFlames){r.visible=true;}
 			r.time_to_Explosion--;
 
 
-			if(r.time_to_Explosion == 0  && r.explosion != SetInFlames){
+			if((r.time_to_Explosion == 0  && r.explosion != SetInFlames)){
 				BadassExplosion(r, m_c.m_redeemer_radius);
 				r.explosion = SetInFlames;
 				r.visible = false;
