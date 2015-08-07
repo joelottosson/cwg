@@ -336,7 +336,7 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     qreal y_pos = t.position.y();
 
 
-    double laser_delay = 0.25;
+    double laser_delay = 0.35;
 
 
     qreal rot = 0;
