@@ -5,7 +5,7 @@ project(tank_game_gui C CXX) #FindQt needs C
 INCLUDE("$ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake")
 
 if (NOT MSVC)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -pg")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 endif()
 
 foreach(flag ${MYFLAGS})
