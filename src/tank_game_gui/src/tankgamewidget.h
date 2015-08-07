@@ -42,6 +42,8 @@ private:
     QPixmap m_dead_dude;
     QPixmap m_poison;
     QPixmap m_redeemer;
+    QPixmap m_redeemer_shadow;
+    QPixmap m_missile_shadow;
     SpriteData m_dude_anim;
 
 

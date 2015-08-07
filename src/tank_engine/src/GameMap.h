@@ -34,9 +34,11 @@ namespace TankEngine
         bool SmokeGrenadeSquare(int pos_x, int pos_y);
 
         bool IsTankHit(int pos_x, int pos_y);
+        int  HitByMissile(int pos_x, int pos_y);
         void AddMine(int pos_x, int pos_y);
 
         bool TankMoveAgainstMissile(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration move_direction);
+        int  MoveAgainstMissile(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration move_direction);
         void MoveMissiles();
         void MoveRedeemers();
         bool MissilesLeft();

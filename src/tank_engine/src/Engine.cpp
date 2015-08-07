@@ -585,9 +585,10 @@ namespace TankEngine
             int request_pos_x = tank_ptr->PosX();
             int request_pos_y = tank_ptr->PosY();
 
-            /***********************************
+            /*********************************************************************
 			 * Move tanks and do rudimentary collision checks
-			 ***********************************/
+			 * this must be done after movement, otherwise the "MoveAgainstMissile" logic is broken
+			 *********************************************************************/
             if (joystick_ptr->MoveDirection() == Consoden::TankGame::Direction::Neutral){
             	tank_ptr->MoveDirection() = joystick_ptr->MoveDirection(); //We still need to set the move direction even though we don't move!
             }else{
@@ -653,7 +654,7 @@ namespace TankEngine
         }
 
         /******************************************************************************************************
-		 * Fire weapons or deploy smoke - this must be done after movement, otherwise the "MoveAgainstMissile" logic is broken
+		 * Fire weapons or deploy smoke
 		 ******************************************************************************************************/
         for (Safir::Dob::Typesystem::ArrayIndex tank_index = 0; 
              (tank_index < game_ptr->TanksArraySize()) && (!game_ptr->Tanks()[tank_index].IsNull()); 
@@ -739,6 +740,21 @@ namespace TankEngine
             	dude_ptr->Dying().SetVal(true);
                 AddPoints(m_config.m_dude_penalty, tank_ptr->TankId(), game_ptr);
             }
+            /*
+            //Here we do some horrible int and bool conversion :(
+            int killer_id1 = gm.HitByMissile(dude_ptr->PosX(),dude_ptr->PosY());
+            int killer_id2 = gm.MoveAgainstMissile(dude_ptr->PosX(),dude_ptr->PosY(),dude_ptr->Direction());
+            if((bool)killer_id1 || (bool)killer_id2){
+            	dude_ptr->Dying() = true;
+
+
+            	if((bool)killer_id1){
+            		AddPoints(m_config.m_dude_penalty, killer_id1, game_ptr);
+            	}else if((bool)killer_id2){
+            		AddPoints(m_config.m_dude_penalty, killer_id2, game_ptr);
+            	}
+            }
+            */
 
             // Stepped on mine
             if (gm.MineSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal())) {
@@ -935,6 +951,7 @@ namespace TankEngine
     			enemy_tank->InFlames() = true;
 
     			enemy_tank->HitMissile() = true;
+    			AddPoints(m_config.m_hit_points,own_tank->TankId(),game_ptr);
     			return true;
     		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
 
@@ -944,6 +961,10 @@ namespace TankEngine
     			return true;
     		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
     			return true;
+    		}else if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY()){
+    			game_ptr->TheDude().GetPtr()->Dying() = true;
+    			game_ptr->TheDude().GetPtr()->StopInstantly() = true;
+    			AddPoints(m_config.m_dude_penalty,own_tank->TankId(),game_ptr);
     		}
 
     	}
@@ -1155,6 +1176,13 @@ namespace TankEngine
         			gm->ClearSquare(x_pos,y_pos);
 
         		}
+
+        		if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY()){
+        			game_ptr->TheDude().GetPtr()->Dying() = true;
+        			game_ptr->TheDude().GetPtr()->StopInstantly() = true;
+        			AddPoints(m_config.m_dude_penalty,redeemer_ptr->TankId(), game_ptr);
+        		}
+
         	}
     	}
 

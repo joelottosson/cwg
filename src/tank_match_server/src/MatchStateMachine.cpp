@@ -208,6 +208,7 @@ Consoden::TankGame::GameStatePtr MatchStateMachine::CreateGameState(const std::s
     dude->Dying() = false;
     dude->Direction() = cwg::Direction::Right;
     dude->Seed() = hashBoard(board);
+    dude->StopInstantly() = false;
 
 
 
