@@ -758,7 +758,7 @@ namespace TankEngine
             //We might need to have this before any movement for the detector to work
             if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || collisonDetector(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
             	dude_ptr->Dying().SetVal(true);
-                AddPoints(m_config.m_dude_penalty, tank_ptr->TankId(), game_ptr);
+                AddPoints(m_config.m_dude_penalty, (tank_index+1) % 2, game_ptr);
             }
             /*
             //Here we do some horrible int and bool conversion :(
@@ -981,10 +981,10 @@ namespace TankEngine
     			return true;
     		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
     			return true;
-    		}else if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY()){
+    		}else if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY() && !game_ptr->TheDude().GetPtr()->Dying()){
     			game_ptr->TheDude().GetPtr()->Dying() = true;
     			game_ptr->TheDude().GetPtr()->StopInstantly() = true;
-    			AddPoints(m_config.m_dude_penalty,own_tank->TankId(),game_ptr);
+    			AddPoints(m_config.m_dude_penalty,enemy_tank->TankId(),game_ptr);
     		}
 
     	}
@@ -1191,10 +1191,10 @@ namespace TankEngine
 
         		}
 
-        		if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY()){
+        		if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY() && !game_ptr->TheDude().GetPtr()->Dying()){
         			game_ptr->TheDude().GetPtr()->Dying() = true;
         			game_ptr->TheDude().GetPtr()->StopInstantly() = true;
-        			AddPoints(m_config.m_dude_penalty,redeemer_ptr->TankId(), game_ptr);
+        			AddPoints(m_config.m_dude_penalty,(redeemer_ptr->TankId() + 1) % 2, game_ptr);
         		}
 
         	}
