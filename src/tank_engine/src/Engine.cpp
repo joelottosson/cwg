@@ -417,7 +417,6 @@ namespace TankEngine
         for (Safir::Dob::Typesystem::ArrayIndex redeemer_index = 0;
              (redeemer_index < game_ptr->RedeemersArraySize());
              redeemer_index++) {
-
         	if(!game_ptr->Redeemers()[redeemer_index].IsNull()){
     			Consoden::TankGame::RedeemerPtr redeemer =
     			                boost::static_pointer_cast<Consoden::TankGame::Redeemer>(game_ptr->Redeemers()[redeemer_index].GetPtr());
@@ -425,7 +424,6 @@ namespace TankEngine
     				game_ptr->Redeemers()[redeemer_index].SetNull();
     				break;
     			}
-
     			if(gm.WallSquare(redeemer->PosX(),redeemer->PosY())){
 					detonateRedeemer(game_ptr, redeemer, &gm, 1);
 					redeemer->InFlames() = true;
@@ -435,10 +433,9 @@ namespace TankEngine
 		            redeemer->TimeToExplosion()=0;
 					break;
     			}
-
     			gm.MoveRedeemer(redeemer_index);
-
-        		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 1){//Needs to be done when timer is 1 to mitigate for delayed updates
+    			if(game_ptr->Redeemers()[redeemer_index].IsNull()){continue;}				//redeemer may have been removed in move stage
+        		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 1){	//Needs to be done when timer is 1 to mitigate for delayed updates
         			if(gm.OnBoard(redeemer->PosX(),redeemer->PosY())){
 						detonateRedeemer(game_ptr, redeemer, &gm, 1);
 						redeemer->InFlames() = true;
