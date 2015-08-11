@@ -336,7 +336,7 @@ void GameWorld::DrawLaser(const Consoden::TankGame::TankPtr& tank,const Board& b
     qreal y_pos = t.position.y();
 
 
-    double laser_delay = 0.5;
+    double laser_delay = 1.5;
 
 
     qreal rot = 0;
@@ -1389,12 +1389,17 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 				r.time_to_Explosion = redeemer->TimeToExplosion().GetVal();
 
 				r.moveDirection=ToDirection(redeemer->Direction());
+
+
 				if(board.isWall(r.position.x(),r.position.y())){
 					//Welcome to the land of the glourious workarounds!
 	                m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace, [&]
 	                {
 	                	BadassExplosion(r, m_c.m_redeemer_radius);
+	                    r.explosion = SetInFlames;
+	    				r.visible = false;
 	                }));
+
 				}
 				if (redeemer->InFlames().GetVal()){
 					r.visible = false;
@@ -1414,8 +1419,17 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 
 			if(r.explosion == NotInFlames){r.visible=true;}
 			r.time_to_Explosion--;
+			if(board.isWall(r.position.x(),r.position.y())){
+				//Welcome to the land of the glourious workarounds!
+                m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace, [&]
+                {
+                	BadassExplosion(r, m_c.m_redeemer_radius);
+                    r.explosion = SetInFlames;
+    				r.visible = false;
+                }));
 
-
+                continue;
+			}
 			if((r.time_to_Explosion == 0  && r.explosion != SetInFlames)){
 				BadassExplosion(r, m_c.m_redeemer_radius);
 				r.explosion = SetInFlames;
