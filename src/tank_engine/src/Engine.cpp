@@ -420,21 +420,27 @@ namespace TankEngine
         	if(!game_ptr->Redeemers()[redeemer_index].IsNull()){
     			Consoden::TankGame::RedeemerPtr redeemer =
     			                boost::static_pointer_cast<Consoden::TankGame::Redeemer>(game_ptr->Redeemers()[redeemer_index].GetPtr());
-    			if(redeemer->InFlames()){
+	            Consoden::TankGame::TankPtr tank_ptr =
+	                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[redeemer->TankId()].GetPtr());
+
+	            if(redeemer->InFlames()){
     				game_ptr->Redeemers()[redeemer_index].SetNull();
     				break;
     			}
+
     			if(gm.WallSquare(redeemer->PosX(),redeemer->PosY())){
 					detonateRedeemer(game_ptr, redeemer, &gm, 1);
 					redeemer->InFlames() = true;
-		            Consoden::TankGame::TankPtr tank_ptr =
-		                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[redeemer->TankId()].GetPtr());
+
 		            tank_ptr->RedeemerTimerLeft() = 0;
 		            redeemer->TimeToExplosion()=0;
 					break;
     			}
     			gm.MoveRedeemer(redeemer_index);
-    			if(game_ptr->Redeemers()[redeemer_index].IsNull()){continue;}				//redeemer may have been removed in move stage
+    			if(game_ptr->Redeemers()[redeemer_index].IsNull()){  //redeemer may have been removed when updating position
+    				tank_ptr->RedeemerTimerLeft() = 0;
+    				continue;
+    			}
         		if(game_ptr->Redeemers()[redeemer_index].GetPtr()->TimeToExplosion() <= 1){	//Needs to be done when timer is 1 to mitigate for delayed updates
         			if(gm.OnBoard(redeemer->PosX(),redeemer->PosY())){
 						detonateRedeemer(game_ptr, redeemer, &gm, 1);

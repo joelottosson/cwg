@@ -168,9 +168,45 @@ namespace TankEngine
         m_Game[pos_x][pos_y] = 'o';
     }
 
+    bool GameMap::MissileActive(int tank_id){
+    	Safir::Dob::Typesystem::ArrayIndex missile_index;
+        for (missile_index = 0;
+        		missile_index < m_Game_ptr->MissilesArraySize();
+        		missile_index++) {
+            if (m_Game_ptr->Missiles()[missile_index].IsNull()) {
+                continue;
+            }
+
+            Consoden::TankGame::MissilePtr missile_ptr =
+                boost::static_pointer_cast<Consoden::TankGame::Missile>(m_Game_ptr->Missiles()[missile_index].GetPtr());
+            if (missile_ptr->TankId().GetVal() == tank_id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool GameMap::RedeemerActive(int tank_id){
+    	Safir::Dob::Typesystem::ArrayIndex redeemer_index;
+        for (redeemer_index = 0;
+        		redeemer_index < m_Game_ptr->RedeemersArraySize();
+        		redeemer_index++) {
+            if (m_Game_ptr->Redeemers()[redeemer_index].IsNull()) {
+                continue;
+            }
+
+            Consoden::TankGame::RedeemerPtr redeemer_ptr =
+                boost::static_pointer_cast<Consoden::TankGame::Redeemer>(m_Game_ptr->Redeemers()[redeemer_index].GetPtr());
+            if (redeemer_ptr->TankId().GetVal() == tank_id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool GameMap::FireRedeemer(int pos_x, int pos_y, Consoden::TankGame::Direction::Enumeration direction, int time_to_detonation, int tank_id){
     	Safir::Dob::Typesystem::ArrayIndex redeemer_index;
-    	if(time_to_detonation < 2){
+    	if(time_to_detonation < 1){
     		return false;
     	}
 
@@ -205,6 +241,9 @@ namespace TankEngine
         }
 
 
+        if(RedeemerActive(tank_id) || MissileActive(tank_id)){
+        	return false;
+        }
 
     	int empty_index = -1;
         for (redeemer_index = 0;
@@ -218,17 +257,11 @@ namespace TankEngine
                 }else{
                 	continue;
                 }
-            }else{
-				Consoden::TankGame::RedeemerConstPtr redeemer_ptr =
-					boost::static_pointer_cast<Consoden::TankGame::Redeemer>(m_Game_ptr->Redeemers()[redeemer_index].GetPtr());
-				if (redeemer_ptr->TankId().GetVal() == tank_id) {
-					return false;
-				}
             }
         }
 
         if (empty_index == -1) {
-            // Only one missile per tank can be active, or array is full
+            // Only one redeemer per tank can be active, or array is full
             return false;
         }
 
@@ -238,7 +271,7 @@ namespace TankEngine
 		redeemer_ptr->TankId() = tank_id;
 		redeemer_ptr->Direction() = direction;
 		redeemer_ptr->InFlames() = false;
-		redeemer_ptr->TimeToExplosion() = time_to_detonation - 1; //We actually need to compensate for the redeemer not being updated in the round in wich it is fired.
+		redeemer_ptr->TimeToExplosion() = time_to_detonation ; //We actually need to compensate for the redeemer not being updated in the round in wich it is fired.
 
 
 		if (OnBoard(pos_x, pos_y) && WallSquare(pos_x, pos_y)) {
@@ -297,10 +330,12 @@ namespace TankEngine
         }
 
 
-        Safir::Dob::Typesystem::ArrayIndex missile_index;
-        bool tank_missile_active = false;
-        int empty_index = -1;
+        if(RedeemerActive(tank_id) || MissileActive(tank_id)){
+        	return false;
+        }
 
+        Safir::Dob::Typesystem::ArrayIndex missile_index;
+        int empty_index = -1;
         for (missile_index = 0; 
              missile_index < m_Game_ptr->MissilesArraySize(); 
              missile_index++) {
@@ -313,14 +348,9 @@ namespace TankEngine
                 continue;
             }
 
-            Consoden::TankGame::MissilePtr missile_ptr = 
-                boost::static_pointer_cast<Consoden::TankGame::Missile>(m_Game_ptr->Missiles()[missile_index].GetPtr());
-            if (missile_ptr->TankId().GetVal() == tank_id) {
-                tank_missile_active = true;
-            }
         }
 
-        if (tank_missile_active || empty_index == -1) {
+        if (empty_index == -1) {
             // Only one missile per tank can be active, or array is full
             return false;
         }
