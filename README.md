@@ -6,7 +6,9 @@ Building CWG is fairly straight forward. Just stand in the root directory and ty
 `make all`
 to build the entire project.
 
-To see the other targets just run `make targets`
+To see the other targets just run `make stargets`
+
+**NOTE:** Building the GUI will fail every second time due to odness with the Qt moc files.
 
 One can compile CWG without the new additions for CWG 16 by running:
 `make FLAGS='NOSMOKE;NOLASER;NOREDEEMER' all`
