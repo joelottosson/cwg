@@ -89,8 +89,6 @@ namespace tank_player_cs
 				redeemerTimer = 3;
 			}
 			
-
-
 			//Move our joystick.
 			setJoystick (moveDirection, towerDirection, fire,dropMine,fireLaser,deploySmoke, fireRedeemer, redeemerTimer);
 		}

@@ -72,6 +72,66 @@ class GameMap {
 		}
 	}
 	
+	//Functionality identical to GetMissile	
+	public consoden.tankgame.Redeemer GetRedeemer(boolean enemy_tank){
+		int id;
+		if(enemy_tank){
+			id = (tankId +1) % 2;
+		}else{
+			id = tankId;
+		}
+		 
+		 
+		for (int i=0; i<this.gameState.redeemers().size(); i++) {
+			if (gameState.redeemers().get(i).isNull()){
+				continue;
+			}
+
+			consoden.tankgame.Redeemer redeemer = gameState.redeemers().get(i).getObj();
+			System.out.println(redeemer.tankId().getVal() + "and the target id is sorta like ish " + id);
+			if (redeemer.tankId().getVal() == id) {
+				return redeemer;
+			}
+		}
+		return null;
+	}
+	 /*
+	 * Returns an objet with information about the missile. If enemy_tank is set to false
+	 * the missile of your own player will be returned otherwise its the enemys missile.
+	 *
+	 * If no missile exists the function will still return a missile object but it will be null.
+	 * To get the other field you need to use getter methods wich are just the name of the field you want to get.
+	 *
+	 * Se the game documentation for details about the different fields.
+	 *
+	 * example:
+	 *	consoden.tankgame.Missile missile = gm.GetMissile(false);
+	 *   if(missile != null){
+	 *	    System.out.println("enemy missile head position is " + missile.headPosX().getVal() + "," + missile.headPosY().getVal() );
+	 *   }
+	 *   
+	 *
+	 */
+	public consoden.tankgame.Missile GetMissile(boolean enemy_tank){
+		int id;
+		if(enemy_tank){
+			id = (tankId +1) % 2;
+		}else{
+			id = tankId;
+		}
+		 
+		for (int i=0; i<this.gameState.missiles().size(); i++) {
+			if (gameState.missiles().get(i).isNull()){
+				continue;
+			}
+			consoden.tankgame.Missile missile = gameState.missiles().get(i).getObj();
+			if (missile.tankId().getVal() == id) {
+				return missile;
+			}
+		}
+		return null;
+	}
+	
 	//Enemy tank position.
 	public boolean hasRedeemer() {
 		return gameState.tanks().get(tankId).getObj().hasRedeemer().getVal();

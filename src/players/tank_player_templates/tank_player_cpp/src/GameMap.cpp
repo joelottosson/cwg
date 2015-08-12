@@ -165,6 +165,56 @@ bool GameMap::HasRedeemer() const{
     return false;
 }
 
+
+Consoden::TankGame::MissilePtr GameMap::GetMissile(bool enemy_tank){
+	int tank_id;
+	if(enemy_tank){
+		tank_id = (m_TankId +1) % 2;
+	}else{
+		tank_id = m_TankId;
+	}
+
+    for (Safir::Dob::Typesystem::ArrayIndex missileIndex = 0;
+         missileIndex < m_gamePtr->MissilesArraySize();
+         missileIndex++) {
+
+        if (m_gamePtr->Missiles()[missileIndex].IsNull()) {
+            // empty missile slot
+            continue;
+        }
+
+        if(m_gamePtr->Missiles()[missileIndex].GetPtr()->TankId() == tank_id){
+        	return m_gamePtr->Missiles()[missileIndex].GetPtr();
+        }
+    }
+	return NULL;
+}
+
+Consoden::TankGame::RedeemerPtr GameMap::GetRedeemer(bool enemy_tank){
+	int tank_id;
+	if(enemy_tank){
+		tank_id = (m_TankId +1) % 2;
+	}else{
+		tank_id = m_TankId;
+	}
+
+    for (Safir::Dob::Typesystem::ArrayIndex redeemerIndex = 0;
+         redeemerIndex < m_gamePtr->RedeemersArraySize();
+         redeemerIndex++) {
+
+        if (m_gamePtr->Redeemers()[redeemerIndex].IsNull()) {
+            // empty missile slot
+            continue;
+        }
+
+        if(m_gamePtr->Redeemers()[redeemerIndex].GetPtr()->TankId() == tank_id){
+        	return m_gamePtr->Redeemers()[redeemerIndex].GetPtr();
+        }
+    }
+	return NULL;
+}
+
+
 bool GameMap::IsWall(const std::pair<int, int>& pos) const
 {
     return m_gamePtr->Board().GetVal()[Index(pos)]=='x';

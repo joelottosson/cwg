@@ -54,8 +54,13 @@ cool_players: .FORCE
 	@cd ../../..
 	cd src/players/tank_player_templates/tank_player_cpp/src && cmake . && make install
 	@cd ../../..
+	cd src/players/tank_player_templates/tank_player_java/src && cmake . && make install
+	@cd ../../..
+		cd src/players/tank_player_templates/tank_player_cs/src && cmake . && make install
+	@cd ../../..
 	cd src/players/tank_player_powerup/src && cmake . && make install
 	@cd ../../..
+
 	
 clean_cool_players: .FORCE
 	cd src/players/tank_random_player/src && cmake . && make clean

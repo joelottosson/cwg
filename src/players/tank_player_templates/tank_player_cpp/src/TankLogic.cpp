@@ -78,6 +78,7 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     if(gm.HasSmoke()){
     	deploy_smoke = true;
     }
+
     //Move our joystick.
     SetJoystick(moveDirection, towerDirection, fire, dropMine, fire_laser,deploy_smoke,fire_redeemer, redemer_timer);
 }

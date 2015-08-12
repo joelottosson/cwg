@@ -94,7 +94,6 @@ class TankLogic {
 	    	redeemerTimer = 3;
 	    }
 	    
-	    
 		//Move our joystick.
 		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine,fireLaser,deploySmoke,fireRedeemer,redeemerTimer);
 	}

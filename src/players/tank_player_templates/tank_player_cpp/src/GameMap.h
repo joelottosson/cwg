@@ -120,6 +120,29 @@ public:
                              Consoden::TankGame::Direction::Enumeration direction) const;
 
     /**
+     * Returns an objet with information about the missile. If enemy_tank is set to false
+     * the missile of your own player will be returned otherwise its the enemys missile.
+     *
+     * If no missile exists the function will still return a missile object but it will be NULL.
+     * To get the other field you need to use getter methods wich are just the name of the field you want to get.
+     *
+     * Se the game documentation for details about the different fields.
+     *
+     * example:
+     *	Consoden::TankGame::MissilePtr missile = gm.GetMissile(true);
+     *	if(missile != NULL){
+     *		std::wcout<< "Missile head is at position " << missile->HeadPosX() << "," << missile->HeadPosY() << std::endl;
+     *	}
+     *
+     */
+    Consoden::TankGame::MissilePtr GetMissile(bool enemy_tank);
+
+    /**
+     * Functionality identical to GetMissile
+     */
+    Consoden::TankGame::RedeemerPtr GetRedeemer(bool enemy_tank);
+
+    /**
      * Time left (milliseconds) until the joystick will be readout next time.
      */
     int TimeToNextMove() const;

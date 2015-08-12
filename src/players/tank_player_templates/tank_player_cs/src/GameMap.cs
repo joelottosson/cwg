@@ -133,6 +133,67 @@ namespace tank_player_cs
 			return RawVal (p.X, p.Y) == 'l';
 		}
 
+		/*
+			
+			 Returns an objet with information about the missile. If enemy_tank is set to false
+			 the missile of your own player will be returned otherwise its the enemys missile.
+			 
+			 If no missile exists the function will still return a missile object but it will be null.
+			 To get the other field you need to use getter methods wich are just the name of the field you want to get.
+			 
+			 Se the game documentation for details about the different fields.
+			 
+			 example:
+			 	consoden.tankgame.Missile missile = gm.GetMissile(false);
+			    if(missile != null){
+			 	    System.out.println("enemy missile head position is " + missile.headPosX().getVal() + "," + missile.headPosY().getVal() );
+			    }
+		*/
+		public Consoden.TankGame.Missile GetMissile(bool enemy_tank){
+			int id = 0;
+			if(enemy_tank){
+				id = (tankId + 1) % 2;
+			}else{
+				id = tankId;
+			}
+			
+			for (int i=0; i<this.gameState.Missiles.Count; i++) {
+				if (gameState.Missiles [i].IsNull ()){
+					continue;
+				}
+				
+				Consoden.TankGame.Missile missile = gameState.Missiles [i].Obj;	
+				if(missile.TankId.Val == id){
+					return missile;
+				}
+			}
+			
+			return null;
+		}
+		
+		//Functionality identical to GetMissile
+		public Consoden.TankGame.Redeemer GetRedeemer(bool enemy_tank){
+			int id = 0;
+			if(enemy_tank){
+				id = (tankId + 1) % 2;
+			}else{
+				id = tankId;
+			}
+			
+			for (int i=0; i<this.gameState.Redeemers.Count; i++) {
+				if (gameState.Redeemers [i].IsNull ()){
+					continue;
+				}
+				
+				Consoden.TankGame.Redeemer redeemer = gameState.Redeemers [i].Obj;	
+				if(redeemer.TankId.Val == id){
+					return redeemer;
+				}
+			}
+			
+			return null;
+		}
+
 		//Is there a missile in this square
 		public bool IsMissileInPosition (Position p)
 		{
