@@ -154,6 +154,7 @@ namespace TankEngine
                 game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::Draw);
                 SetWinner(game_ptr);
                 StopGame();
+
                 if (gm.MissilesLeft()) {
                     mMissileCleanupRunning = true;
                     ScheduleMissileCleanup();
@@ -230,19 +231,20 @@ namespace TankEngine
                         boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
 
                     GameMap gm(game_ptr);
-                    gm.MoveMissiles();
-                    gm.MoveRedeemers();
+                    //gm.MoveMissiles();
+                    //gm.MoveRedeemers();
+                    gm.ClearMissilesAndRedeemers();
 
                     game_ptr->Counter() = game_ptr->Counter() + 1;
 
-                    m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
+                    m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);
 
-                    if (gm.MissilesLeft() || gm.RedeemersLeft()) {
-                        ScheduleMissileCleanup();
-                    } else {
+                    //if (gm.MissilesLeft() || gm.RedeemersLeft()) {
+                    //    ScheduleMissileCleanup();
+                    //} else {
                         // We are done
                         mMissileCleanupRunning = false;
-                    }
+                    //}
                 }
             } else {
                 Safir::Logging::SendSystemLog(Safir::Logging::Critical,
@@ -763,21 +765,6 @@ namespace TankEngine
             	dude_ptr->Dying().SetVal(true);
                 AddPoints(m_config.m_dude_penalty, (tank_index+1) % 2, game_ptr);
             }
-            /*
-            //Here we do some horrible int and bool conversion :(
-            int killer_id1 = gm.HitByMissile(dude_ptr->PosX(),dude_ptr->PosY());
-            int killer_id2 = gm.MoveAgainstMissile(dude_ptr->PosX(),dude_ptr->PosY(),dude_ptr->Direction());
-            if((bool)killer_id1 || (bool)killer_id2){
-            	dude_ptr->Dying() = true;
-
-
-            	if((bool)killer_id1){
-            		AddPoints(m_config.m_dude_penalty, killer_id1, game_ptr);
-            	}else if((bool)killer_id2){
-            		AddPoints(m_config.m_dude_penalty, killer_id2, game_ptr);
-            	}
-            }
-            */
 
             // Stepped on mine
             if (gm.MineSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal())) {
@@ -851,6 +838,9 @@ namespace TankEngine
             }
         }
 
+
+
+
         // Check for game termination states
         bool player_one_in_flames = true;
         bool player_two_in_flames = true;
@@ -882,6 +872,7 @@ namespace TankEngine
             game_ptr->Survivor().SetVal(Consoden::TankGame::Winner::Draw);
             SetWinner(game_ptr);
             StopGame();
+
             if (gm.MissilesLeft() || gm.RedeemersLeft()) {
                 mMissileCleanupRunning = true;
                 ScheduleMissileCleanup();

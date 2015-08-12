@@ -582,6 +582,21 @@ namespace TankEngine
         redeemer_ptr->PosY() = pos_y;
     }
 
+    void GameMap::ClearMissilesAndRedeemers(){
+        for (Safir::Dob::Typesystem::ArrayIndex redeemer_index = 0;
+             redeemer_index < m_Game_ptr->RedeemersArraySize();
+             redeemer_index++) {
+        	m_Game_ptr->Redeemers()[redeemer_index].SetNull();
+        }
+
+        for (Safir::Dob::Typesystem::ArrayIndex missile_index = 0;
+             missile_index < m_Game_ptr->MissilesArraySize();
+             missile_index++) {
+        	m_Game_ptr->Missiles()[missile_index].SetNull();
+        }
+
+    }
+
     void GameMap::MoveRedeemers()
     {
         for (Safir::Dob::Typesystem::ArrayIndex redeemer_index = 0;
