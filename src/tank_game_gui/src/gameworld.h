@@ -27,19 +27,16 @@
 #include "boardparser.h"
 #include "screentext.h"
 #include "PassiveGroup.h"
-#include "../../Config.h"
 
 class GameWorld
 {
 public:
-	GameWorld(int updateInterval, bool soundEnabled,ConfigSystem::Config conf);
+    GameWorld(int updateInterval, bool soundEnabled);
 
 
 
     std::vector<Sprite> getPassiveSprites() const;
     std::vector<boost::shared_ptr<PassiveGroup>>  getPassiveGroups() const;
-
-    ConfigSystem::Config m_c;
 
     void Clear();
     void ClearGameState();

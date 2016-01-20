@@ -17,7 +17,7 @@ FIND_PACKAGE(Boost COMPONENTS system)
 TARGET_LINK_LIBRARIES(tank_engine ${Boost_LIBRARIES})
   
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(tank_engine swre_interface_cpp dose_cpp dots_generated-Consoden-cpp dots_generated-Safir-cpp dots_cpp logging_cpp lluf_utils confuse libconfig.so)
+  TARGET_LINK_LIBRARIES(tank_engine swre_interface_cpp dose_cpp dots_generated-Consoden-cpp dots_generated-Safir-cpp dots_cpp logging_cpp lluf_utils)
 endif()
 
 INSTALL(TARGETS tank_engine

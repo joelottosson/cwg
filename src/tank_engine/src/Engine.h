@@ -18,7 +18,6 @@
 
 #include "JoystickEntityHandler.h"
 #include "JoystickEngineIF.h"
-#include "../../Config.h"
 
 
 #include "GameMap.h"
@@ -32,8 +31,6 @@ namespace TankEngine
         public JoystickEngineIF
     {
     public:
-
-    	ConfigSystem::Config m_config;
 
         Engine(boost::asio::io_service& io);
 

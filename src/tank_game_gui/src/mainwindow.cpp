@@ -15,7 +15,6 @@
 
 MainWindow::MainWindow(int updateFrequency, bool soundEnalbed, bool override_sound, bool override_freq, QWidget *parent)
     :QMainWindow(parent)
-	,m_conf(std::string(getenv("SAFIR_RUNTIME")) + std::string("/data/tank_game/rules.cfg"))
 	//,m_world(updateFrequency,soundEnalbed,m_conf)
     ,ui(new Ui::MainWindow)
     ,m_updateInterval(1000/updateFrequency) //hz
@@ -29,16 +28,16 @@ MainWindow::MainWindow(int updateFrequency, bool soundEnalbed, bool override_sou
 
 
 
-	bool audio_enbaled = m_conf.m_audio_enabled;
+    bool audio_enbaled = Consoden::TankGame::Configuration::AudioEnabled();
 	if(override_sound){
 		audio_enbaled = soundEnalbed;
 	}
-	int update_freq = m_conf.m_frame_rate;
+    int update_freq = Consoden::TankGame::Configuration::FrameRate();
 	if(override_freq){
 		update_freq = updateFrequency;
 	}
 
-	m_world.reset(new GameWorld(update_freq,audio_enbaled, m_conf));
+    m_world.reset(new GameWorld(update_freq,audio_enbaled));
 
 
 	this->setWindowState(Qt::WindowMaximized);

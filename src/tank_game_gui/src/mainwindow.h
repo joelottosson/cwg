@@ -15,11 +15,11 @@
 #include <qtimer.h>
 #include <Safir/Dob/Connection.h>
 #include <Consoden/TankGame/Match.h>
+#include <Consoden/TankGame/Configuration.h>
 #include "tankgamewidget.h"
 #include "tankinfowidget.h"
 #include "gamemodel.h"
 #include "newgamedialog.h"
-#include "../../Config.h"
 
 //----------------------------------------
 class DobConnector : public QThread
@@ -66,8 +66,6 @@ class MainWindow : public QMainWindow,
 public:
     explicit MainWindow(int updateFrequency, bool soundEnalbed, bool override_sound, bool override_freq, QWidget *parent = 0);
     ~MainWindow();
-
-    ConfigSystem::Config m_conf;
 
     virtual bool eventFilter(QObject* o, QEvent* e);
 

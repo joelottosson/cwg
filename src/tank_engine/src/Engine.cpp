@@ -13,6 +13,7 @@
 
 #include <Consoden/TankGame/GameState.h>
 #include <Consoden/TankGame/Player.h>
+#include <Consoden/TankGame/Configuration.h>
 
 #include <Safir/Logging/Log.h>
 #include <Safir/Dob/SuccessResponse.h>
@@ -30,7 +31,6 @@
 namespace TankEngine
 {
     Engine::Engine(boost::asio::io_service& io) :
-    	m_config(std::string(getenv("SAFIR_RUNTIME")) + std::string("/data/tank_game/rules.cfg")),
         mGamePrepare(true),
         mGameRunning(false),
         mMissileCleanupRunning(false),
@@ -145,8 +145,8 @@ namespace TankEngine
                 GameMap gm(game_ptr);
 
                 // Draw game, both players get one point
-                AddPoints(m_config.m_draw_points, mPlayerOneTankId, game_ptr);
-                AddPoints(m_config.m_draw_points, mPlayerTwoTankId, game_ptr);
+                AddPoints(CWG::Configuration::DrawPoints(), mPlayerOneTankId, game_ptr);
+                AddPoints(CWG::Configuration::DrawPoints(), mPlayerTwoTankId, game_ptr);
 
                 std::cout << "Both tanks survived, game timeout." << std::endl;
                 Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Both tanks survived, game timeout.");
@@ -360,7 +360,7 @@ namespace TankEngine
                         boost::static_pointer_cast<Consoden::TankGame::GameState>(m_connection.Read(m_GameEntityId).GetEntity());
                     // Walk over, 5 point to opponent
                     int loser_tank_id = (*it).first;
-                    AddPoints(m_config.m_walkover_penalty, OpponentTankId(loser_tank_id), game_ptr);
+                    AddPoints(CWG::Configuration::WalkoverPenalty(), OpponentTankId(loser_tank_id), game_ptr);
                     game_ptr->Survivor().SetVal(TankIdToWinner(OpponentTankId(loser_tank_id)));
                     SetWinner(game_ptr);
                     m_connection.SetChanges(game_ptr, m_GameEntityId.GetInstanceId(), m_HandlerId);        
@@ -704,7 +704,7 @@ namespace TankEngine
 
             if(joystick_ptr->DeploySmoke() && tank_ptr->HasSmoke()){
             	tank_ptr->HasSmoke() = false;
-            	tank_ptr->SmokeLeft() = tank_ptr->SmokeLeft() + m_config.m_smoke_timer;
+                tank_ptr->SmokeLeft() = tank_ptr->SmokeLeft() + CWG::Configuration::SmokeTimer();
             }
 
 
@@ -763,7 +763,7 @@ namespace TankEngine
             //We might need to have this before any movement for the detector to work
             if ((gm.DudeSquare(tank_ptr->PosX().GetVal(), tank_ptr->PosY().GetVal()) || collisonDetector(dude_ptr,tank_ptr) )&& !dude_ptr->Dying() ) {
             	dude_ptr->Dying().SetVal(true);
-                AddPoints(m_config.m_dude_penalty, (tank_index+1) % 2, game_ptr);
+                AddPoints(CWG::Configuration::DudePenalty(), (tank_index+1) % 2, game_ptr);
             }
 
             // Stepped on mine
@@ -775,7 +775,7 @@ namespace TankEngine
             // Hit by missile?
             if (gm.IsTankHit(tank_ptr->PosX(), tank_ptr->PosY())) {
                 // Hit by missile awards two points to opponent
-                AddPoints(m_config.m_hit_points, OpponentTankId(tank_ptr->TankId()), game_ptr);
+                AddPoints(CWG::Configuration::HitPoints(), OpponentTankId(tank_ptr->TankId()), game_ptr);
                 tank_ptr->InFlames() = true;
                 tank_ptr->HitMissile() = true;
             }
@@ -803,7 +803,7 @@ namespace TankEngine
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //take the coin
 
                     // One point for taking a coin
-                    AddPoints(m_config.m_coin_value, tank_ptr->TankId(), game_ptr);
+                    AddPoints(CWG::Configuration::CointValue(), tank_ptr->TankId(), game_ptr);
                     tank_ptr->TookCoin() = true;
 
                 }else if (gm.LaserAmmo(tank_ptr->PosX(), tank_ptr->PosY())) {
@@ -814,7 +814,7 @@ namespace TankEngine
                 }else if (gm.PoisonSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
                     // Give one point to the opponent for driving into poison gas. 
                     gm.ClearSquare(tank_ptr->PosX(), tank_ptr->PosY()); //remove poison
-                    AddPoints(m_config.m_gas_penalty, OpponentTankId(tank_ptr->TankId()), game_ptr);
+                    AddPoints(CWG::Configuration::GasPenalty(), OpponentTankId(tank_ptr->TankId()), game_ptr);
                     tank_ptr->HitPoisonGas() = true;
 
                 } else if (gm.SmokeGrenadeSquare(tank_ptr->PosX(), tank_ptr->PosY())) {
@@ -863,8 +863,8 @@ namespace TankEngine
 
         if (player_one_in_flames && player_two_in_flames) {
             // Draw game, both players get one point
-            AddPoints(m_config.m_draw_points, mPlayerOneTankId, game_ptr);
-            AddPoints(m_config.m_draw_points, mPlayerTwoTankId, game_ptr);
+            AddPoints(CWG::Configuration::DrawPoints(), mPlayerOneTankId, game_ptr);
+            AddPoints(CWG::Configuration::DrawPoints(), mPlayerTwoTankId, game_ptr);
 
             std::cout << "Both players died." << std::endl;
             Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Both players died.");
@@ -881,7 +881,7 @@ namespace TankEngine
 
         } else if (player_one_in_flames) {
             // One player survives, three points
-            AddPoints(m_config.m_survival_points, mPlayerTwoTankId, game_ptr);
+            AddPoints(CWG::Configuration::SurvivalPoints(), mPlayerTwoTankId, game_ptr);
 
             std::cout << "Player Two (" << mPlayerTwoName << ") survives!" << std::endl;
             Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Player two survives!");
@@ -897,7 +897,7 @@ namespace TankEngine
 
         } else if (player_two_in_flames) {
             // One player survives, three points
-            AddPoints(m_config.m_survival_points, mPlayerOneTankId, game_ptr);
+            AddPoints(CWG::Configuration::SurvivalPoints(), mPlayerOneTankId, game_ptr);
 
             std::cout << "Player One (" << mPlayerOneName << ") survives!" << std::endl;
             Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Player one survives!.");
@@ -965,7 +965,7 @@ namespace TankEngine
     			enemy_tank->InFlames() = true;
 
     			enemy_tank->HitMissile() = true;
-    			AddPoints(m_config.m_hit_points,own_tank->TankId(),game_ptr);
+                AddPoints(CWG::Configuration::HitPoints(),own_tank->TankId(),game_ptr);
     			return true;
     		}else if(x_pos == own_tank->PosX() && y_pos == own_tank->PosY()){
 
@@ -978,7 +978,7 @@ namespace TankEngine
     		}else if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY() && !game_ptr->TheDude().GetPtr()->Dying()){
     			game_ptr->TheDude().GetPtr()->Dying() = true;
     			game_ptr->TheDude().GetPtr()->StopInstantly() = true;
-    			AddPoints(m_config.m_dude_penalty,enemy_tank->TankId(),game_ptr);
+                AddPoints(CWG::Configuration::DudePenalty(),enemy_tank->TankId(),game_ptr);
     		}
 
     	}
@@ -1177,7 +1177,7 @@ namespace TankEngine
 
         		if(x_pos == enemy_x && y_pos == enemy_y && !enemy->InFlames()){
 					enemy->InFlames() = true;
-					AddPoints(m_config.m_hit_points,redeemer_ptr->TankId(), game_ptr);
+                    AddPoints(CWG::Configuration::HitPoints(),redeemer_ptr->TankId(), game_ptr);
 				}
 
         		if(gm->WallSquare(x_pos,y_pos) || gm->MineSquare(x_pos,y_pos) ){
@@ -1188,7 +1188,7 @@ namespace TankEngine
         		if(x_pos == game_ptr->TheDude().GetPtr()->PosX() && y_pos == game_ptr->TheDude().GetPtr()->PosY() && !game_ptr->TheDude().GetPtr()->Dying()){
         			game_ptr->TheDude().GetPtr()->Dying() = true;
         			game_ptr->TheDude().GetPtr()->StopInstantly() = true;
-        			AddPoints(m_config.m_dude_penalty,(redeemer_ptr->TankId() + 1) % 2, game_ptr);
+                    AddPoints(CWG::Configuration::DudePenalty(),(redeemer_ptr->TankId() + 1) % 2, game_ptr);
         		}
 
         	}

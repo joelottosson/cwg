@@ -17,7 +17,7 @@ PassiveGroup::PassiveGroup(MatchState match_state, char const* image_name, int f
 
 	m_layer = layer;
 
-	m_silly_image_name = image_name;
+    m_imageName = image_name;
     m_image = QPixmap(image_name);
 	m_sprite_data.lifeTime  = life_time;
 	m_update_delay = delay;
@@ -45,13 +45,6 @@ PassiveGroup::PassiveGroup(MatchState match_state, char const* image_name, int f
 	m_sound_enabled = false;
 
 	m_lol_function = board_function;
-
-}
-
-PassiveGroup::PassiveGroup(MatchState match_state, char const* image_name, int frames, int width, int height, int life_time, int repetitions, int layer,double delay,char const* sound_file, bool sound_enabled,  boost::function<const Board::PointVec& ( const Board&)> board_function){
-	PassiveGroup(match_state, image_name, frames, width, height ,life_time, repetitions, layer,delay, board_function);
-	setSoundPlayer(sound_file,  sound_enabled,100);
-
 
 }
 
@@ -102,15 +95,11 @@ void  PassiveGroup::updateGroupOnChange(Board board,GameState game_state,std::mu
         else
         {
 
-
             m_positions.clear();
             m_positions.insert(m_positions.begin(), board_positions.begin(), board_positions.end());
 
             events_queue.insert(std::multimap<qint64, boost::function<void()>>::value_type(game_state.lastUpdate+game_state.pace*delay, [=]
             {
-
-
-
                 for (auto spriteIt=m_sprites.begin(); spriteIt!=m_sprites.end();)
                 {
 

@@ -78,7 +78,7 @@ endif()
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
 
 IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(tank_game_gui libconfig.so dots_cpp dots_generated-Safir-cpp dots_generated-cpp dots_generated-Consoden-cpp dose_internal dose_cpp lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tank_game_gui dots_cpp dots_generated-Safir-cpp dots_generated-cpp dots_generated-Consoden-cpp dose_internal dose_cpp lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
 ENDIF ()
 
 INSTALL(TARGETS tank_game_gui

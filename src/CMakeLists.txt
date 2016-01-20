@@ -15,14 +15,14 @@ FILE(GLOB sources *.cpp)
 FILE(GLOB headers *.h)
 
 
-ADD_LIBRARY(config SHARED ${sources} ${headers})
+ADD_LIBRARY(SHARED ${sources} ${headers})
 
 
 FIND_PACKAGE(Boost COMPONENTS system)
-#TARGET_LINK_LIBRARIES(config ${Boost_LIBRARIES})
+#TARGET_LINK_LIBRARIES(${Boost_LIBRARIES})
   
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(config swre_interface_cpp dose_cpp dots_generated-Consoden-cpp dots_generated-Safir-cpp dots_cpp logging_cpp lluf_utils confuse)
+  TARGET_LINK_LIBRARIES(swre_interface_cpp dose_cpp dots_generated-Consoden-cpp dots_generated-Safir-cpp dots_cpp logging_cpp lluf_utils)
 endif()
 
 INSTALL(TARGETS config
@@ -32,4 +32,3 @@ INSTALL(TARGETS config
 
 INSTALL(FILES rules.cfg DESTINATION ${SAFIR_RUNTIME}/data/tank_game)
 
-INSTALL_DEBUG_INFO(config)

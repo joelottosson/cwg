@@ -28,7 +28,7 @@ public:
 	PointVec m_positions;
 	QPixmap m_image;
 	std::vector<Sprite> m_sprites;
-	const char* m_silly_image_name;
+    std::string m_imageName;
 	int m_layer;
 
 
@@ -41,7 +41,7 @@ public:
 	 * class used to retrive the positions of the silly things.
 	 */
 	PassiveGroup(MatchState match_state, char const* image_name, int frames, int width, int height, int life_time, int repetitions, int layer,double delay, boost::function<const Board::PointVec& ( const Board&)> board_function);
-	PassiveGroup(MatchState match_state, char const* image_name, int frames, int width, int height, int life_time, int repetitions, int layer,double delay,char const* sound_file, bool sound_enabled,  boost::function<const Board::PointVec& ( const Board&)> board_function);
+
 	virtual ~PassiveGroup();
 
 
@@ -60,7 +60,6 @@ public:
      */
 	void updateGroupOnChange(Board board,GameState game_state,std::multimap<qint64, boost::function<void()>>&  events_queue,double delay);
 	void updateGroupOnChange(Board board,GameState game_state,std::multimap<qint64, boost::function<void()>>&  events_queue);
-
 
 
 	bool operator<(const PassiveGroup& other) const;

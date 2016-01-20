@@ -66,6 +66,8 @@ private:
     }
 
     void PaintGrid(QPainter& painter);
+    void PaintWalls(QPainter& painter);
+    void PaintMines(QPainter& painter);
     void PaintDudes(const Dude& dude, QPainter& painter);
     void PaintTank(const Tank& tank, bool blue, QPainter& painter);
     void PaintMissile(const Missile& missile, QPainter& painter);

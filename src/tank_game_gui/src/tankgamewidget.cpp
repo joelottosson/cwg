@@ -31,7 +31,7 @@ TankGameWidget::TankGameWidget(const GameWorld& world, QWidget *parent)
     ,m_tankBlue(":/images/panzerIV_blue.png")
     ,m_tankRed(":/images/panzerIV_red.png")
     ,m_tankTower(":/images/panzerIV_tower.png")
-    ,m_obstacle(":/images/obstacle.jpg")
+    ,m_obstacle(":/images/obstacle.png")
 
     ,m_missile(":/images/missile.png")
     ,m_tankWreck(":/images/panzerIV_wreck.png")
@@ -62,6 +62,7 @@ void TankGameWidget::Reset()
     m_backgroundPainter.reset(new QPainter(m_backgroundPixmap.get()));
     m_backgroundPainter->setRenderHint(QPainter::Antialiasing);
     PaintGrid(*m_backgroundPainter);
+    PaintWalls(*m_backgroundPainter);
 }
 
 void TankGameWidget::UpdatePaintConstants()
@@ -93,6 +94,8 @@ void TankGameWidget::paintEvent(QPaintEvent*)
     UpdatePaintConstants();
     global_timer_averages[0] += ((float)(clock() - start)/CLOCKS_PER_SEC);
 
+    //Paint mines
+    PaintMines(*m_backgroundPainter);
 
     start = clock();
     QPixmap tmp(*m_backgroundPixmap);    
@@ -221,6 +224,26 @@ void TankGameWidget::PaintGrid(QPainter &painter)
     for (int i=0; i<=m_world.GetGameState().size.x(); ++i)
     {
         painter.drawLine(i*m_const.squarePixelSize, 0, i*m_const.squarePixelSize, m_const.boardPixelSizeFloat.y());
+    }
+}
+
+void TankGameWidget::PaintWalls(QPainter& painter)
+{
+    for (auto& p : m_world.GetGameState().walls)
+    {
+        painter.drawPixmap(p.x()*m_const.squarePixelSize,
+                           p.y()*m_const.squarePixelSize,
+                           m_const.squarePixelSize,
+                           m_const.squarePixelSize,
+                           m_obstacle);
+    }
+}
+
+void TankGameWidget::PaintMines(QPainter& painter)
+{
+    for (const auto& mine : m_world.GetGameState().mines)
+    {
+        painter.drawPixmap(ToScreen(mine, 0, 0), m_mine);
     }
 }
 

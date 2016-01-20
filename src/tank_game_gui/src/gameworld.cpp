@@ -16,12 +16,13 @@
 * Use the push sprite thing for drawing of temporary stuffs such as explosions.
 *
 *******************************************************************************/
-#include "gameworld.h"
-#include "PassiveGroup.h"
+#include <Consoden/TankGame/Configuration.h>
 #include <boost/make_shared.hpp>
 #include <memory>
-
 #include <limits>
+#include "gameworld.h"
+#include "PassiveGroup.h"
+
 
 
 namespace CWG = Consoden::TankGame;
@@ -45,9 +46,8 @@ namespace
     }
 }
 
-GameWorld::GameWorld(int updateInterval, bool soundEnabled,ConfigSystem::Config conf)
-	:m_c(conf)
-	,m_matchState()
+GameWorld::GameWorld(int updateInterval, bool soundEnabled)
+    :m_matchState()
     ,m_players()
     ,m_animationUpdateInterval(updateInterval)
     ,m_soundEnabled(soundEnabled)
@@ -112,34 +112,27 @@ GameWorld::GameWorld(int updateInterval, bool soundEnabled,ConfigSystem::Config 
     Removing a object from here will only remove them from the gui but not from the
     actual game so they can still be interacted with by the tanks.
     */
+
 #ifndef NOLASER
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/laser-ammo.png", 27, 66, 67,1200,0,0,0.75, &Board::LaserAmmo));
-	m_passive_objects.back()->setSoundPlayer("laser-pickup.mp3",soundEnabled,(int)((m_c.m_laser_sound_volume*100)/m_c.m_master_volume));
+    m_passive_objects.back()->setSoundPlayer("laser-pickup.mp3",soundEnabled,(int)((Consoden::TankGame::Configuration::LaserVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
 #endif
 
 #ifndef NOREDEEMER
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/redeemer-ammo.png", 1, 72, 72,1000,0,0,0.75, &Board::RedeemerAmmo));
-	m_passive_objects.back()->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((m_c.m_redeemer_ammo_volume*100)/m_c.m_master_volume));
+    m_passive_objects.back()->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((Consoden::TankGame::Configuration::RedeemerAmmoVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
 #endif
 
 #ifndef NOSMOKE
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/smoke_grenade.png", 1, 72, 72,1000,0,0,0.75, &Board::Smoke));
-	m_passive_objects.back()->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((m_c.m_redeemer_ammo_volume*100)/m_c.m_master_volume));
+    m_passive_objects.back()->setSoundPlayer("redeemer-pickup.mp3",soundEnabled,(int)((Consoden::TankGame::Configuration::RedeemerAmmoVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
 #endif
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/coin_sheet.png", 8, 72, 72,1000,0,0,0.75, &Board::Coins));
-	m_passive_objects.back()->setSoundPlayer("coin.mp3",soundEnabled,(int)((m_c.m_coin_volume*100)/m_c.m_master_volume));
+    m_passive_objects.back()->setSoundPlayer("coin.mp3",soundEnabled,(int)((Consoden::TankGame::Configuration::CoinVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
 
 	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/poison.png", 1, 72, 72,1000,0,0,0.75, &Board::Poison));
-	m_passive_objects.back()->setSoundPlayer("wilhelm_scream.mp3",soundEnabled,(int)((m_c.m_scream_volume*100)/m_c.m_master_volume));
-
-	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/mine.png", 1, 72, 72,1000,0,0,0.75, &Board::Mines));
-
-	m_passive_objects.push_back(boost::make_shared<PassiveGroup>(m_matchState,":/images/obstacle.png", 1, 72, 72,1000,0,0,0.75, &Board::Walls));
-
-
-
-
+    m_passive_objects.back()->setSoundPlayer("wilhelm_scream.mp3",soundEnabled,(int)((Consoden::TankGame::Configuration::ScreamVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
 }
 
 std::vector<boost::shared_ptr<PassiveGroup>>  GameWorld::getPassiveGroups() const{
@@ -441,12 +434,12 @@ void GameWorld::UpdateTank(const Consoden::TankGame::TankPtr& tank, const Board&
     t.oldMoveDirection = t.moveDirection;
 
     if(!tank->SmokeLeft().IsNull() && tank->SmokeLeft() > 0){
-    	int smoke_puffs = m_c.m_smoke_puffs;
+        int smoke_puffs = Consoden::TankGame::Configuration::SmokePuffs();
         qint64 time_per_puff=(m_matchState.gameState.pace)/smoke_puffs;
-        int smoke_spread = m_c.m_smoke_spread;
+        int smoke_spread = Consoden::TankGame::Configuration::SmokeSpread();
     	for(int i = 0; i <smoke_puffs; i++){
     		QPointF random_start = t.position + QPointF(((qreal)(rand()%smoke_spread*2-smoke_spread))/100,((qreal)(rand()%smoke_spread*2-smoke_spread))/100)/2;
-    		QPointF random_direction = QPointF(((float)((rand()%smoke_spread*2)-smoke_spread))/100,((float)((rand()%smoke_spread*2)-smoke_spread))/100)*m_moveSpeed*(((float)1)/m_c.m_smoke_speed);
+            QPointF random_direction = QPointF(((float)((rand()%smoke_spread*2)-smoke_spread))/100,((float)((rand()%smoke_spread*2)-smoke_spread))/100)*m_moveSpeed*(((float)1)/Consoden::TankGame::Configuration::SmokeSpeed());
         	m_sprites.push_back(Sprite(m_smoke, random_start, random_direction , rand()%360, QDateTime::currentMSecsSinceEpoch()+time_per_puff*i, 1));
     	}
     	if(!t.deploying_smoke && m_soundEnabled){
@@ -558,7 +551,11 @@ void GameWorld::Update(const Consoden::TankGame::GameStatePtr &game)
     m_matchState.gameState.lastUpdate=QDateTime::currentMSecsSinceEpoch();
     m_matchState.gameState.elapsedTime=static_cast<int>(game->ElapsedTime().GetVal());
 
+    m_matchState.gameState.mines.clear();
+
     Board boardParser(&game->Board().GetVal()[0], game->Width().GetVal(), game->Height().GetVal());
+
+    m_matchState.gameState.mines.insert(m_matchState.gameState.mines.begin(), boardParser.Mines().begin(), boardParser.Mines().end());
 
     for(auto a : m_passive_objects){
     	a->updateGroupOnChange(boardParser ,m_matchState.gameState, m_eventQueue);
@@ -759,10 +756,10 @@ void GameWorld::Update()
         		time = now + timeToNextUpdate/2;
         	}
         	srand(clock());
-        	int spread = m_c.m_death_explosion_spread;
-        	for(int i = 0; i < m_c.m_death_explosion_count; i++){
+            int spread = Consoden::TankGame::Configuration::DeathExplosionSpread();
+            for(int i = 0; i < Consoden::TankGame::Configuration::DeathExplosionCount(); i++){
         		m_sprites.push_back(Sprite(m_explosion, QPointF(tank.position.x()+(((float)(rand() % spread*2)-spread)/(spread*2)), tank.position.y() + (((float)(rand() % spread*2)-spread)/(spread*2))),
-        				time + (rand() % m_c.m_death_eclosion_time), 1));
+                        time + (rand() % Consoden::TankGame::Configuration::DeathExplosionTime()), 1));
         	}
 
 
@@ -1071,11 +1068,11 @@ void GameWorld::HandleEventQueue(qint64 time)
 
 void GameWorld::InitMediaPlayers()
 {
-    m_fireMediaPlayer1.setVolume((int)((m_c.m_fire_volume*100)/m_c.m_master_volume));
-    m_explosionMediaPlayer1.setVolume((int)((m_c.m_explosion_volume*100)/m_c.m_master_volume));
-    m_fireMediaPlayer2.setVolume((int)((m_c.m_fire_volume*100)/m_c.m_master_volume));
-    m_explosionMediaPlayer2.setVolume((int)((m_c.m_explosion_volume*100)/m_c.m_master_volume));
-    m_smokeMediaPlayer.setVolume((int)((m_c.m_smoke_volume*100)/m_c.m_master_volume));
+    m_fireMediaPlayer1.setVolume((int)((Consoden::TankGame::Configuration::FireVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
+    m_explosionMediaPlayer1.setVolume((int)((Consoden::TankGame::Configuration::ExplosionVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
+    m_fireMediaPlayer2.setVolume((int)((Consoden::TankGame::Configuration::FireVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
+    m_explosionMediaPlayer2.setVolume((int)((Consoden::TankGame::Configuration::ExplosionVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
+    m_smokeMediaPlayer.setVolume((int)((Consoden::TankGame::Configuration::SmokeVolume()*100)/Consoden::TankGame::Configuration::MasterVolume()));
 
     const char* runtime=getenv("SAFIR_RUNTIME");
     QString path=QDir::cleanPath(QString(runtime)+QDir::separator()+"data"+QDir::separator()+"tank_game"+QDir::separator()+"sounds");
@@ -1389,7 +1386,7 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 					//Welcome to the land of the glourious workarounds!
 	                m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace, [&]
 	                {
-	                	BadassExplosion(r, m_c.m_redeemer_radius);
+                        BadassExplosion(r, Consoden::TankGame::Configuration::RedeemerRadius());
 	                    r.explosion = SetInFlames;
 	    				r.visible = false;
 	                }));
@@ -1417,7 +1414,7 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
 				//Welcome to the land of the glourious workarounds!
                 m_eventQueue.insert(WorldEvents::value_type(m_matchState.gameState.lastUpdate+m_matchState.gameState.pace, [&]
                 {
-                	BadassExplosion(r, m_c.m_redeemer_radius);
+                    BadassExplosion(r, Consoden::TankGame::Configuration::RedeemerRadius());
                     r.explosion = SetInFlames;
     				r.visible = false;
                 }));
@@ -1425,7 +1422,7 @@ inline void GameWorld::UpdateRedeemers(const Consoden::TankGame::GameStatePtr &g
                 continue;
 			}
 			if((r.time_to_Explosion == 0  && r.explosion != SetInFlames)){
-				BadassExplosion(r, m_c.m_redeemer_radius);
+                BadassExplosion(r, Consoden::TankGame::Configuration::RedeemerRadius());
 				r.explosion = SetInFlames;
 				r.visible = false;
 			}else
@@ -1482,10 +1479,10 @@ void GameWorld::BadassExplosion(Redeemer& redeemer, int radius){
 	qreal center_y = redeemer.position.y();
 	redeemer.detonate = true;
 	redeemer.explosion = SetInFlames;
-	int exploisions_per_square = m_c.m_redeemer_explosion_per_square;
+    int exploisions_per_square = Consoden::TankGame::Configuration::RedeemerExplosionPerSquare();
 	int exploision_time = (m_matchState.gameState.pace)/exploisions_per_square;
 
-	int spread = m_c.m_redeemer_explosion_spread;
+    int spread = Consoden::TankGame::Configuration::RedeemerExplosionSpread();
 
 	for(qreal x_pos = center_x - radius; x_pos <= center_x+radius; x_pos++){
 		for(qreal y_pos = center_y - radius; y_pos <= center_y+radius; y_pos++){

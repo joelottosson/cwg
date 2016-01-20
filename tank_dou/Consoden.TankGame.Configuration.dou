@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Consoden.TankGame.Configuration</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+    
+        <parameter>
+            <summary>Points gained by a coin</summary>
+            <name>CointValue</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
+        
+        <parameter>
+            <summary>Points gained when opponent hit gas</summary>
+            <name>GasPenalty</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
+        
+        <parameter>
+            <summary>Survive the game</summary>
+            <name>SurvivalPoints</name>
+            <type>Int32</type>
+            <value>3</value>
+        </parameter>
+        
+        <parameter>
+            <summary>Points gained when for hitting opponent with a missile or laser</summary>
+            <name>HitPoints</name>
+            <type>Int32</type>
+            <value>2</value>
+        </parameter>
+        
+        <parameter>
+            <summary>Points gained when opponent kills the penguin</summary>
+            <name>DudePenalty</name>
+            <type>Int32</type>
+            <value>5</value>
+        </parameter>
+        
+        <parameter>
+            <summary>Points gained in case of draw</summary>
+            <name>DrawPoints</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
+        
+        <parameter>
+            <summary>Points gained in case of a walkover</summary>
+            <name>WalkoverPenalty</name>
+            <type>Int32</type>
+            <value>5</value>
+        </parameter>
+        
+        <parameter>
+            <summary>For how many rounds the smoke grenades has effect</summary>
+            <name>SmokeTimer</name>
+            <type>Int32</type>
+            <value>3</value>
+        </parameter>
+        
+        <parameter>
+            <summary>Gui frame rate</summary>
+            <name>FrameRate</name>
+            <type>Int32</type>
+            <value>30</value>
+        </parameter>
+        
+        <parameter>
+            <name>AudioEnabled</name>
+            <type>Boolean</type>
+            <value>True</value>
+        </parameter>
+        
+        <parameter>
+            <name>LaserDelay</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
+        
+        <parameter>
+            <name>SmokePuffs</name>
+            <type>Int32</type>
+            <value>7</value>
+        </parameter>
+        
+        <parameter>
+            <name>SmokeSpread</name>
+            <type>Int32</type>
+            <value>100</value>
+        </parameter>
+        
+        <parameter>
+            <name>SmokeSpeed</name>
+            <type>Int32</type>
+            <value>5</value>
+        </parameter>
+        
+        <parameter>
+            <name>DeathExplosionCount</name>
+            <type>Int32</type>
+            <value>10</value>
+        </parameter>
+        
+        <parameter>
+            <name>DeathExplosionSpread</name>
+            <type>Int32</type>
+            <value>400</value>
+        </parameter>
+        
+        <parameter>
+            <name>DeathExplosionTime</name>
+            <type>Int32</type>
+            <value>300</value>
+        </parameter>
+        
+        <parameter>
+            <name>RedeemerRadius</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
+        
+        <parameter>
+            <name>RedeemerExplosionPerSquare</name>
+            <type>Int32</type>
+            <value>7</value>
+        </parameter>
+        
+        <parameter>
+            <name>RedeemerExplosionSpread</name>
+            <type>Int32</type>
+            <value>200</value>
+        </parameter>
+        
+        <parameter>
+            <name>MasterVolume</name>
+            <type>Int32</type>
+            <value>100</value>
+        </parameter>
+        
+        <parameter>
+            <name>LaserVolume</name>
+            <type>Int32</type>
+            <value>90</value>
+        </parameter>
+        
+        <parameter>
+            <name>CoinVolume</name>
+            <type>Int32</type>
+            <value>80</value>
+        </parameter>
+        
+        <parameter>
+            <name>ScreamVolume</name>
+            <type>Int32</type>
+            <value>60</value>
+        </parameter>
+        
+        <parameter>
+            <name>FireVolume</name>
+            <type>Int32</type>
+            <value>35</value>
+        </parameter>
+        
+        <parameter>
+            <name>ExplosionVolume</name>
+            <type>Int32</type>
+            <value>80</value>
+        </parameter>
+        
+        <parameter>
+            <name>SmokeVolume</name>
+            <type>Int32</type>
+            <value>75</value>
+        </parameter>
+        
+        <parameter>
+            <name>RedeemerAmmoVolume</name>
+            <type>Int32</type>
+            <value>85</value>
+        </parameter>
+        
+    </parameters>
+</class>
+
