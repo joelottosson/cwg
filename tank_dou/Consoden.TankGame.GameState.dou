@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Consoden.TankGame.GameState</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+        <member>
+            <summary>Maximum time of a game</summary>
+            <name>GameTime</name>
+            <type>Second32</type>
+        </member>
+        <member>
+            <summary>Elapsed time so far in the game. Game is over when equal to GameTime</summary>
+            <name>ElapsedTime</name>
+            <type>Second32</type>
+        </member>
+        <member>
+            <summary>Time point when the joysticks are read next time</summary>
+            <name>NextMove</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>Board width, number of squares</summary>
+            <name>Width</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>Board height, number of squares</summary>
+            <name>Height</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>This is how often the game engine reads joysticks and update game state</summary>
+            <name>GamePace</name>
+            <type>Second32</type>
+        </member>
+        <member>
+            <name>PlayerOneId</name>
+            <type>InstanceId</type>
+        </member>
+        <member>
+            <name>PlayerTwoId</name>
+            <type>InstanceId</type>
+        </member>
+        <member>
+            <name>PlayerOnePoints</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>PlayerTwoPoints</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>TheDude</name>
+            <type>Consoden.TankGame.Dude</type>
+        </member>
+        <member>
+            <name>Tanks</name>
+            <arraySize>2</arraySize>
+            <type>Consoden.TankGame.Tank</type>
+        </member>
+        <member>
+            <name>Missiles</name>
+            <arraySize>25</arraySize>
+            <type>Consoden.TankGame.Missile</type>
+        </member>
+        <member>
+            <name>Redeemers</name>
+            <arraySize>25</arraySize>
+            <type>Consoden.TankGame.Redeemer</type>
+        </member>
+        <member>
+            <summary>mine='o', obstacle='x', flag='f', free='.'</summary>
+            <name>Board</name>
+            <type>Binary</type>
+        </member>
+        <member>
+            <summary>Survivor of the game</summary>
+            <name>Survivor</name>
+            <type>Consoden.TankGame.Winner</type>
+        </member>
+        <member>
+            <summary>Winner of the game (highest points)</summary>
+            <name>Winner</name>
+            <type>Consoden.TankGame.Winner</type>
+        </member>
+        <member>
+            <name>Counter</name>
+            <type>Int32</type>
+        </member>
+    </members>
+</class>
+
