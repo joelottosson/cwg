@@ -14,15 +14,17 @@ class Bfs {
 	private consoden.tankgame.GameState gameState;	
 	private Position startPos;
 	private int[][] gamePaths = null;
+	private boolean allowGas = false;
 	
 	private byte empty=(byte)'.';
 	private byte coin=(byte)'$';
 	private byte poison=(byte)'p';
 	
 	//Create a bfs graph based on startPos.
-	public Bfs(consoden.tankgame.GameState gameState, Position startPos) {		
+	public Bfs(consoden.tankgame.GameState gameState, Position startPos, boolean allowGas) {		
 		this.gameState=gameState;
 		this.startPos=startPos;
+		this.allowGas=allowGas;
 		gamePaths=new int[getSizeX()][getSizeY()];
 		for (int x=0; x<getSizeX(); x++) {
 			for (int y=0; y<getSizeY(); y++) {
@@ -33,6 +35,10 @@ class Bfs {
 		gamePaths[startPos.x][startPos.y] = 0;
 					
 		evaluateShortestPaths (startPos, 1);
+	}
+
+	public Bfs(consoden.tankgame.GameState gameState, Position startPos) {		
+		this(gameState, startPos, true);
 	}
 	
 	//Check if square is reachable.
@@ -142,8 +148,11 @@ class Bfs {
 	
 	private void evaluateShortestPathsHelper(Position nextPos, int steps) {		
 		byte next = rawVal(nextPos.x, nextPos.y);
-		boolean isEmpty= next==empty || next==coin || next==poison;
-		if (isEmpty) 
+		boolean isMine = next == 'o';
+		boolean isWall = next == 'x';
+		boolean isPoison = next == 'p';
+
+		if (!(isMine || isWall) && (allowGas || !isPoison))  
 		{
 			if (steps < gamePaths[nextPos.x][nextPos.y]) {				
 				gamePaths[nextPos.x][nextPos.y] = steps;

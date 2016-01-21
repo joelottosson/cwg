@@ -12,18 +12,13 @@
 #include <map>
 
 
-BfsHelper::BfsHelper(const Consoden::TankGame::GameStatePtr& gamePtr, std::pair<int, int> start_pos) :
+BfsHelper::BfsHelper(const Consoden::TankGame::GameStatePtr& gamePtr, std::pair<int, int> start_pos, bool allowGas) :
     m_GamePtr(gamePtr),
     m_SizeX(gamePtr->Width().GetVal()),
-    m_SizeY(gamePtr->Height().GetVal())
+    m_SizeY(gamePtr->Height().GetVal()),
+    m_AllowGas(allowGas)
 {
     GenerateShortestPaths(start_pos);
-}
-
-bool BfsHelper::IsEmpty(const std::pair<int, int>& pos) const
-{
-    char c=m_GamePtr->Board().GetVal()[Index(pos)];
-    return c=='.' || c=='$' || c=='p' || c == 's' || c == 'l' || c == 'r';
 }
 
 void BfsHelper::GenerateShortestPaths(std::pair<int, int> start_pos)
@@ -41,7 +36,12 @@ void BfsHelper::GenerateShortestPaths(std::pair<int, int> start_pos)
 
 void BfsHelper::EvaluateShortestPathsHelper(std::pair<int, int> current_pos, std::pair<int, int> next_pos, int steps)
 {
-    if (IsEmpty(next_pos)) 
+    char next = m_GamePtr->Board().GetVal()[Index(next_pos)];
+    bool isMine = next == 'o';
+    bool isWall = next == 'x';
+    bool isPoison = next == 'p';
+
+    if (!(isMine || isWall) && (m_AllowGas || !isPoison)) 
     {
         if (steps < m_GamePaths[next_pos.first][next_pos.second]) {
             m_GamePaths[next_pos.first][next_pos.second] = steps;

@@ -24,7 +24,7 @@ public:
     /**
      * Create a bfs graph based on startPos.
      */
-    BfsHelper(const Consoden::TankGame::GameStatePtr& gamePtr, std::pair<int, int> start_pos);
+    BfsHelper(const Consoden::TankGame::GameStatePtr& gamePtr, std::pair<int, int> start_pos, bool allowGas = true);
 
     /**
      * Is it possible to reach the square pos?
@@ -61,12 +61,6 @@ private:
     int SizeY() const { return m_SizeY; }
 
     /**
-     * Is this square empty? Only checks for walls and mines.
-     * Flags and missiles are ignored.
-     */
-    bool IsEmpty(const std::pair<int, int>& pos) const;
-
-    /**
      * Helper functions that moves one step in the indicated direction
      */
     std::pair<int, int> MoveLeft(const std::pair<int, int>& pos) const;
@@ -82,6 +76,7 @@ private:
     Consoden::TankGame::GameStatePtr m_GamePtr;
     int m_SizeX;
     int m_SizeY;
+    bool m_AllowGas;
     // Shortest paths from a given position
     std::map<int, std::map<int, int> > m_GamePaths;
 

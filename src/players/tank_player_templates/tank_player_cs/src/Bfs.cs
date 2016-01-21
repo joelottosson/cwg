@@ -16,12 +16,14 @@ namespace tank_player_cs
 		private Consoden.TankGame.GameState gameState;
 		private int[,] gamePaths = null;
 		private Position startPos;
+		private bool allowGas = true;
 
 		//Create a bfs graph based on startPos.
-		public Bfs (Consoden.TankGame.GameState gameState, Position startPos)
+		public Bfs (Consoden.TankGame.GameState gameState, Position startPos, bool allowGas = true)
 		{
 			this.gameState=gameState;
 			this.startPos = startPos;
+			this.allowGas = allowGas;
 
 			gamePaths = new int[SizeX, SizeY];
 			for (int x=0; x<SizeX; x++) {
@@ -113,8 +115,11 @@ namespace tank_player_cs
 		private void EvaluateShortestPathsHelper(Position nextPos, int steps) 
 		{
 			char next = RawVal (nextPos.X, nextPos.Y);
-			bool isEmpty=next=='.' || next=='$' || next=='p';
-			if (isEmpty) 
+			bool isMine = next == 'o';
+			bool isWall = next == 'x';
+			bool isPoison = next == 'p';
+
+			if (!(isMine || isWall) && (allowGas || !isPoison)) 
 			{
 				if (steps < gamePaths[nextPos.X, nextPos.Y]) {
 					gamePaths[nextPos.X, nextPos.Y] = steps;
