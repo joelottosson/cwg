@@ -712,11 +712,11 @@ namespace TankEngine
 				tank_ptr->TowerDirection() = joystick_ptr->TowerDirection();
 			}
 
-            if(joystick_ptr->Fire() &&	joystick_ptr->FireLaser() && joystick_ptr->TowerDirection() != CWG::Direction::Neutral && joystick_ptr->MoveDirection() == CWG::Direction::Neutral){
+            // Fire laser?
+            if(joystick_ptr->FireLaser() && joystick_ptr->TowerDirection() != CWG::Direction::Neutral && joystick_ptr->MoveDirection() == CWG::Direction::Neutral){
             	if(tank_ptr->Lasers() > 0){
             		tank_ptr->Lasers() = tank_ptr->Lasers() - 1;
             		tank_ptr->FireLaser() = true;
-            		tank_ptr->Fire() = true;
 
             		Consoden::TankGame::TankPtr enemy_ptr =
             		                boost::static_pointer_cast<Consoden::TankGame::Tank>(game_ptr->Tanks()[(tank_index+1) % 2].GetPtr());
@@ -728,13 +728,14 @@ namespace TankEngine
             	}
             }
 
+            // Fire missile?
             if (joystick_ptr->Fire() && !joystick_ptr->FireLaser() && !joystick_ptr->FireRedeemer()) {
 
 				bool fired = gm.FireMissile(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(), tank_ptr->TankId().GetVal());
 
 				tank_ptr->Fire() = fired; // Only indicate fire if firing was successful
 
-			}else if (joystick_ptr->Fire() && !joystick_ptr->FireLaser() && joystick_ptr->FireRedeemer() && tank_ptr->HasRedeemer()) {
+			} else if (joystick_ptr->FireRedeemer() && !joystick_ptr->FireLaser() && tank_ptr->HasRedeemer()) { // Fire redeemer
                 bool fired = gm.FireRedeemer(tank_ptr->PosX(), tank_ptr->PosY(), joystick_ptr->TowerDirection(),
                 		joystick_ptr->RedeemerTimer(), tank_ptr->TankId().GetVal());
                 tank_ptr->Fire() = fired; // Only indicate fire if firing was successful

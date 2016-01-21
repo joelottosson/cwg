@@ -151,11 +151,9 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
 
     if (gm.HasRedeemer()) {
         fire_redeemer = true;
-        fire = true;
         redemer_timer = 4;
     } else if (gm.LaserAmmoCount() > 0) {
         fire_laser = true;
-        fire = true;
         // Stand still to fire laser
         moveDirection = Consoden::TankGame::Direction::Neutral;
     } else {
