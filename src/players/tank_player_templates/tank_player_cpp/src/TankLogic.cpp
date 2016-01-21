@@ -20,7 +20,7 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     GameMap gm(m_ownTankId, gameState);
     auto currentPosition=gm.OwnPosition();
     auto enemyPosition=gm.EnemyPosition();
-    BfsHelper bfs(gameState, currentPosition, false);
+    BfsHelper bfs(gameState, currentPosition, true);
     Consoden::TankGame::Direction::Enumeration moveDirection;
 
     if (bfs.CanReachSquare(enemyPosition)) {
