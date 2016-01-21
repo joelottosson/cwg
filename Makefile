@@ -16,16 +16,6 @@ server: .FORCE
 	cd src/tank_match_server/src && cmake -DMYFLAGS='$(FLAGS)' . && make install
 	@cd ../../..
 	
-config: .FORCE
-	cd src/ && cmake . && make install
-	@cd ../
-	
-	
-	
-clean_config: .FORCE
-	cd src/ && cmake . && make clean
-	@cd ../
-
 	
 clean_engine: .FORCE
 	cd src/tank_engine/src && cmake . && make clean
@@ -74,13 +64,13 @@ clean_cool_players: .FORCE
 	cd src/players/tank_player_templates/tank_player_cpp/src && cmake . && make clean
 	@cd ../../..
 
-backend: config engine gui server
+backend: engine gui server
 
-clean_backend: clean_engine clean_gui clean_server clean_config
+clean_backend: clean_engine clean_gui clean_server
 
-clean_all: clean_engine clean_gui clean_server clean_cool_players clean_config
+clean_all: clean_engine clean_gui clean_server clean_cool_players
 
-all: .FORCE copy_and_rebuild_dob config engine gui server cool_players 
+all: .FORCE copy_and_rebuild_dob engine gui server cool_players 
 
 
 remove_cache: .FORCE
@@ -101,7 +91,7 @@ targets:
 	@echo "backend                    - builds only the engine, match server, the gui and the config system"
 	@echo "cool_players               - builds the default players"
 	@echo "clean_all                  - cleans everything except the backend"
-	@echo "gui|engine|server|config   - builds a specific module"
+	@echo "gui|engine|server          - builds a specific module"
 	@echo "clean_*                    - cleans a specific module where * is the name of the module"
 	@echo "copy_and_rebuild_dob       - copies dou files from the tank_dou to the runtime path and rebuilds them"
 
