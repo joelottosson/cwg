@@ -20,12 +20,13 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     GameMap gm(m_ownTankId, gameState);
     auto currentPosition=gm.OwnPosition();
     auto enemyPosition=gm.EnemyPosition();
-    BfsHelper bfs(gameState, currentPosition);
+    BfsHelper bfs(gameState, currentPosition, false);
     Consoden::TankGame::Direction::Enumeration moveDirection;
 
     if (bfs.CanReachSquare(enemyPosition)) {
         // It is possible to move all the way to the enemy, do it
         moveDirection=bfs.FindDirection(currentPosition, bfs.BacktrackFromSquare(enemyPosition));
+        std::cout << "Can reach enemy!" << std::endl;
 
     } else {
         //Find an empty sqaure we can move to, otherwise move downwards
@@ -68,18 +69,12 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     	fire_laser = true;
     }
 
-    bool fire_redeemer = false;
-    int redemer_timer = 3;
-    if(gm.HasRedeemer()){
-    	fire_redeemer = true;
-    }
-
-    bool deploy_smoke = false;
-    if(gm.HasSmoke()){
-    	deploy_smoke = true;
+    if (gm.IsPenguinAlive()) {
+        std::cout << "Penguin is alive" << std::endl;
+    } else {        
+        std::cout << "Penguin is dead" << std::endl;
     }
 
     //Move our joystick.
-    dropMine = true;
-    SetJoystick(moveDirection, towerDirection, fire, dropMine, fire_laser,deploy_smoke,fire_redeemer, redemer_timer);
+    SetJoystick(moveDirection, towerDirection, fire, dropMine, fire_laser);
 }

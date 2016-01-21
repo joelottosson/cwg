@@ -67,14 +67,6 @@ namespace tank_player_cs
 			}
 		}
 
-		//Penguin position
-		public Position PenguinPosition {
-			get {
-				
-				return new Position (gameState.TheDude.Obj.PosX.Val, gameState.TheDude.Obj.PosY.Val);
-			}
-		}
-
 		//Cheks if you have some smoke avaliable
 		public bool HasSmoke   {
 			get {
@@ -104,7 +96,7 @@ namespace tank_player_cs
 		}
 		
 		//Check if square has redeemerAmmo.
-		public bool isRedeemerAmmo (Position p)
+		public bool IsRedeemerAmmo (Position p)
 		{
 			return RawVal (p.X, p.Y) == 'r';
 		}
@@ -132,6 +124,21 @@ namespace tank_player_cs
 		{
 			return RawVal (p.X, p.Y) == 'l';
 		}
+
+		//Check if Penguin is in position
+		public bool IsPenguin (Position p) {
+			return (p.X == gameState.TheDude.Obj.PosX.Val &&  
+					p.Y == gameState.TheDude.Obj.PosY.Val);
+		}
+
+
+		//Check if Penguin is alive
+		public bool IsPenguinAlive {
+			get {
+				return !(gameState.TheDude.Obj.Dying.Val);
+			}
+		}
+
 
 		/*
 			

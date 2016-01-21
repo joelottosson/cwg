@@ -255,6 +255,11 @@ bool GameMap::IsPenguin(const std::pair<int, int>& pos) const
    return pos.first == m_gamePtr->TheDude().GetPtr()->PosX() && pos.second == m_gamePtr->TheDude().GetPtr()->PosY();
 }
 
+bool GameMap::IsPenguinAlive() const
+{
+    return !(m_gamePtr->TheDude().GetPtr()->Dying());
+}
+
 bool GameMap::IsRedeemerInPosition(const std::pair<int, int>& pos) const{
     Safir::Dob::Typesystem::ArrayIndex redeemerIndex;
 
@@ -280,8 +285,6 @@ bool GameMap::IsRedeemerInPosition(const std::pair<int, int>& pos) const{
 
     return false;
 }
-
-
 
 
 bool GameMap::IsMissileInPosition(const std::pair<int, int>& pos) const

@@ -142,10 +142,15 @@ class GameMap {
 		return gameState.tanks().get(tankId).getObj().hasSmoke().getVal();
 	}
 	
-	//Returns the position of the penguin.
-	public Position getPenguinPosition() {
-		return new Position(gameState.theDude().getObj().posX().getVal(),
-				gameState.theDude().getObj().posX().getVal());
+	//Check if the Penguin is in this square.
+	public boolean isPenguin(final Position pos) {
+		return (pos.x == gameState.theDude().getObj().posX().getVal() &&  
+				pos.y == gameState.theDude().getObj().posY().getVal());
+	}
+
+	// Check if the Penguin is still alive
+	public boolean isPenguinAlive() {
+		return !(gameState.theDude().getObj().dying().getVal());
 	}
 	
 	//Check if square is a wall.

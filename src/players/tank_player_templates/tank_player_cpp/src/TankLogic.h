@@ -75,6 +75,21 @@ private:
         m_joystick(moveDirection, towerDirection, fire, dropMine, fireLaser,deploySmoke,fireRedeemer, redeemerTimer);
     }
 
+
+    /**
+     * Call this method to change the joystick state.
+     * @param moveDirection The tanks movement direction.
+     * @param towerDirection The tanks canon tower direction.
+     * @param fire True if the tank wants to fire a missile, else false.
+     * @param fireLaser True if the tank should fire the laser. Has no effect if lasercount <= 0
+     */
+    inline void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
+                            Consoden::TankGame::Direction::Enumeration towerDirection,
+                            bool fire, bool dropMine, bool fireLaser)
+    {
+        m_joystick(moveDirection, towerDirection, fire, dropMine, fireLaser, false, false, 0);
+    }
+
 };
 
 #endif

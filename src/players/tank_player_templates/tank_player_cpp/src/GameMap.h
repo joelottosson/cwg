@@ -97,10 +97,15 @@ public:
     bool IsPoisonGas(const std::pair<int, int>& pos) const;
 
     /**
-	 * Check if there is a penguin.
+	 * Check if there is a penguin in this square.
 	 */
 	bool IsPenguin(const std::pair<int, int>& pos) const;
 
+
+    /**
+     * Check if the penguin is alive.
+     */
+    bool IsPenguinAlive() const;
 
     /**
      * Is there a missile in this position right now?

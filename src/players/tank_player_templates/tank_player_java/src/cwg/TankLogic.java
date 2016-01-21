@@ -36,7 +36,7 @@ class TankLogic {
 		//Remove it and write your own brilliant version!
 		//-------------------------------------------------------
 	    GameMap gm=new GameMap(tankId, gameState); //helper object
-	    Bfs bfs=new Bfs(gameState, gm.getOwnPosition());	    
+	    Bfs bfs=new Bfs(gameState, gm.getOwnPosition(), true);	    
 	    
 		Position currentPosition = gm.getOwnPosition(); //this is our current tank position
 		Position enemyPosition = gm.getEnemyPosition(); //this is the enemy tank position
@@ -45,6 +45,7 @@ class TankLogic {
 
 		if (bfs.canReachSquare(enemyPosition)) { //if we can reach the enemy, get him			
 			moveDirection=bfs.backtrackFromSquare(enemyPosition);
+			System.out.println("Can reach enemy!");
 		}
 		else { //find any empty square			
 			if (!gm.isWall(gm.move(currentPosition, consoden.tankgame.Direction.LEFT)) &&
@@ -81,24 +82,22 @@ class TankLogic {
 	    	fireLaser = true;
 	    }
 	    
-	    //if we can we will deploy the smokes!!
-	    boolean deploySmoke = false;
-	    if(gm.hasSmoke()){ 
-	    	deploySmoke = true;
-	    }
+	    if (gm.isPenguinAlive()) {
+        	System.out.println("Penguin is alive");
+    	} else {        
+        	System.out.println("Penguin is dead");
+    	}
 	    
-	    boolean fireRedeemer = false;
-	    int redeemerTimer = 0;
-	    if(gm.hasRedeemer()){
-	    	fireRedeemer = true;
-	    	redeemerTimer = 3;
-	    }
-	    
-		//Move our joystick.
-		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine,fireLaser,deploySmoke,fireRedeemer,redeemerTimer);
+		setJoystick(moveDirection, towerDirection, fire, dropMine, fireLaser);
 	}
 	
-	
+	public void setJoystick(consoden.tankgame.Direction moveDirection,
+								consoden.tankgame.Direction towerDirection,
+								boolean fire, boolean dropMine, boolean fireLaser)
+	{
+		//Move our joystick.
+		joystickHandler.setJoystick(moveDirection, towerDirection, fire, dropMine, fireLaser, false, false, 0);
+	}
 }
 
 

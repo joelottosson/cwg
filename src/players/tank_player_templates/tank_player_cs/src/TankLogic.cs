@@ -20,13 +20,13 @@ namespace tank_player_cs
 		public const string PlayerName = "tank_player_csharp"; //TODO: Change to your team name
 
 		private int tankId;
-		private SetJoystick setJoystick;
+		private SetJoystick externalSetJoystick;
 
 		//Constructor: A new instance will be created every time a new game is started.
 		public TankLogic (int tankId, SetJoystick setJoystick)
 		{
 			this.tankId=tankId;
-			this.setJoystick=setJoystick;
+			this.externalSetJoystick=setJoystick;
 		}
 
 		//Called every time player is supposed to calculate a new move.
@@ -40,11 +40,12 @@ namespace tank_player_cs
 			//Remove it and write your own brilliant version!
 			//-------------------------------------------------------
 			GameMap gm = new GameMap (tankId, gameState); //helpler object
-			Bfs bfs=new Bfs(gameState, gm.OwnPosition); //breadth first search
+			Bfs bfs=new Bfs(gameState, gm.OwnPosition, true); //breadth first search, ignore poision gas
 			Consoden.TankGame.Direction.Enumeration moveDirection = Consoden.TankGame.Direction.Enumeration.Neutral;
 
 			if (bfs.CanReachSquare (gm.EnemyPosition)) { //if we can reach the enemy, get him
 				moveDirection = bfs.BacktrackFromSquare (gm.EnemyPosition);
+				System.Console.WriteLine("Can reach enemy");
 			} 
 			else { //find any empty square
 				if (!gm.IsWall (gm.Move (gm.OwnPosition, Consoden.TankGame.Direction.Enumeration.Left)) &&
@@ -77,21 +78,23 @@ namespace tank_player_cs
 				fireLaser = true;
 			}
 
-			bool deploySmoke = false;
-			if(gm.HasSmoke){
-				deploySmoke = true;
-			}
-			
-			bool fireRedeemer = false;
-			int redeemerTimer = 0;
-			if(gm.HasRedeemer){
-				fireRedeemer = true;
-				redeemerTimer = 3;
-			}
-			
+		    if (gm.IsPenguinAlive) {
+	        	System.Console.WriteLine("Penguin is alive");
+	    	} else {        
+	        	System.Console.WriteLine("Penguin is dead");
+	    	}
+
 			//Move our joystick.
-			setJoystick (moveDirection, towerDirection, fire,dropMine,fireLaser,deploySmoke, fireRedeemer, redeemerTimer);
+			SetJoystick (moveDirection, towerDirection, fire,dropMine,fireLaser);
 		}
+
+		public void SetJoystick(Consoden.TankGame.Direction.Enumeration moveDirection,
+									Consoden.TankGame.Direction.Enumeration towerDirection,
+									bool fire, bool dropMine, bool fireLaser)
+		{
+			//Move our joystick.
+			externalSetJoystick(moveDirection, towerDirection, fire, dropMine, fireLaser, false, false, 0);
+		}	
 	}
 }
 
