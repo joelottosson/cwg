@@ -100,6 +100,7 @@ namespace tank_player_cs
 						joystick.PlayerId.Val = myPlayerId;
 						joystick.GameId.Val = currentGameId;
 						joystick.TankId.Val = myTankId;
+						joystick.MineDrop.Val = true;
 						joystick.Counter.Val = joystickCounter++;
 						connection.SetAll (joystick, myJoystickId, myHandlerId);
 						logic = new TankLogic (myTankId, UpdateJoystick);
@@ -144,7 +145,7 @@ namespace tank_player_cs
 
 		private void UpdateJoystick (Consoden.TankGame.Direction.Enumeration moveDirection,
 		                            Consoden.TankGame.Direction.Enumeration towerDirection,
-		                            bool fire, bool dropMine, bool fireLaser, bool deployLaser,
+		                            bool fire, bool fireLaser, bool deployLaser,
 		                            bool fireRedeemer, int redeemerTimer)
 		{
 			if (myJoystickId == null) {
@@ -160,7 +161,7 @@ namespace tank_player_cs
 			joystick.TowerDirection.Val = towerDirection;
 			joystick.Fire.Val = fire;
 			joystick.FireLaser.Val = fireLaser;
-			joystick.MineDrop.Val = dropMine;
+			joystick.MineDrop.Val = true;
 			joystick.DeploySmoke.Val = deployLaser;
 			joystick.FireRedeemer.Val = fireRedeemer;
 			joystick.RedeemerTimer.Val = redeemerTimer;

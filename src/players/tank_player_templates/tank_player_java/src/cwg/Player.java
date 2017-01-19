@@ -102,6 +102,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
     					joystick.playerId().setVal(myPlayerId);
     					joystick.gameId().setVal(currentGameId);
     					joystick.tankId().setVal(myTankId);
+                        joystick.mineDrop().setVal(true);
     					joystick.counter().setVal(joystickCounter++);
     					dobConnection.setAll(joystick, myJoystickId, myHandlerId);
     					logic=new TankLogic(myTankId, this);
@@ -181,7 +182,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
     }
     
 	@Override
-	public void setJoystick(Direction moveDirection, Direction towerDirection, boolean fire, boolean dropMine, boolean fireLaser, boolean deploySmoke, boolean fireRedeemer, int redeemerTimer) {
+	public void setJoystick(Direction moveDirection, Direction towerDirection, boolean fire, boolean fireLaser, boolean deploySmoke, boolean fireRedeemer, int redeemerTimer) {
 
 	    if (myJoystickId==null) {
 	        return; //we are not active in a game
@@ -201,7 +202,7 @@ class Player implements com.saabgroup.safir.dob.Dispatcher,
 		joystick.towerDirection().setVal(towerDirection);
 		joystick.fire().setVal(fire);
 		joystick.fireLaser().setVal(fireLaser);
-		joystick.mineDrop().setVal(dropMine);
+		joystick.mineDrop().setVal(true);
 		joystick.deploySmoke().setVal(deploySmoke);
 		joystick.fireRedeemer().setVal(fireRedeemer);
 		joystick.redeemerTimer().setVal(redeemerTimer);

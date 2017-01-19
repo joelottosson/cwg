@@ -60,9 +60,10 @@ void Player::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
                 joystick->PlayerId()=m_myPlayerId;
                 joystick->GameId()=m_currentGameId;
                 joystick->TankId()=m_currentTankId;
+                joystick->MineDrop()=true;
                 joystick->Counter()=0;
                 m_connection.SetAll(joystick, m_myJoystickId, m_myHandlerId);
-                m_logic.reset(new TankLogic(m_currentTankId, boost::bind(&Player::SetJoystick, this, _1, _2, _3, _4, _5, _6, _7, _8)));
+                m_logic.reset(new TankLogic(m_currentTankId, boost::bind(&Player::SetJoystick, this, _1, _2, _3, _4, _5, _6, _7)));
                 break;
             }
         }
@@ -130,11 +131,7 @@ void Player::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, 
     }
 }
 
-/*void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine){
-	SetJoystick(moveDirection, towerDirection,  fire,  dropMine,false,false,false,0);
-}*/
-
-void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool dropMine,bool laser,
+void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection, Consoden::TankGame::Direction::Enumeration towerDirection, bool fire, bool laser,
 		bool deploySmoke, bool fireRedeemer, int redeemerTimer){
     static int counter=0;
 
@@ -152,7 +149,7 @@ void Player::SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirectio
     joystick->TowerDirection()=towerDirection;
     joystick->Fire()=fire;
     joystick->FireLaser() = laser;
-    joystick->MineDrop()=dropMine;
+    joystick->MineDrop()=true;
     joystick->DeploySmoke() = deploySmoke;
     joystick->FireRedeemer() = fireRedeemer;
     joystick->RedeemerTimer() = redeemerTimer;

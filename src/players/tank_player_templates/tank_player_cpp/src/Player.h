@@ -51,14 +51,11 @@ private:
     void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender);
     void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId);
 
-    //Update joystick
-    /*void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
-                     Consoden::TankGame::Direction::Enumeration towerDirection,
-                     bool fire, bool dropMine);*/
+    // Update joystick
     void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                      Consoden::TankGame::Direction::Enumeration towerDirection,
-                     bool fire, bool dropMine,bool fireLaser,bool deploySmoke
-					 ,bool fireRedeemer, int redeemer_timer);
+                     bool fire, bool fireLaser, bool deploySmoke,
+					 bool fireRedeemer, int redeemer_timer);
 };
 
 #endif

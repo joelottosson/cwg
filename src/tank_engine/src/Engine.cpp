@@ -6,8 +6,8 @@
 *
 *******************************************************************************/
 
-// Comment this out to deny null movements!
-//#define ALLOW_NULL_MOVE
+// Comment this out to force players to always place mines
+//#define ALLOW_NO_MINES
 
 #include "Engine.h"
 
@@ -664,7 +664,11 @@ namespace TankEngine
                     // Check if something in the way!!
                     if (!gm.WallSquare(request_pos_x, request_pos_y)) {
                         // Moving,  place mine in last position?
+#ifndef ALLOW_NO_MINES
                         if (joystick_ptr->MineDrop().IsNull() || joystick_ptr->MineDrop()) {
+#else
+                        {
+#endif                                                    
                             gm.AddMine(tank_ptr->PosX(), tank_ptr->PosY());
                         }
                         tank_ptr->PosX() = request_pos_x;

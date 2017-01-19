@@ -163,12 +163,13 @@ std::string BoardHandler::GenerateRandomFile()
         board[rand()%size]='x';
     }
 
+/* No coins in Winter Games 2017!
     int numCoins=size*static_cast<double>((rand()%25)/100.0); //at most 25% coins
     for (int i=0; i<numCoins; ++i)
     {
         board[rand()%size]='$';
     }
-
+*/
     int numPoison=size*static_cast<double>((rand()%15)/100.0); //at most 15% poison
     for (int i=0; i<numPoison; ++i)
     {

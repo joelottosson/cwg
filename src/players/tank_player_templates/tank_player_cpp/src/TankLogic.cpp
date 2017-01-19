@@ -59,9 +59,6 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     //Of course we always want to fire
     bool fire=true;
 
-    //Sometimes we also drop a mine
-    bool dropMine=(static_cast<int>(gameState->ElapsedTime().GetVal()) % 3)==0;
-
     //lets fire the laser if we can
     bool fire_laser = false;
 
@@ -76,5 +73,5 @@ void TankLogic::MakeMove(Consoden::TankGame::GameStatePtr gameState)
     }
 
     //Move our joystick.
-    SetJoystick(moveDirection, towerDirection, fire, dropMine, fire_laser);
+    SetJoystick(moveDirection, towerDirection, fire, fire_laser);
 }

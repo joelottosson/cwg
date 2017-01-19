@@ -13,7 +13,7 @@
 
 typedef boost::function<void(Consoden::TankGame::Direction::Enumeration,
                              Consoden::TankGame::Direction::Enumeration,
-                             bool,bool,bool,bool,bool,int)> MoveJoystick;
+                             bool,bool,bool,bool,int)> MoveJoystick;
 class TankLogic
 {
 public:
@@ -54,9 +54,9 @@ private:
      */
     inline void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                             Consoden::TankGame::Direction::Enumeration towerDirection,
-                            bool fire, bool dropMine)
+                            bool fire)
     {
-        m_joystick(moveDirection, towerDirection, fire, dropMine,false,false,false ,0);
+        m_joystick(moveDirection, towerDirection, fire, false, false, false ,0);
     }
 
 
@@ -69,10 +69,10 @@ private:
      */
     inline void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                             Consoden::TankGame::Direction::Enumeration towerDirection,
-                            bool fire, bool dropMine, bool fireLaser,bool deploySmoke
+                            bool fire, bool fireLaser,bool deploySmoke
 							,bool fireRedeemer, int redeemerTimer)
     {
-        m_joystick(moveDirection, towerDirection, fire, dropMine, fireLaser,deploySmoke,fireRedeemer, redeemerTimer);
+        m_joystick(moveDirection, towerDirection, fire, fireLaser,deploySmoke,fireRedeemer, redeemerTimer);
     }
 
 
@@ -85,9 +85,9 @@ private:
      */
     inline void SetJoystick(Consoden::TankGame::Direction::Enumeration moveDirection,
                             Consoden::TankGame::Direction::Enumeration towerDirection,
-                            bool fire, bool dropMine, bool fireLaser)
+                            bool fire, bool fireLaser)
     {
-        m_joystick(moveDirection, towerDirection, fire, dropMine, fireLaser, false, false, 0);
+        m_joystick(moveDirection, towerDirection, fire, fireLaser, false, false, 0);
     }
 
 };
